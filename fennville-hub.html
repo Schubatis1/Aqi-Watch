@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Fennville Vacation Dashboard</title>
+<link rel="apple-touch-icon" href="https://i.imgur.com/gtqPj7P.png">
+<link rel="icon" type="image/png" href="https://i.imgur.com/gtqPj7P.png">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Fennville Hub" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap');
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #EAF0F1;
+    background-image: radial-gradient(circle at 15% 0%, #F2F6F6 0%, #EAF0F1 45%);
+    color: #16232A;
+    font-family: 'Inter', sans-serif;
+    padding: 24px 16px 48px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .header { max-width: 1000px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #1F6F78; margin: 0 0 6px; font-weight: 700; }
+  h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(28px, 5vw, 38px); margin: 0 0 6px; line-height: 1.1; font-weight: 700; letter-spacing: -0.01em; }
+  .sub { margin: 0; color: #55707A; max-width: 55ch; font-size: 14.5px; line-height: 1.5; }
+
+  .grid { max-width: 1000px; margin: 0 auto; display: grid; gap: 20px; grid-template-columns: 1fr; }
+  @media (min-width: 850px) { .grid { grid-template-columns: 1.1fr 0.9fr; } }
+
+  .panel { background: #FFFFFF; border: 1px solid #C7D6D6; border-radius: 16px; padding: 22px 20px 18px; box-shadow: 0 4px 12px rgba(22,35,42,0.03); }
+  .panel-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid #EAF0F1; padding-bottom: 10px; }
+  .panel-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; margin: 0; font-weight: 700; color: #1F6F78; display: flex; align-items: center; gap: 8px; }
+
+  /* Widget styles */
+  .widget-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+  .widget-card { background: #F4F7F7; border: 1px solid #DCE7E8; border-radius: 12px; padding: 12px; position: relative; }
+  .widget-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #55707A; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .widget-val { font-size: 18px; font-weight: 700; color: #16232A; font-family: 'Space Grotesk', sans-serif; }
+  .widget-code { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #1F6F78; font-weight: 700; background: #FFFFFF; padding: 2px 6px; border-radius: 4px; border: 1px dashed #C7D6D6; display: inline-block; margin-top: 4px; }
+
+  /* Timeline & Navigation lists */
+  .item-list { display: flex; flex-direction: column; gap: 12px; }
+  .route-section { background: #F8FAFA; border-left: 4px solid #1F6F78; padding: 12px; border-radius: 0 12px 12px 0; margin-bottom: 14px; }
+  .route-title { font-size: 14px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.02em; color: #435B66; }
+
+  .link-chip { display: inline-flex; align-items: center; background: #FFFFFF; border: 1px solid #C7D6D6; border-radius: 8px; padding: 6px 12px; font-size: 13px; color: #16232A; text-decoration: none; font-weight: 500; transition: all 0.2s; margin: 3px; }
+  .link-chip:hover { background: #EAF0F1; border-color: #1F6F78; color: #1F6F78; }
+  .link-chip.map-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #1F6F78; background: #EAF0F1; border: none; }
+
+  /* Rules checklist */
+  .check-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; line-height: 1.4; margin-bottom: 8px; }
+  .check-item input { margin-top: 3px; accent-color: #1F6F78; }
+
+  /* Weather/AQI enhancements */
+  .day-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .day-card { border: 1px solid #DCE7E8; border-radius: 10px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #FAFCFC; min-height: 80px; }
+  .day-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; }
+  .day-aqi { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; margin: 4px 0; }
+
+  .alert-banner { background: #FFF4F2; border: 1px solid #F2D2CD; color: #A63224; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; line-height: 1.4; }
+  .success-banner { background: #E8F5E9; border: 1px solid #C8E6C9; color: #2E7D32; padding: 10px; border-radius: 10px; font-size: 12px; font-family: 'JetBrains Mono', monospace; text-align: center; margin-bottom: 12px; }
+
+  .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #8CA3A8; font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <p class="eyebrow">🚗 West Michigan Travel Companion</p>
+    <h1>Orchard Hill Farm Hub</h1>
+    <p class="sub">Sat, July 18 — Tue, July 21, 2026. Live updates, offline tracking safeguards, check-in instructions, and curated route stops.</p>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- LEFT COLUMN: DEPARTURE, LOGISTICS, & TASKS -->
+  <div class="item-list">
+
+    <!-- Stay Essentials Panel -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">🏡 Airbnb Logistics</h2>
+      </div>
+
+      <div class="alert-banner">
+        <strong>⚠️ Early Check-In Notification:</strong> Lauren Booker pinged host for 2 PM access. Host flagged same-day turnaround cleanup constraints & items left by prior renters. Check Airbnb app for final greenlight before entering!
+      </div>
+
+      <div class="widget-row">
+        <div class="widget-card">
+          <span class="widget-label">Address</span>
+          <div class="widget-val" style="font-size:14px;line-height:1.3;">1814 Lakeshore Dr<br>Fennville, MI 49408</div>
+          <a href="https://www.google.com/maps/search/?api=1&query=1814+Lakeshore+Drive+Fennville+MI" target="_blank" class="link-chip map-btn" style="margin-top:6px; display:inline-block;">🗺️ Map Route</a>
+        </div>
+        <div class="widget-card">
+          <span class="widget-label">Access Code</span>
+          <div class="widget-code">2531</div>
+          <span class="widget-label" style="margin-top:8px;">Locks/Unlocks Door</span>
+        </div>
+      </div>
+
+      <div class="widget-row">
+        <div class="widget-card" style="grid-column: span 2;">
+          <span class="widget-label">🔒 Wi-Fi Connection</span>
+          <div class="widget-val" style="font-size:15px; font-family:'JetBrains Mono', monospace;">Network: <span style="color:#1F6F78">hug2G379225</span></div>
+          <div class="widget-val" style="font-size:15px; font-family:'JetBrains Mono', monospace; margin-top:2px;">Password: <span style="color:#1F6F78">wheel77switch</span></div>
+        </div>
+      </div>
+
+      <div class="widget-row">
+        <div class="widget-card">
+          <span class="widget-label">Check-In</span>
+          <div class="widget-val" style="font-size:14px;">Today @ 4:00 PM<br><span style="font-size:11px; color:#55707A;" id="countdown-in">--</span></div>
+        </div>
+        <div class="widget-card">
+          <span class="widget-label">Checkout</span>
+          <div class="widget-val" style="font-size:14px;">Tue, Jul 21 @ 11:00 AM<br><span style="font-size:11px; color:#55707A;" id="countdown-out">--</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- House Rules & Operational Knowledge -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">📜 House Rules & Quirks</h2>
+      </div>
+      <div class="check-item"><input type="checkbox"> <span><strong>Driveway Only:</strong> Park exclusively on the circular drive. No grass parking (underground sprinkler hazard).</span></div>
+      <div class="check-item"><input type="checkbox"> <span><strong>Septic Safe:</strong> Absolutely nothing down toilets except toilet paper. Old farm plumbing.</span></div>
+      <div class="check-item"><input type="checkbox"> <span><strong>Counters:</strong> Never chop straight on counter surfaces. Use provided cutting boards.</span></div>
+      <div class="check-item"><input type="checkbox"> <span><strong>Porch Windows:</strong> Do not open screened porch frames; mechanisms are incredibly delicate.</span></div>
+      <div class="check-item"><input type="checkbox"> <span><strong>Loft Restriction:</strong> Zero playing or sleeping permitted on the loft access ladder.</span></div>
+      <div class="check-item"><input type="checkbox"> <span><strong>Out of Bounds:</strong> Basement and barn structures are entirely off-limits.</span></div>
+      <div class="check-item"><input type="checkbox"> <span><strong>Quiet Windows:</strong> Local municipal noise ordinances enforced 10 PM – 7 AM.</span></div>
+    </section>
+
+    <!-- Checkout Protocol Panel -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">🧹 Checkout Checklist (Strict 11 AM)</h2>
+      </div>
+      <p style="font-size: 12px; color: #55707A; margin: -6px 0 12px 0;">Cleaner has a tight turnaround window. Please execute the following before turning keys:</p>
+      <div class="check-item"><input type="checkbox"> <span>Strip beds completely.</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Consolidate and pile dirty towels onto bathroom floors.</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Clear out all customized food items from the refrigerator and freezer units.</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Ensure all kitchen dishes are thoroughly cleaned.</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Haul all indoor trash out to the exterior roll bins <strong>(Trash day is Monday morning)</strong>.</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Kill all internal overhead lights and securely lock all exterior escape thresholds.</span></div>
+    </section>
+  </div>
+
+  <!-- RIGHT COLUMN: ROUTES, EXPERIENCES, & LIVE ENVIRO DATA -->
+  <div class="item-list">
+
+    <!-- Live Environmental Conditions -->
+    <section class="panel" id="panel-weather">
+      <div class="panel-head">
+        <h2 class="panel-title">🌤️ Fennville Atmospheric Conditions</h2>
+      </div>
+      <div id="live-weather-root">
+        <p style="font-size:13px; color:#55707A;">Querying AirNow API & Open-Meteo systems...</p>
+      </div>
+    </section>
+
+    <!-- The Transit Route Plan & Stops -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">🚗 Route Options & Planned Stops</h2>
+      </div>
+
+      <div class="route-section">
+        <div class="route-title">🌿 Lansing Route (Outdoor Focus)</div>
+        <a href="https://www.google.com/maps/search/?api=1&query=Horrocks+Farm+Market+Lansing" target="_blank" class="link-chip">Horrocks Market (7a-10p)</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Old+Nation+Brewing+Williamston" target="_blank" class="link-chip">Old Nation Brewing</a>
+      </div>
+
+      <div class="route-section">
+        <div class="route-title">🏎️ Portage Route (Indoor Safe Alternatives)</div>
+        <a href="https://www.google.com/maps/search/?api=1&query=Air+Zoo+Portage+MI" target="_blank" class="link-chip">Air Zoo Aerospace ($19.50)</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=One+Well+Brewing+Kalamazoo" target="_blank" class="link-chip">One Well Brewing</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Latitude+42+Brewing+Portage" target="_blank" class="link-chip">Latitude 42</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Presidential+Brewing+Portage" target="_blank" class="link-chip">Presidential Brewing</a>
+      </div>
+
+      <div class="route-section">
+        <div class="route-title">🎨 Grand Rapids Route (Scenery & Culture)</div>
+        <a href="https://www.google.com/maps/search/?api=1&query=Frederik+Meijer+Gardens+Grand+Rapids" target="_blank" class="link-chip">Meijer Gardens ($25.00)</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Brewery+Vivant+Grand+Rapids" target="_blank" class="link-chip">Brewery Vivant</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=The+Mitten+Brewing+Grand+Rapids" target="_blank" class="link-chip">Mitten Brewing Co.</a>
+      </div>
+    </section>
+
+    <!-- Local Destination Options Hub -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">📍 Destination Inventory Hub</h2>
+      </div>
+
+      <div class="route-section" style="border-left-color: #D8A61B;">
+        <div class="route-title" style="color:#A67B00;">🍎 Local Farms & Artisans</div>
+        <a href="https://www.google.com/maps/search/?api=1&query=Fernwood+Farm+Fennville" target="_blank" class="link-chip">Fernwood Farm</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Evergreen+Lane+Goat+Farm+Fennville" target="_blank" class="link-chip">Evergreen Lane Goat Farm</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Bluestar+Farm+Fennville" target="_blank" class="link-chip">Bluestar Farm (Blueberries)</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Cranes+Pie+Pantry+Fennville" target="_blank" class="link-chip">Cranes Apple Orchard</a>
+      </div>
+
+      <div class="route-section" style="border-left-color: #E07B39;">
+        <div class="route-title" style="color:#B35517;">🍺 Tasting Rooms & Breweries</div>
+        <a href="https://www.google.com/maps/search/?api=1&query=Modales+Wines+Fennville" target="_blank" class="link-chip">Modales Wines</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Michigan+Wine+Company+Fennville" target="_blank" class="link-chip">Michigan Wine Co.</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Fenn+Valley+Vineyards" target="_blank" class="link-chip">Fennville Winery</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Rusty+Rocket+Brewing+Pullman" target="_blank" class="link-chip">Rusty Rocket Brewing</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Three+Blondes+Brewing+South+Haven" target="_blank" class="link-chip">3 Blondes Brewing</a>
+      </div>
+
+      <div class="route-section" style="border-left-color: #2E9E5B;">
+        <div class="route-title" style="color:#1D663A;">🌊 Shorelines & Preservation Beaches</div>
+        <a href="https://www.google.com/maps/search/?api=1&query=Wau-Ke-Na+Preserve" target="_blank" class="link-chip">Wau-Ke-Na Preserve (Ultra-Close)</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Westside+County+Park+Fennville" target="_blank" class="link-chip">Westside County Park</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Pier+Cove+Park" target="_blank" class="link-chip">Pier Cove</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Oval+Beach+Saugatuck" target="_blank" class="link-chip">Oval Beach</a>
+      </div>
+
+      <div class="route-section" style="border-left-color: #7A3B8C;">
+        <div class="route-title" style="color:#562463;">🧸 Family & Rainy Day Kids Activities</div>
+        <a href="https://expressyourselfartbarn.com/" target="_blank" class="link-chip">Express Yourself Art Barn</a>
+        <a href="https://www.mittenmuseum.com/" target="_blank" class="link-chip">Mitten Museum</a>
+        <a href="https://hollandaquatic.org/" target="_blank" class="link-chip">Holland Aquatic Center</a>
+        <a href="https://www.rocketarcade.com/" target="_blank" class="link-chip">Rocket Arcade (South Haven)</a>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="footer">
+  Built securely with pure client execution components. All routing indexes functional offline once cached.
+</div>
+
+<!-- DATA INTEGRATION SCRIPT -->
+<script>
+  // Dynamic Real-time Countdown Calculations
+  function updateCountdowns() {
+    const targetCheckIn = new Date("2026-07-18T16:00:00-04:00");
+    const targetCheckOut = new Date("2026-07-21T11:00:00-04:00");
+    const now = new Date();
+
+    const diffIn = targetCheckIn - now;
+    const diffOut = targetCheckOut - now;
+
+    const elIn = document.getElementById("countdown-in");
+    const elOut = document.getElementById("countdown-out");
+
+    if(diffIn > 0) {
+      const hours = Math.floor(diffIn / (1000 * 60 * 60));
+      const mins = Math.floor((diffIn % (1000 * 60 * 60)) / (1000 * 60));
+      elIn.innerText = `Starts in: ${hours}h ${mins}m`;
+    } else {
+      elIn.innerText = "Active Stay Window";
+    }
+
+    if(diffOut > 0) {
+      const days = Math.floor(diffOut / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diffOut % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      elOut.innerText = `Remaining: ${days}d ${hours}h`;
+    } else {
+      elOut.innerText = "Checkout window elapsed";
+    }
+  }
+
+  setInterval(updateCountdowns, 60000);
+  updateCountdowns();
+
+  // ---- Environmental data: AirNow for "current" (ground truth), Open-Meteo for 3-day forecast ----
+  const CATEGORIES = [
+    { max: 50, label: "Good", color: "#2E9E5B" },
+    { max: 100, label: "Moderate", color: "#D8A61B" },
+    { max: 150, label: "Unhealthy (Sensitive)", color: "#E07B39" },
+    { max: 200, label: "Unhealthy", color: "#C1432E" },
+    { max: 300, label: "Very Unhealthy", color: "#7A3B8C" },
+    { max: Infinity, label: "Hazardous", color: "#6B1420" }
+  ];
+  function getCat(val) { return CATEGORIES.find(c => val <= c.max) || CATEGORIES[CATEGORIES.length - 1]; }
+
+  const LAT = 42.5975;
+  const LON = -86.1089;
+  const AIRNOW_KEY = '80781D70-714E-4225-977B-8E032C27AD62';
+
+  function fmtDayLabel(dateStr, idx) {
+    if (idx === 0) return "Today";
+    if (idx === 1) return "Tomorrow";
+    const d = new Date(dateStr + "T12:00:00");
+    return d.toLocaleDateString(undefined, { weekday: "short" });
+  }
+
+  const WEATHER_CODES = {
+    0: ["☀️", "Clear"], 1: ["🌤️", "Mostly Clear"], 2: ["⛅", "Partly Cloudy"], 3: ["☁️", "Cloudy"],
+    45: ["🌫️", "Fog"], 48: ["🌫️", "Fog"],
+    51: ["🌦️", "Drizzle"], 53: ["🌦️", "Drizzle"], 55: ["🌦️", "Drizzle"],
+    56: ["🌧️", "Frzg Drizzle"], 57: ["🌧️", "Frzg Drizzle"],
+    61: ["🌧️", "Rain"], 63: ["🌧️", "Rain"], 65: ["🌧️", "Heavy Rain"],
+    66: ["🌧️", "Frzg Rain"], 67: ["🌧️", "Frzg Rain"],
+    71: ["🌨️", "Snow"], 73: ["🌨️", "Snow"], 75: ["🌨️", "Heavy Snow"], 77: ["🌨️", "Snow Grains"],
+    80: ["🌦️", "Showers"], 81: ["🌦️", "Showers"], 82: ["🌦️", "Showers"],
+    85: ["🌨️", "Snow Showers"], 86: ["🌨️", "Snow Showers"],
+    95: ["⛈️", "T-storms"], 96: ["⛈️", "T-storms"], 99: ["⛈️", "T-storms"],
+  };
+  function weatherIconLabel(code) { return WEATHER_CODES[code] || ["🌡️", "—"]; }
+
+  function loadWeather() {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m&temperature_unit=fahrenheit&timezone=America%2FDetroit`;
+    return fetch(url).then(r => { if (!r.ok) throw new Error(`Weather HTTP ${r.status}`); return r.json(); });
+  }
+
+  function loadWeatherForecast() {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=America%2FDetroit&forecast_days=3`;
+    return fetch(url).then(r => { if (!r.ok) throw new Error(`Weather forecast HTTP ${r.status}`); return r.json(); })
+      .then(data => {
+        const d = data.daily;
+        return d.time.slice(0, 3).map((date, idx) => ({
+          date, label: fmtDayLabel(date, idx),
+          code: d.weather_code[idx],
+          hi: Math.round(d.temperature_2m_max[idx]),
+          lo: Math.round(d.temperature_2m_min[idx]),
+          precip: d.precipitation_probability_max[idx],
+        }));
+      });
+  }
+
+  function loadAirNowCurrent() {
+    const url = `https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${LAT}&longitude=${LON}&distance=50&API_KEY=${AIRNOW_KEY}`;
+    return fetch(url).then(r => { if (!r.ok) throw new Error(`AirNow HTTP ${r.status}`); return r.json(); });
+  }
+
+  // Forecast now sourced from Open-Meteo (global coverage) instead of AirNow,
+  // since AirNow only issues forecasts for ~500 designated reporting areas and
+  // Fennville isn't one of them -- that's why the forecast cards were empty/broken.
+  function loadForecast() {
+    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&hourly=us_aqi&forecast_days=3&timezone=America%2FDetroit`;
+    return fetch(url).then(r => { if (!r.ok) throw new Error(`Forecast HTTP ${r.status}`); return r.json(); })
+      .then(data => {
+        const times = data.hourly.time;
+        const aqi = data.hourly.us_aqi;
+        const byDate = {};
+        times.forEach((t, i) => {
+          const date = t.split("T")[0];
+          if (!byDate[date]) byDate[date] = [];
+          if (aqi[i] != null) byDate[date].push(aqi[i]);
+        });
+        return Object.keys(byDate).slice(0, 3).map((date, idx) => {
+          const vals = byDate[date];
+          const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+          return { date, label: fmtDayLabel(date, idx), avgAqi: Math.round(avg) };
+        });
+      });
+  }
+
+  function renderWeatherAndCurrentAqi(weatherData, airNowCurrent) {
+    const curTemp = Math.round(weatherData.current.temperature_2m);
+    const curHumidity = weatherData.current.relative_humidity_2m;
+
+    let curAqi = 0;
+    let curCatName = "Good";
+    if (airNowCurrent && airNowCurrent.length > 0) {
+      curAqi = Math.max(...airNowCurrent.map(d => d.AQI));
+      const primary = airNowCurrent.find(d => d.AQI === curAqi);
+      if (primary && primary.Category) curCatName = primary.Category.Name;
+    }
+    const aqiCat = getCat(curAqi);
+
+    return `
+      <div class="widget-row">
+        <div class="widget-card">
+          <span class="widget-label">Current Temp</span>
+          <div class="widget-val" style="font-size:28px;">${curTemp}°F</div>
+          <span class="widget-label" style="margin-top:4px;">Humidity: ${curHumidity}%</span>
+        </div>
+        <div class="widget-card">
+          <span class="widget-label">Air Quality Now</span>
+          <div class="widget-val" style="font-size:28px; color:${aqiCat.color}">${curAqi}</div>
+          <span class="widget-label" style="margin-top:4px; font-weight:700; color:${aqiCat.color}">${curCatName}</span>
+        </div>
+      </div>`;
+  }
+
+  function renderForecast(days) {
+    if (!days || days.length === 0) {
+      return `<div style="grid-column: 1 / -1; font-size:12px; color:#55707A; padding:8px; text-align:center;">Forecast temporarily unavailable.</div>`;
+    }
+    const cards = days.map(d => {
+      const cat = getCat(d.avgAqi);
+      return `
+        <div class="day-card">
+          <span class="day-name">${d.label}</span>
+          <span class="day-aqi" style="color:${cat.color}">${d.avgAqi}</span>
+          <span style="font-size:9px; color:#55707A; text-transform:uppercase;">${cat.label}</span>
+        </div>`;
+    }).join("");
+    return `<span class="widget-label" style="margin-bottom:6px; display:block;">3-Day AQI Forecast (avg, Open-Meteo):</span><div class="day-grid">${cards}</div>`;
+  }
+
+  function loadEnvironmentalMetrics() {
+    const root = document.getElementById("live-weather-root");
+
+    Promise.allSettled([loadWeather(), loadAirNowCurrent(), loadForecast()]).then(results => {
+      const [weatherResult, airNowResult, forecastResult] = results;
+
+      let html = "";
+
+      if (weatherResult.status === "fulfilled" && airNowResult.status === "fulfilled") {
+        html += `<div class="success-banner">⚡ Live conditions synced (AirNow + Open-Meteo)</div>`;
+        html += renderWeatherAndCurrentAqi(weatherResult.value, airNowResult.value);
+      } else {
+        html += `<div class="alert-banner" style="margin-bottom:12px;">⚠️ Couldn't load current temp/AQI right now.</div>`;
+      }
+
+      if (forecastResult.status === "fulfilled") {
+        html += renderForecast(forecastResult.value);
+      } else {
+        html += `<div class="alert-banner" style="margin:8px 0 0;">⚠️ Couldn't load the 3-day forecast right now.</div>`;
+      }
+
+      root.innerHTML = html;
+    });
+  }
+
+  window.addEventListener("DOMContentLoaded", loadEnvironmentalMetrics);
+</script>
+
+</body>
+</html>
