@@ -45,6 +45,13 @@
   .day-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; }
   .day-date { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: #55707A; }
   .gauge-svg { width: 100px; height: 55px; margin-top: 2px; }
+  .advice-banner { border: 1px solid; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+  .advice-verdict { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: -0.01em; }
+  .advice-text { margin: 6px 0 0; font-size: 12.5px; color: #16232A; line-height: 1.5; }
+  .advice-window { margin: 6px 0 0; font-size: 11.5px; color: #55707A; font-family: 'JetBrains Mono', monospace; }
+  .now-row { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #55707A; margin: 2px 0 -2px; }
+  .now-label { text-transform: uppercase; letter-spacing: 0.04em; font-size: 9.5px; }
+  .now-val { font-weight: 700; font-size: 13px; }
   .aqi-readout { display: flex; align-items: baseline; gap: 5px; margin-top: 2px; }
   .aqi-number { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 26px; }
   .aqi-unit { font-size: 10px; color: #55707A; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -92,6 +99,10 @@
 <footer>
   Air quality data from the Open‑Meteo Air Quality API (CAMS), pulled live each time this page loads or you tap
   refresh. US AQI scale. Attribution: <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">open-meteo.com</a>
+  <br/><br/>
+  Note: CAMS is a forecast model, not a ground sensor network — it can read differently than apps like Apple
+  Weather, which pull from AirNow's physical monitoring stations. "Peak AQI" is the worst forecast hour of the
+  day, not the current reading; "Right now" (shown on today's card) is the closer comparison to Apple Weather.
 </footer>
 
 <script>
@@ -111,6 +122,42 @@
 
   function categoryFor(aqi) {
     return CATEGORIES.find((c) => aqi <= c.max) || CATEGORIES[CATEGORIES.length - 1];
+  }
+
+  function trainingAdvice(catLabel) {
+    switch (catLabel) {
+      case "Good":
+        return { verdict: "Go", text: "Great conditions — hard efforts and long sessions are fine outdoors." };
+      case "Moderate":
+        return { verdict: "Go", text: "Generally fine outdoors. If you're unusually sensitive to air quality, watch for symptoms." };
+      case "Unhealthy (sensitive)":
+        return { verdict: "Caution", text: "OK for most, but consider trimming intensity or duration today." };
+      case "Unhealthy":
+        return { verdict: "Modify", text: "Cut back on prolonged or high-intensity outdoor work — shorten the session or move hard intervals indoors." };
+      case "Very Unhealthy":
+        return { verdict: "Indoors", text: "Skip outdoor training today if you can — move it indoors." };
+      default:
+        return { verdict: "Indoors", text: "Avoid outdoor activity entirely today." };
+    }
+  }
+
+  function fmtHour(h) {
+    const period = h >= 12 ? "PM" : "AM";
+    let hh = h % 12;
+    if (hh === 0) hh = 12;
+    return `${hh}${period}`;
+  }
+
+  function bestWindow(hourlyAqi) {
+    let bestStart = null, bestAvg = Infinity;
+    for (let h = 5; h <= 20; h++) {
+      const a = hourlyAqi[h], b = hourlyAqi[h + 1];
+      if (a == null || b == null) continue;
+      const avg = (a + b) / 2;
+      if (avg < bestAvg) { bestAvg = avg; bestStart = h; }
+    }
+    if (bestStart == null) return null;
+    return { start: bestStart, end: bestStart + 2, avg: bestAvg };
   }
 
   function fmtDate(dateStr, idx) {
@@ -167,12 +214,16 @@
 
   function dayCardHtml(day) {
     const cat = categoryFor(day.peak);
+    const nowBlock = day.current != null
+      ? `<div class="now-row"><span class="now-label">Right now</span><span class="now-val" style="color:${categoryFor(day.current).color}">${Math.round(day.current)}</span></div>`
+      : "";
     return `
       <div class="day-card">
         <div class="day-head">
           <span class="day-name">${day.label}</span>
           <span class="day-date">${day.short}</span>
         </div>
+        ${nowBlock}
         ${gaugeSvg(day.peak, cat.color)}
         <div class="aqi-readout">
           <span class="aqi-number">${Math.round(day.peak)}</span>
@@ -235,6 +286,9 @@
           byDate[date].ozone.push(ozone ? ozone[i] : null);
         });
 
+        const nowHour = new Date().getHours();
+        const todayStr = new Date().toLocaleDateString("en-CA");
+
         const days = Object.keys(byDate).slice(0, 3).map((date, idx) => {
           const bucket = byDate[date];
           const valid = bucket.values.filter((v) => v != null);
@@ -248,14 +302,29 @@
             else if (p != null) dominant = "PM2.5";
             else if (o != null) dominant = "ozone";
           }
+          const current = date === todayStr ? bucket.values[nowHour] : null;
           return {
             date, label: fmtDate(date, idx), short: fmtShort(date),
-            peak, dominant, hourlyAqi: bucket.values,
+            peak, dominant, hourlyAqi: bucket.values, current,
           };
         });
 
         const body = document.getElementById(`body-${loc.id}`);
-        body.innerHTML = `<div class="day-grid">${days.map(dayCardHtml).join("")}</div>
+        const todayCat = categoryFor(days[0].peak);
+        const advice = trainingAdvice(todayCat.label);
+        const win = bestWindow(days[0].hourlyAqi);
+        const winText = win
+          ? `${fmtHour(win.start)}–${fmtHour(win.end)} · avg AQI ~${Math.round(win.avg)}`
+          : "no clear low window today";
+        const bannerHtml = `
+          <div class="advice-banner" style="background:${todayCat.color}14;border-color:${todayCat.color}">
+            <div class="advice-top">
+              <span class="advice-verdict" style="color:${todayCat.ink}">${advice.verdict} — outdoor training</span>
+            </div>
+            <p class="advice-text">${advice.text}</p>
+            <p class="advice-window">Best window today: <strong>${winText}</strong></p>
+          </div>`;
+        body.innerHTML = bannerHtml + `<div class="day-grid">${days.map(dayCardHtml).join("")}</div>
           <p class="updated">Pulled ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>`;
       })
       .catch((err) => renderError(loc, err && err.message ? err.message : String(err)));
