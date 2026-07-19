@@ -10,28 +10,30 @@
 <meta name="apple-mobile-web-app-title" content="Fennville Hub" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap');
+  /* Importing vintage-inspired fonts: a script, a sturdy serif, and a clean sans-serif */
+  @import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Cinzel:wght@600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600&display=swap');
 
   * { box-sizing: border-box; }
+  
   body {
     margin: 0;
     min-height: 100vh;
-    background: #EAF0F1;
-    background-image: radial-gradient(circle at 15% 0%, #F2F6F6 0%, #EAF0F1 45%);
-    color: #16232A;
-    font-family: 'Inter', sans-serif;
-    padding: 24px 16px 48px;
+    background-color: #F4F1E1; /* Warm, aged paper/whitewash tone */
+    background-image: linear-gradient(to bottom, #F7F5E9 0%, #EBE7D3 100%);
+    color: #211E1C; /* Faded black / charcoal */
+    font-family: 'Montserrat', sans-serif;
+    padding: 30px 16px 48px;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Header */
-  .header { max-width: 1000px; margin: 0 auto 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #1F6F78; margin: 0 0 6px; font-weight: 700; }
-  h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; margin: 0 0 6px; line-height: 1.1; font-weight: 700; letter-spacing: -0.01em; }
-  @media (min-width: 600px) { h1 { font-size: 38px; } }
-  .sub { margin: 0; color: #55707A; max-width: 55ch; font-size: 14.5px; line-height: 1.5; }
+  /* Header Typography */
+  .header { max-width: 1000px; margin: 0 auto 30px; text-align: center; border-bottom: 2px solid #211E1C; padding-bottom: 20px; }
+  .eyebrow { font-family: 'Sacramento', cursive; font-size: 32px; color: #211E1C; margin: 0 0 -10px; font-weight: normal; }
+  h1 { font-family: 'Cinzel', serif; font-size: 34px; margin: 0 0 10px; line-height: 1.1; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  @media (min-width: 600px) { h1 { font-size: 46px; } }
+  .sub { margin: 0 auto; color: #4A453F; max-width: 55ch; font-size: 15px; font-family: 'Libre Baskerville', serif; font-style: italic; }
 
-  /* Grid replacement using Flexbox & Negative Margins for older browser support */
+  /* Flex Layout (2016 compatible) */
   .flex-container { max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; margin-left: -10px; margin-right: -10px; }
   .col-left, .col-right { width: 100%; padding: 0 10px; margin-bottom: 20px; }
   
@@ -40,51 +42,149 @@
     .col-right { width: 45%; margin-bottom: 0; } 
   }
 
-  .panel { background: #FFFFFF; border: 1px solid #C7D6D6; border-radius: 16px; padding: 22px 20px 18px; box-shadow: 0 4px 12px rgba(22,35,42,0.03); margin-bottom: 20px; }
+  /* Panels (Signage style) */
+  .panel { 
+    background: #FCFBF7; 
+    border: 2px solid #211E1C; 
+    padding: 24px 20px 20px; 
+    margin-bottom: 24px; 
+    box-shadow: 4px 4px 0px rgba(33, 30, 28, 0.1); /* Hard shadow for physical card look */
+  }
   .panel:last-child { margin-bottom: 0; }
-  .panel-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid #EAF0F1; padding-bottom: 10px; }
-  .panel-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; margin: 0; font-weight: 700; color: #1F6F78; display: flex; align-items: center; }
+  
+  .panel-head { 
+    margin-bottom: 20px; 
+    border-top: 3px double #211E1C; 
+    border-bottom: 3px double #211E1C; 
+    padding: 12px 0;
+    text-align: center;
+  }
+  .panel-title { 
+    font-family: 'Cinzel', serif; 
+    font-size: 19px; 
+    margin: 0; 
+    font-weight: 700; 
+    color: #211E1C; 
+    letter-spacing: 1px;
+  }
 
-  /* Widget styles (Flexbox converted) */
+  /* Widgets */
   .widget-row { display: flex; flex-wrap: wrap; margin: 0 -6px 16px -6px; }
-  .widget-card { background: #F4F7F7; border: 1px solid #DCE7E8; border-radius: 12px; padding: 12px; position: relative; flex: 1; margin: 0 6px; min-width: 120px; }
+  .widget-card { 
+    background: transparent; 
+    border: 1px solid #D1CDC1; 
+    padding: 12px; 
+    position: relative; 
+    flex: 1; 
+    margin: 0 6px; 
+    min-width: 120px; 
+    text-align: center;
+  }
   .widget-card-full { flex: 1 1 100%; margin-top: 6px; margin-bottom: 6px; }
-  .widget-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #55707A; text-transform: uppercase; display: block; margin-bottom: 4px; }
-  .widget-val { font-size: 18px; font-weight: 700; color: #16232A; font-family: 'Space Grotesk', sans-serif; }
-  .widget-code { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #1F6F78; font-weight: 700; background: #FFFFFF; padding: 2px 6px; border-radius: 4px; border: 1px dashed #C7D6D6; display: inline-block; margin-top: 4px; }
+  
+  .widget-label { 
+    font-family: 'Montserrat', sans-serif; 
+    font-size: 10px; 
+    color: #5E5851; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px;
+    display: block; 
+    margin-bottom: 6px; 
+    font-weight: 600;
+  }
+  .widget-val { font-size: 18px; font-weight: 700; color: #211E1C; font-family: 'Libre Baskerville', serif; }
+  .widget-code { 
+    font-family: 'Courier New', Courier, monospace; 
+    font-size: 16px; 
+    color: #211E1C; 
+    font-weight: bold; 
+    border: 1px dashed #211E1C; 
+    display: inline-block; 
+    padding: 4px 10px; 
+    margin-top: 4px; 
+  }
 
   /* Lists & Links */
-  .route-section { background: #F8FAFA; border-left: 4px solid #1F6F78; padding: 12px; border-radius: 0 12px 12px 0; margin-bottom: 14px; }
-  .route-title { font-size: 14px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.02em; color: #435B66; }
+  .route-section { 
+    background: transparent; 
+    border: 1px solid #D1CDC1; 
+    padding: 14px; 
+    margin-bottom: 16px; 
+    text-align: center;
+  }
+  .route-title { 
+    font-family: 'Cinzel', serif;
+    font-size: 15px; 
+    font-weight: 700; 
+    margin: 0 0 10px; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    color: #211E1C !important; /* Overriding previous inline colors for a uniform stamp look */
+    border-bottom: 1px solid #D1CDC1;
+    padding-bottom: 8px;
+  }
 
-  .link-chip { display: inline-flex; align-items: center; background: #FFFFFF; border: 1px solid #C7D6D6; border-radius: 8px; padding: 6px 12px; font-size: 13px; color: #16232A; text-decoration: none; font-weight: 500; transition: all 0.2s; margin: 3px; }
-  .link-chip:hover { background: #EAF0F1; border-color: #1F6F78; color: #1F6F78; }
-  .link-chip.map-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #1F6F78; background: #EAF0F1; border: none; }
+  .link-chip { 
+    display: inline-flex; 
+    align-items: center; 
+    background: transparent; 
+    border: 1px solid #211E1C; 
+    padding: 6px 12px; 
+    font-size: 11px; 
+    color: #211E1C; 
+    text-decoration: none; 
+    font-weight: 600; 
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s; 
+    margin: 4px; 
+  }
+  .link-chip:hover { background: #211E1C; color: #F4F1E1; }
+  .link-chip.map-btn { font-family: 'Courier New', Courier, monospace; font-size: 12px; background: #EBE7D3; border-style: dashed; }
 
   /* Rules checklist */
-  .check-item { display: flex; align-items: flex-start; font-size: 13.5px; line-height: 1.4; margin-bottom: 8px; }
-  .check-item input { margin-top: 3px; margin-right: 10px; }
+  .check-item { 
+    display: flex; 
+    align-items: flex-start; 
+    font-family: 'Libre Baskerville', serif;
+    font-size: 14px; 
+    line-height: 1.5; 
+    margin-bottom: 12px; 
+    color: #211E1C;
+  }
+  .check-item input { margin-top: 4px; margin-right: 12px; }
 
   /* Weather/AQI enhancements */
   .day-grid { display: flex; flex-wrap: wrap; margin: 10px -4px 0 -4px; }
-  .day-card { border: 1px solid #DCE7E8; border-radius: 10px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #FAFCFC; min-height: 80px; flex: 1; margin: 0 4px; min-width: 70px; }
-  .day-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; }
-  .day-aqi { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; margin: 4px 0; }
+  .day-card { 
+    border: 1px solid #D1CDC1; 
+    padding: 12px 6px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center; 
+    background: transparent; 
+    min-height: 80px; 
+    flex: 1; 
+    margin: 0 4px; 
+    min-width: 70px; 
+  }
+  .day-name { font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px; text-transform: uppercase; }
+  .day-aqi { font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 22px; margin: 6px 0; }
 
-  .alert-banner { background: #FFF4F2; border: 1px solid #F2D2CD; color: #A63224; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; line-height: 1.4; }
-  .success-banner { background: #E8F5E9; border: 1px solid #C8E6C9; color: #2E7D32; padding: 10px; border-radius: 10px; font-size: 12px; font-family: 'JetBrains Mono', monospace; text-align: center; margin-bottom: 12px; }
+  .alert-banner { background: transparent; border: 2px dashed #8B2C24; color: #8B2C24; padding: 12px; font-size: 13px; margin-bottom: 16px; line-height: 1.4; text-align: center; font-weight: bold; }
+  .success-banner { background: transparent; border: 1px solid #211E1C; border-top: 3px solid #211E1C; color: #211E1C; padding: 10px; font-size: 11px; font-family: 'Montserrat', sans-serif; text-align: center; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
 
-  .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #8CA3A8; font-family: 'JetBrains Mono', monospace; }
+  .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #5E5851; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; letter-spacing: 1px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div>
-    <p class="eyebrow">🚗 West Michigan Travel Companion</p>
-    <h1>Orchard Hill Farm Hub</h1>
-    <p class="sub">Sat, July 18 — Tue, July 21, 2026. </p>
-  </div>
+  <p class="eyebrow">The West Michigan Travel Companion</p>
+  <h1>Orchard Hill Farm Hub</h1>
+  <p class="sub">Saturday, July 18 — Tuesday, July 21, 2026</p>
 </div>
 
 <div class="flex-container">
@@ -95,38 +195,38 @@
     <!-- Stay Essentials Panel -->
     <section class="panel">
       <div class="panel-head">
-        <h2 class="panel-title">🏡 Airbnb Logistics</h2>
+        <h2 class="panel-title">Airbnb Logistics</h2>
       </div>
 
       <div class="widget-row">
         <div class="widget-card">
           <span class="widget-label">Address</span>
-          <div class="widget-val" style="font-size:14px;line-height:1.3;">1814 Lakeshore Dr<br>Fennville, MI 49408</div>
-          <a href="https://www.google.com/maps/search/?api=1&query=1814+Lakeshore+Drive+Fennville+MI" target="_blank" class="link-chip map-btn" style="margin-top:6px; display:inline-block;">🗺️ Map Route</a>
+          <div class="widget-val" style="font-size:15px;line-height:1.4;">1814 Lakeshore Dr<br>Fennville, MI 49408</div>
+          <a href="https://www.google.com/maps/search/?api=1&query=1814+Lakeshore+Drive+Fennville+MI" target="_blank" class="link-chip map-btn" style="margin-top:10px; display:inline-block;">Map Route</a>
         </div>
         <div class="widget-card">
           <span class="widget-label">Access Code</span>
           <div class="widget-code">2531</div>
-          <span class="widget-label" style="margin-top:8px;">Locks/Unlocks Door</span>
+          <span class="widget-label" style="margin-top:10px;">Locks/Unlocks Door</span>
         </div>
       </div>
 
       <div class="widget-row">
         <div class="widget-card widget-card-full">
-          <span class="widget-label">🔒 Wi-Fi Connection</span>
-          <div class="widget-val" style="font-size:15px; font-family:'JetBrains Mono', monospace;">Network: <span style="color:#1F6F78">hug2G379225</span></div>
-          <div class="widget-val" style="font-size:15px; font-family:'JetBrains Mono', monospace; margin-top:2px;">Password: <span style="color:#1F6F78">wheel77switch</span></div>
+          <span class="widget-label">Wi-Fi Connection</span>
+          <div class="widget-val" style="font-size:16px;">Network: <span style="border-bottom:1px solid #211E1C; font-style:italic;">hug2G379225</span></div>
+          <div class="widget-val" style="font-size:16px; margin-top:6px;">Password: <span style="border-bottom:1px solid #211E1C; font-style:italic;">wheel77switch</span></div>
         </div>
       </div>
 
       <div class="widget-row" style="margin-bottom: 0;">
         <div class="widget-card">
           <span class="widget-label">Check-In</span>
-          <div class="widget-val" style="font-size:14px;">Today @ 4:00 PM<br><span style="font-size:11px; color:#55707A;" id="countdown-in">--</span></div>
+          <div class="widget-val" style="font-size:14px; font-family:'Montserrat', sans-serif;">Today @ 4:00 PM<br><span style="font-size:11px; color:#5E5851; font-weight:normal;" id="countdown-in">--</span></div>
         </div>
         <div class="widget-card">
           <span class="widget-label">Checkout</span>
-          <div class="widget-val" style="font-size:14px;">Tue, Jul 21 @ 11:00 AM<br><span style="font-size:11px; color:#55707A;" id="countdown-out">--</span></div>
+          <div class="widget-val" style="font-size:14px; font-family:'Montserrat', sans-serif;">Tue, Jul 21 @ 11:00 AM<br><span style="font-size:11px; color:#5E5851; font-weight:normal;" id="countdown-out">--</span></div>
         </div>
       </div>
     </section>
@@ -134,7 +234,7 @@
     <!-- House Rules & Operational Knowledge -->
     <section class="panel">
       <div class="panel-head">
-        <h2 class="panel-title">📜 House Rules & Quirks</h2>
+        <h2 class="panel-title">House Rules & Quirks</h2>
       </div>
       <div class="check-item"><input type="checkbox"> <span><strong>Driveway Only:</strong> Park exclusively on the circular drive. No grass parking (underground sprinkler hazard).</span></div>
       <div class="check-item"><input type="checkbox"> <span><strong>Septic Safe:</strong> Absolutely nothing down toilets except toilet paper. Old farm plumbing.</span></div>
@@ -148,9 +248,9 @@
     <!-- Checkout Protocol Panel -->
     <section class="panel">
       <div class="panel-head">
-        <h2 class="panel-title">🧹 Checkout Checklist (Strict 11 AM)</h2>
+        <h2 class="panel-title">Checkout Checklist (Strict 11 AM)</h2>
       </div>
-      <p style="font-size: 12px; color: #55707A; margin: -6px 0 12px 0;">Cleaner has a tight turnaround window. Please execute the following before turning keys:</p>
+      <p style="font-size: 13px; color: #4A453F; margin: -10px 0 16px 0; font-style: italic; text-align: center;">Cleaner has a tight turnaround window. Please execute the following before turning keys:</p>
       <div class="check-item"><input type="checkbox"> <span>Strip beds completely.</span></div>
       <div class="check-item"><input type="checkbox"> <span>Consolidate and pile dirty towels onto bathroom floors.</span></div>
       <div class="check-item"><input type="checkbox"> <span>Clear out all customized food items from the refrigerator and freezer units.</span></div>
@@ -166,27 +266,27 @@
     <!-- Live Environmental Conditions -->
     <section class="panel" id="panel-weather">
       <div class="panel-head">
-        <h2 class="panel-title">🌤️ Fennville Weather</h2>
+        <h2 class="panel-title">Fennville Weather</h2>
       </div>
       <div id="live-weather-root">
-        <p style="font-size:13px; color:#55707A;">Querying AirNow API & Open-Meteo systems...</p>
+        <p style="font-size:12px; color:#5E5851; text-align:center; font-style:italic;">Querying Atmospheric Systems...</p>
       </div>
     </section>
 
     <!-- The Transit Route Plan & Stops -->
     <section class="panel">
       <div class="panel-head">
-        <h2 class="panel-title">🚗 Route Options & Planned Stops</h2>
+        <h2 class="panel-title">Route Options & Planned Stops</h2>
       </div>
 
       <div class="route-section">
-        <div class="route-title">🌿 Lansing Route (Outdoor Focus)</div>
+        <div class="route-title">Lansing Route (Outdoor Focus)</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Horrocks+Farm+Market+Lansing" target="_blank" class="link-chip">Horrocks Market (7a-10p)</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Old+Nation+Brewing+Williamston" target="_blank" class="link-chip">Old Nation Brewing</a>
       </div>
 
       <div class="route-section">
-        <div class="route-title">🏎️ Portage Route (Indoor Safe Alternatives)</div>
+        <div class="route-title">Portage Route (Indoor Safe Alternatives)</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Air+Zoo+Portage+MI" target="_blank" class="link-chip">Air Zoo Aerospace ($19.50)</a>
         <a href="https://www.google.com/maps/search/?api=1&query=One+Well+Brewing+Kalamazoo" target="_blank" class="link-chip">One Well Brewing</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Latitude+42+Brewing+Portage" target="_blank" class="link-chip">Latitude 42</a>
@@ -194,7 +294,7 @@
       </div>
 
       <div class="route-section">
-        <div class="route-title">🎨 Grand Rapids Route (Scenery & Culture)</div>
+        <div class="route-title">Grand Rapids Route (Scenery & Culture)</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Frederik+Meijer+Gardens+Grand+Rapids" target="_blank" class="link-chip">Meijer Gardens ($25.00)</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Brewery+Vivant+Grand+Rapids" target="_blank" class="link-chip">Brewery Vivant</a>
         <a href="https://www.google.com/maps/search/?api=1&query=The+Mitten+Brewing+Grand+Rapids" target="_blank" class="link-chip">Mitten Brewing Co.</a>
@@ -204,19 +304,19 @@
     <!-- Local Destination Options Hub -->
     <section class="panel">
       <div class="panel-head">
-        <h2 class="panel-title">📍 Destination Inventory Hub</h2>
+        <h2 class="panel-title">Destination Inventory Hub</h2>
       </div>
 
-      <div class="route-section" style="border-left-color: #D8A61B;">
-        <div class="route-title" style="color:#A67B00;">🍎 Local Farms & Artisans</div>
+      <div class="route-section">
+        <div class="route-title">Local Farms & Artisans</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Fernwood+Farm+Fennville" target="_blank" class="link-chip">Fernwood Farm</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Evergreen+Lane+Goat+Farm+Fennville" target="_blank" class="link-chip">Evergreen Lane Goat Farm</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Bluestar+Farm+Fennville" target="_blank" class="link-chip">Bluestar Farm (Blueberries)</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Cranes+Pie+Pantry+Fennville" target="_blank" class="link-chip">Cranes Apple Orchard</a>
       </div>
 
-      <div class="route-section" style="border-left-color: #E07B39;">
-        <div class="route-title" style="color:#B35517;">🍺 Tasting Rooms & Breweries</div>
+      <div class="route-section">
+        <div class="route-title">Tasting Rooms & Breweries</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Modales+Wines+Fennville" target="_blank" class="link-chip">Modales Wines</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Michigan+Wine+Company+Fennville" target="_blank" class="link-chip">Michigan Wine Co.</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Fenn+Valley+Vineyards" target="_blank" class="link-chip">Fennville Winery</a>
@@ -224,20 +324,20 @@
         <a href="https://www.google.com/maps/search/?api=1&query=Three+Blondes+Brewing+South+Haven" target="_blank" class="link-chip">3 Blondes Brewing</a>
       </div>
 
-      <div class="route-section" style="border-left-color: #2E9E5B;">
-        <div class="route-title" style="color:#1D663A;">🌊 Shorelines & Preservation Beaches</div>
-        <a href="https://www.google.com/maps/search/?api=1&query=Wau-Ke-Na+Preserve" target="_blank" class="link-chip">Wau-Ke-Na Preserve (Ultra-Close)</a>
+      <div class="route-section">
+        <div class="route-title">Shorelines & Preservation Beaches</div>
+        <a href="https://www.google.com/maps/search/?api=1&query=Wau-Ke-Na+Preserve" target="_blank" class="link-chip">Wau-Ke-Na Preserve</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Westside+County+Park+Fennville" target="_blank" class="link-chip">Westside County Park</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Pier+Cove+Park" target="_blank" class="link-chip">Pier Cove</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Oval+Beach+Saugatuck" target="_blank" class="link-chip">Oval Beach</a>
       </div>
 
-      <div class="route-section" style="border-left-color: #7A3B8C;">
-        <div class="route-title" style="color:#562463;">🧸 Family & Rainy Day Kids Activities</div>
+      <div class="route-section">
+        <div class="route-title">Family & Rainy Day Kids Activities</div>
         <a href="https://expressyourselfartbarn.com/" target="_blank" class="link-chip">Express Yourself Art Barn</a>
         <a href="https://www.mittenmuseum.com/" target="_blank" class="link-chip">Mitten Museum</a>
         <a href="https://hollandaquatic.org/" target="_blank" class="link-chip">Holland Aquatic Center</a>
-        <a href="https://www.rocketarcade.com/" target="_blank" class="link-chip">Rocket Arcade (South Haven)</a>
+        <a href="https://www.rocketarcade.com/" target="_blank" class="link-chip">Rocket Arcade</a>
       </div>
     </section>
 
@@ -245,14 +345,13 @@
 </div>
 
 <div class="footer">
-  Built securely with pure client execution components. All routing indexes functional offline once cached.
+  // Built Securely // Client Execution // Offline Indexed //
 </div>
 
 <!-- DATA INTEGRATION SCRIPT -->
 <script>
   // Dynamic Real-time Countdown Calculations
   function updateCountdowns() {
-    // ES5 string parsing fallback compatible with old IE/Safari
     var targetCheckIn = new Date("2026-07-18T16:00:00-04:00").getTime();
     var targetCheckOut = new Date("2026-07-21T11:00:00-04:00").getTime();
     var now = new Date().getTime();
@@ -283,14 +382,14 @@
   setInterval(updateCountdowns, 60000);
   updateCountdowns();
 
-  // ---- Environmental data: AirNow for "current" (ground truth), Open-Meteo for 3-day forecast ----
+  // ---- Environmental data: AirNow for "current", Open-Meteo for 3-day forecast ----
   var CATEGORIES = [
-    { max: 50, label: "Good", color: "#2E9E5B" },
-    { max: 100, label: "Moderate", color: "#D8A61B" },
-    { max: 150, label: "Unhealthy (Sensitive)", color: "#E07B39" },
-    { max: 200, label: "Unhealthy", color: "#C1432E" },
-    { max: 300, label: "Very Unhealthy", color: "#7A3B8C" },
-    { max: Infinity, label: "Hazardous", color: "#6B1420" }
+    { max: 50, label: "Good", color: "#32623D" }, // Muted green
+    { max: 100, label: "Moderate", color: "#B8860B" }, // Muted gold
+    { max: 150, label: "Sensitive", color: "#B25A24" }, // Muted rust
+    { max: 200, label: "Unhealthy", color: "#8B2C24" }, // Muted red
+    { max: 300, label: "Very Unhealthy", color: "#543063" }, // Muted purple
+    { max: Infinity, label: "Hazardous", color: "#4A1A24" }
   ];
 
   function getCat(val) {
@@ -314,15 +413,15 @@
   }
 
   var WEATHER_CODES = {
-    0: ["☀️", "Clear"], 1: ["🌤️", "Mostly Clear"], 2: ["⛅", "Partly Cloudy"], 3: ["☁️", "Cloudy"],
+    0: ["☀️", "Clear"], 1: ["🌤️", "M. Clear"], 2: ["⛅", "P. Cloudy"], 3: ["☁️", "Cloudy"],
     45: ["🌫️", "Fog"], 48: ["🌫️", "Fog"],
     51: ["🌦️", "Drizzle"], 53: ["🌦️", "Drizzle"], 55: ["🌦️", "Drizzle"],
-    56: ["🌧️", "Frzg Drizzle"], 57: ["🌧️", "Frzg Drizzle"],
-    61: ["🌧️", "Rain"], 63: ["🌧️", "Rain"], 65: ["🌧️", "Heavy Rain"],
-    66: ["🌧️", "Frzg Rain"], 67: ["🌧️", "Frzg Rain"],
-    71: ["🌨️", "Snow"], 73: ["🌨️", "Snow"], 75: ["🌨️", "Heavy Snow"], 77: ["🌨️", "Snow Grains"],
+    56: ["🌧️", "F. Drizzle"], 57: ["🌧️", "F. Drizzle"],
+    61: ["🌧️", "Rain"], 63: ["🌧️", "Rain"], 65: ["🌧️", "H. Rain"],
+    66: ["🌧️", "F. Rain"], 67: ["🌧️", "F. Rain"],
+    71: ["🌨️", "Snow"], 73: ["🌨️", "Snow"], 75: ["🌨️", "H. Snow"], 77: ["🌨️", "S. Grains"],
     80: ["🌦️", "Showers"], 81: ["🌦️", "Showers"], 82: ["🌦️", "Showers"],
-    85: ["🌨️", "Snow Showers"], 86: ["🌨️", "Snow Showers"],
+    85: ["🌨️", "S. Showers"], 86: ["🌨️", "S. Showers"],
     95: ["⛈️", "T-storms"], 96: ["⛈️", "T-storms"], 99: ["⛈️", "T-storms"]
   };
 
@@ -423,34 +522,34 @@
              '<div class="widget-card">' +
                '<span class="widget-label">Current Temp</span>' +
                '<div class="widget-val" style="font-size:28px;">' + curTemp + '°F</div>' +
-               '<span class="widget-label" style="margin-top:4px;">Humidity: ' + curHumidity + '%</span>' +
+               '<span class="widget-label" style="margin-top:8px; font-weight:normal; text-transform:none;">Humidity: ' + curHumidity + '%</span>' +
              '</div>' +
              '<div class="widget-card">' +
                '<span class="widget-label">Air Quality Now</span>' +
                '<div class="widget-val" style="font-size:28px; color:' + aqiCat.color + '">' + curAqi + '</div>' +
-               '<span class="widget-label" style="margin-top:4px; font-weight:700; color:' + aqiCat.color + '">' + curCatName + '</span>' +
+               '<span class="widget-label" style="margin-top:8px; font-weight:700; color:' + aqiCat.color + '">' + curCatName + '</span>' +
              '</div>' +
            '</div>';
   }
 
   function renderForecast(days) {
     if (!days || days.length === 0) {
-      return '<div style="width:100%; font-size:12px; color:#55707A; padding:8px; text-align:center;">Forecast temporarily unavailable.</div>';
+      return '<div style="width:100%; font-size:12px; color:#5E5851; padding:8px; text-align:center;">Forecast temporarily unavailable.</div>';
     }
     var cards = days.map(function(d) {
       var cat = getCat(d.avgAqi);
       return '<div class="day-card">' +
                '<span class="day-name">' + d.label + '</span>' +
                '<span class="day-aqi" style="color:' + cat.color + '">' + d.avgAqi + '</span>' +
-               '<span style="font-size:9px; color:#55707A; text-transform:uppercase;">' + cat.label + '</span>' +
+               '<span style="font-size:9px; font-family:\'Montserrat\', sans-serif; font-weight:bold; color:#5E5851; text-transform:uppercase;">' + cat.label + '</span>' +
              '</div>';
     }).join("");
-    return '<span class="widget-label" style="margin-bottom:6px; display:block;">3-Day AQI Forecast (avg, Open-Meteo):</span><div class="day-grid">' + cards + '</div>';
+    return '<span class="widget-label" style="margin-bottom:8px; display:block; text-align:center;">3-Day AQI Forecast</span><div class="day-grid">' + cards + '</div>';
   }
 
   function renderWeatherForecast(days) {
     if (!days || days.length === 0) {
-      return '<div style="width: 100%; font-size:12px; color:#55707A; padding:8px; text-align:center;">Weather forecast temporarily unavailable.</div>';
+      return '<div style="width: 100%; font-size:12px; color:#5E5851; padding:8px; text-align:center;">Weather forecast temporarily unavailable.</div>';
     }
     var cards = days.map(function(d) {
       var iconInfo = weatherIconLabel(d.code);
@@ -460,12 +559,12 @@
       
       return '<div class="day-card">' +
                '<span class="day-name">' + d.label + '</span>' +
-               '<span style="font-size:26px; margin:2px 0;">' + icon + '</span>' +
-               '<span class="day-aqi" style="font-size:15px; margin:2px 0;">' + d.hi + '° / ' + d.lo + '°</span>' +
-               '<span style="font-size:9px; color:#55707A;">' + label + precipStr + '</span>' +
+               '<span style="font-size:24px; margin:4px 0;">' + icon + '</span>' +
+               '<span class="day-aqi" style="font-size:16px; margin:2px 0;">' + d.hi + '° / ' + d.lo + '°</span>' +
+               '<span style="font-size:10px; font-family:\'Montserrat\', sans-serif; color:#5E5851;">' + label + precipStr + '</span>' +
              '</div>';
     }).join("");
-    return '<span class="widget-label" style="margin:14px 0 6px; display:block;">72-Hour Weather Forecast (Open-Meteo):</span><div class="day-grid">' + cards + '</div>';
+    return '<span class="widget-label" style="margin:20px 0 8px; display:block; text-align:center;">72-Hour Weather Forecast</span><div class="day-grid">' + cards + '</div>';
   }
 
   // ES5 Promise.allSettled Polyfill logic for 2016 clients
@@ -492,22 +591,22 @@
       var html = "";
 
       if (weatherResult.status === "fulfilled" && airNowResult.status === "fulfilled") {
-        html += '<div class="success-banner">⚡ Live conditions synced (AirNow + Open-Meteo)</div>';
+        html += '<div class="success-banner">Live conditions synced</div>';
         html += renderWeatherAndCurrentAqi(weatherResult.value, airNowResult.value);
       } else {
-        html += '<div class="alert-banner" style="margin-bottom:12px;">⚠️ Couldn\'t load current temp/AQI right now.</div>';
+        html += '<div class="alert-banner">COULD NOT LOAD CURRENT CONDITIONS</div>';
       }
 
       if (forecastResult.status === "fulfilled") {
         html += renderForecast(forecastResult.value);
       } else {
-        html += '<div class="alert-banner" style="margin:8px 0 0;">⚠️ Couldn\'t load the 3-day AQI forecast right now.</div>';
+        html += '<div class="alert-banner" style="margin-top:12px;">COULD NOT LOAD AQI FORECAST</div>';
       }
 
       if (weatherForecastResult.status === "fulfilled") {
         html += renderWeatherForecast(weatherForecastResult.value);
       } else {
-        html += '<div class="alert-banner" style="margin:8px 0 0;">⚠️ Couldn\'t load the weather forecast right now.</div>';
+        html += '<div class="alert-banner" style="margin-top:12px;">COULD NOT LOAD WEATHER FORECAST</div>';
       }
 
       root.innerHTML = html;
