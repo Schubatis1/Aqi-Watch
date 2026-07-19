@@ -33,7 +33,11 @@
   }
 
   .panel { background: #FCFBF7; border: 2px solid #211E1C; border-radius: 0; padding: 16px 14px 14px; margin-bottom: 16px; }
-  .panel-head { border-top: 3px double #211E1C; border-bottom: 3px double #211E1C; padding: 10px 0; margin-bottom: 12px; text-align: center; }
+  .panel-head { border-top: 3px double #211E1C; border-bottom: 3px double #211E1C; padding: 10px 0; margin-bottom: 12px; text-align: center; cursor: pointer; -webkit-user-select: none; user-select: none; }
+  .panel-title:before { content: "\2212 "; }
+  .panel.is-collapsed .panel-head { margin-bottom: 0; }
+  .panel.is-collapsed .panel-title:before { content: "+ "; }
+  .panel.is-collapsed .panel-body { display: none; }
   .panel-head:after { content: ""; display: block; clear: both; }
   .panel-title { font-family: 'Cinzel', serif; font-size: 16px; margin: 0; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
   .refresh-btn { background: #EBE7D3; border: 1px dashed #211E1C; color: #211E1C; padding: 5px 11px; font-size: 11px; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; margin-top: 8px; }
@@ -143,6 +147,7 @@
 
     <section class="panel">
       <div class="panel-head"><h2 class="panel-title">Airbnb Logistics</h2></div>
+      <div class="panel-body">
       <div class="widget-row">
         <div class="widget-card">
           <span class="widget-label">Address</span>
@@ -172,10 +177,25 @@
           <div class="widget-val" style="font-size:13px;">Tue, Jul 21 @ 11:00 AM<br><span style="font-size:11px;color:#5E5851;" id="countdown-out">--</span></div>
         </div>
       </div>
+      </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="panel-weather">
+      <div class="panel-head">
+        <h2 class="panel-title">Fennville Weather</h2>
+        <button class="refresh-btn" id="weather-refresh-btn">Refresh</button>
+      </div>
+      <div class="panel-body">
+      <p class="last-updated" id="last-updated">Not yet updated</p>
+      <div id="live-weather-root">
+        <p style="font-size:12px;color:#5E5851;text-align:center;font-style:italic;">Querying weather and air quality systems...</p>
+      </div>
+      </div>
+    </section>
+
+    <section class="panel is-collapsed">
       <div class="panel-head"><h2 class="panel-title">Cottage Rules</h2></div>
+      <div class="panel-body">
       <div class="check-item">Please don't park on the grass - we have a sprinkler system. Park on the circular drive only.</div>
       <div class="check-item">Please keep the cottage locked when you are not there and when you check out.</div>
       <div class="check-item">Please do not cut anything directly on the counters - use a cutting board.</div>
@@ -184,10 +204,12 @@
       <div class="check-item">Please don't let kids sleep on the loft or play on the ladder.</div>
       <div class="check-item">Please don't go into the basement or barn.</div>
       <div class="check-item">Quiet time is 10pm to 7am in our neighborhood.</div>
+      </div>
     </section>
 
-    <section class="panel">
+    <section class="panel is-collapsed">
       <div class="panel-head"><h2 class="panel-title">Check-out Checklist</h2></div>
+      <div class="panel-body">
       <div class="check-item">Strip beds and place linens on the bedroom floor in each room.</div>
       <div class="check-item">Leave used bath towels in a pile on the bathroom floor.</div>
       <div class="check-item">Clean out fridge/freezer and dispose of your items.</div>
@@ -195,25 +217,16 @@
       <div class="check-item">Clean all dishes/kitchen items and place them back where you found them.</div>
       <div class="check-item">Turn off all lights.</div>
       <div class="check-item">Give Nana a big hug !!!</div>
+      </div>
     </section>
 
   </div>
 
   <div class="colRight">
 
-    <section class="panel" id="panel-weather">
-      <div class="panel-head">
-        <h2 class="panel-title">Fennville Weather</h2>
-        <button class="refresh-btn" id="weather-refresh-btn">Refresh</button>
-      </div>
-      <p class="last-updated" id="last-updated">Not yet updated</p>
-      <div id="live-weather-root">
-        <p style="font-size:12px;color:#5E5851;text-align:center;font-style:italic;">Querying weather and air quality systems...</p>
-      </div>
-    </section>
-
-    <section class="panel">
+    <section class="panel is-collapsed">
       <div class="panel-head"><h2 class="panel-title">Destination Inventory Hub</h2></div>
+      <div class="panel-body">
       <div class="route-section">
         <div class="route-title">Local Farms & Artisans</div>
         <button class="venue-btn" data-venue="fernwood">Fernwood Farm (Khnemu Studio) <span class="btn-drive">(~10 min (6.5 mi))</span></button>
@@ -286,10 +299,12 @@
         <button class="venue-btn" data-venue="everydaypeople">Everyday People Cafe <span class="btn-drive">(~15 min)</span></button>
         <button class="venue-btn" data-venue="saltoftheearth">Salt of the Earth <span class="btn-drive">(~12 min)</span></button>
       </div>
+      </div>
     </section>
 
-    <section class="panel">
+    <section class="panel is-collapsed">
       <div class="panel-head"><h2 class="panel-title">Nearby Essentials</h2></div>
+      <div class="panel-body">
       <div class="route-section" style="margin-bottom:0;">
         <a href="https://www.google.com/maps/search/Urgent+Care" target="_blank" class="link-chip">Urgent Care</a>
         <a href="https://www.google.com/maps/search/Pharmacy" target="_blank" class="link-chip">Pharmacy</a>
@@ -297,6 +312,7 @@
         <a href="https://www.google.com/maps/search/Gas+Station" target="_blank" class="link-chip">Gas</a>
         <a href="https://www.google.com/maps/search/Grocery" target="_blank" class="link-chip">Grocery</a>
         <a href="https://www.google.com/maps/search/Cafe" target="_blank" class="link-chip">Cafe</a>
+      </div>
       </div>
     </section>
 
@@ -853,6 +869,50 @@
     if (overlay) { overlay.onclick = closeVenuePane; }
   }
 
+  // ---- Collapsible panels ----
+  function hasClass(el, cls) {
+    return (" " + el.className + " ").indexOf(" " + cls + " ") > -1;
+  }
+  function addClass(el, cls) {
+    if (!hasClass(el, cls)) { el.className = el.className ? el.className + " " + cls : cls; }
+  }
+  function removeClass(el, cls) {
+    var parts = el.className.split(" ");
+    var out = [];
+    var i;
+    for (i = 0; i < parts.length; i++) {
+      if (parts[i] !== cls && parts[i] !== "") { out.push(parts[i]); }
+    }
+    el.className = out.join(" ");
+  }
+  function toggleClass(el, cls) {
+    if (hasClass(el, cls)) { removeClass(el, cls); } else { addClass(el, cls); }
+  }
+  function findAncestorByClass(el, cls) {
+    var node = el;
+    while (node) {
+      if (node.className && typeof node.className === "string" && hasClass(node, cls)) { return node; }
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function initCollapsibles() {
+    var heads = document.querySelectorAll(".panel-head");
+    var i;
+    for (i = 0; i < heads.length; i++) {
+      heads[i].onclick = (function (headEl) {
+        return function (e) {
+          var target = (e && e.target) ? e.target : (window.event ? window.event.srcElement : headEl);
+          if (target && target.id === "weather-refresh-btn") { return; }
+          if (findAncestorByClass(target, "refresh-btn")) { return; }
+          var panel = findAncestorByClass(headEl, "panel");
+          if (panel) { toggleClass(panel, "is-collapsed"); }
+        };
+      })(heads[i]);
+    }
+  }
+
   function updateCountdowns() {
     var targetCheckIn = new Date("2026-07-18T16:00:00-04:00");
     var targetCheckOut = new Date("2026-07-21T11:00:00-04:00");
@@ -1387,6 +1447,7 @@
 
   function init() {
     initVenuePane();
+    initCollapsibles();
     loadEnvironmentalMetrics();
     setInterval(loadEnvironmentalMetrics, 15 * 60 * 1000);
 
