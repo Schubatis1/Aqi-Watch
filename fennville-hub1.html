@@ -257,6 +257,32 @@
       </div>
     </section>
 
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Nearby Dollar Stores</h2>
+  </div>
+
+  <div class="route-section" style="margin-bottom:0;">
+
+    <button class="venue-btn" data-venue="fdfennville">
+      Family Dollar (Fennville)
+      <span class="btn-drive">(8 min)</span>
+    </button>
+
+    <button class="venue-btn" data-venue="dollartree">
+      Dollar Tree (South Haven)
+      <span class="btn-drive">(18 min)</span>
+    </button>
+
+    <button class="venue-btn" data-venue="fdsouthhaven">
+      Family Dollar (South Haven)
+      <span class="btn-drive">(18 min)</span>
+    </button>
+
+  </div>
+</section>
+
+    
   </div>
 </div>
 
@@ -413,7 +439,42 @@
       hours: "Daily 8:00am-10:00pm",
       desc: "Consistently rated one of the best beaches in the country \u2014 towering sand dunes, soft sand, and excellent swimming conditions. Paid parking in season; busy on summer weekends."
     }
-  };
+  }
+    fdfennville: {
+  name: "Family Dollar",
+  cat: "Dollar Store",
+  drive: "~8 min",
+  address: "717 E Main St, Fennville, MI 49408",
+  phone: "(269) 285-0669",
+  website: "https://locations.familydollar.com/mi/fennville/717-e-main-st",
+  tripadvisor: null,
+  hours: "Daily 8:00 AM–10:00 PM",
+  desc: "Closest dollar store to the Airbnb. Good stop for snacks, toiletries, beach toys, paper products, batteries, and other forgotten essentials."
+},
+
+dollartree: {
+  name: "Dollar Tree",
+  cat: "Dollar Store",
+  drive: "~18 min",
+  address: "1220 Phoenix St Suite 3, South Haven, MI 49090",
+  phone: "(269) 767-8566",
+  website: "https://locations.dollartree.com/mi/south-haven/1220-phoenix-st-suite-3",
+  tripadvisor: null,
+  hours: "Daily (typically 8:00 AM–9:00 PM)",
+  desc: "Best option for inexpensive party supplies, snacks, cleaning supplies, kitchen items, and seasonal products."
+},
+
+fdsouthhaven: {
+  name: "Family Dollar",
+  cat: "Dollar Store",
+  drive: "~18 min",
+  address: "615 Phillips St, South Haven, MI 49090",
+  phone: null,
+  website: "https://locations.familydollar.com/",
+  tripadvisor: null,
+  hours: "Daily (typically 8:00 AM–10:00 PM)",
+  desc: "Convenient if you're already shopping in South Haven or heading toward the beach."
+},;
 
   function mapsUrl(address) {
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
