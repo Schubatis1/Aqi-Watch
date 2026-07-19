@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Fennville Vacation Dashboard (Legacy)</title>
 <link rel="apple-touch-icon" href="https://i.imgur.com/gtqPj7P.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <link rel="icon" type="image/png" href="https://i.imgur.com/gtqPj7P.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Cinzel:wght@600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600&display=swap');
@@ -101,7 +102,8 @@
   .pane-sublist { margin: 6px 0 0 16px; padding: 0; font-size: 12px; color: #4A453F; }
   .pane-sublist li { margin-bottom: 3px; }
   .pane-unknown { color: #8C8880; font-style: italic; font-size: 11.5px; }
-  .pane-map-frame { width: 100%; max-width: 320px; height: 220px; border: 1px solid #211E1C; margin-top: 4px; display: block; }
+  .pane-leaflet-map { width: 100%; height: 220px; border: 1px solid #211E1C; margin-top: 4px; }
+  .pane-map-fallback { width: 100%; min-height: 40px; border: 1px dashed #211E1C; margin-top: 4px; text-align: center; font-size: 11.5px; color: #8C8880; font-style: italic; padding: 14px 10px; }
 
   .link-chip { display: inline-block; background: transparent; border: 1px solid #211E1C; padding: 5px 9px; font-size: 11px; color: #211E1C; text-decoration: none; margin: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
 
@@ -313,6 +315,10 @@
         <button class="venue-btn" data-venue="walmartsouthhaven">Walmart Supercenter</button>
         <button class="venue-btn" data-venue="bronsonhospital">Bronson South Haven Hospital</button>
         <button class="venue-btn" data-venue="hollandhospital">Holland Hospital</button>
+        <button class="venue-btn" data-venue="fd_fennville">Family Dollar (Fennville)</button>
+        <button class="venue-btn" data-venue="fd_sh">Family Dollar (South Haven)</button>
+        <button class="venue-btn" data-venue="dt_sh">Dollar Tree (South Haven)</button>
+        <button class="venue-btn" data-venue="dg_saug">Dollar General (Saugatuck)</button>
       </div>
       </div>
     </section>
@@ -327,6 +333,8 @@
 </div>
 
 <footer>// Legacy-compatibility build for older browsers/embedded displays //</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
 
@@ -805,6 +813,35 @@
       hours: "Open 24 hours",
       desc: "A primary medical facility in Holland providing comprehensive 24-hour emergency care alongside a wide variety of inpatient and outpatient medical services."
     },
+
+    fd_fennville: {
+      name: "Family Dollar (Fennville)", cat: "Discount Store", drive: "Central Fennville",
+      lat: 42.596, lon: -86.099,
+      address: "717 E Main St, Fennville, MI 49408", phone: null,
+      website: null, tripadvisor: null, hours: null,
+      desc: "Closest option for quick household items, snacks, and basic grocery essentials."
+    },
+    fd_sh: {
+      name: "Family Dollar (South Haven)", cat: "Discount Store", drive: "~20 min",
+      lat: 42.404, lon: -86.267,
+      address: "615 Phillips St, South Haven, MI 49090", phone: null,
+      website: null, tripadvisor: null, hours: null,
+      desc: "Standard Family Dollar inventory; convenient if you're already heading into South Haven."
+    },
+    dt_sh: {
+      name: "Dollar Tree (South Haven)", cat: "Discount Store", drive: "~20 min",
+      lat: 42.402, lon: -86.271,
+      address: "1220 Phoenix St, South Haven, MI 49090", phone: null,
+      website: null, tripadvisor: null, hours: null,
+      desc: "Best for inexpensive party supplies, crafts, and cleaning goods."
+    },
+    dg_saug: {
+      name: "Dollar General (Saugatuck)", cat: "Discount Store", drive: "~15 min",
+      lat: 42.652, lon: -86.201,
+      address: "3465 Blue Star Hwy, Saugatuck, MI 49406", phone: null,
+      website: null, tripadvisor: null, hours: null,
+      desc: "Located near the highway; useful for quick stops on your way between Fennville and Saugatuck."
+    },
   };
   function mapsUrl(address) {
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
@@ -813,23 +850,66 @@
   var AIRBNB_LAT = 42.585;
   var AIRBNB_LON = -86.205;
 
-  function padRange(a, b, minPad) {
-    var lo = a < b ? a : b;
-    var hi = a > b ? a : b;
-    var span = hi - lo;
-    var pad = span * 0.3;
-    if (pad < minPad) { pad = minPad; }
-    return [lo - pad, hi + pad];
+  function escapeXml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
-  function mapEmbedUrl(destLat, destLon) {
-    if (destLat === null || destLat === undefined || destLon === null || destLon === undefined) {
-      return null;
+  var paneLeafletMap = null;
+
+  var airbnbPinIcon = null;
+  function getAirbnbIcon() {
+    if (!airbnbPinIcon && window.L) {
+      airbnbPinIcon = L.divIcon({
+        className: "airbnb-pin",
+        html: '<div style="width:20px;height:20px;border-radius:50% 50% 50% 0;background:#1F6F78;border:2px solid #F4F1E1;box-shadow:0 1px 4px rgba(0,0,0,0.5);transform:rotate(-45deg);"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 20],
+        popupAnchor: [0, -18]
+      });
     }
-    var lonRange = padRange(AIRBNB_LON, destLon, 0.01);
-    var latRange = padRange(AIRBNB_LAT, destLat, 0.01);
-    var bbox = lonRange[0] + "," + latRange[0] + "," + lonRange[1] + "," + latRange[1];
-    return "https://www.openstreetmap.org/export/embed.html?bbox=" + bbox + "&layer=mapnik&marker=" + destLat + "," + destLon;
+    return airbnbPinIcon;
+  }
+
+  // Initializes (or re-initializes) a real Leaflet/OpenStreetMap map inside the
+  // pane, with two markers: the Airbnb and the destination venue.
+  function renderPaneMap(destLat, destLon, destName) {
+    if (destLat === null || destLat === undefined || destLon === null || destLon === undefined) {
+      return false;
+    }
+    if (!window.L) { return false; }
+
+    try {
+      if (paneLeafletMap) {
+        paneLeafletMap.remove();
+        paneLeafletMap = null;
+      }
+
+      var map = L.map("pane-map");
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+
+      var airbnbIcon = getAirbnbIcon();
+      var airbnbMarker = airbnbIcon
+        ? L.marker([AIRBNB_LAT, AIRBNB_LON], { icon: airbnbIcon })
+        : L.marker([AIRBNB_LAT, AIRBNB_LON]);
+      airbnbMarker.addTo(map).bindPopup("Airbnb (1814 Lakeshore Dr)");
+
+      L.marker([destLat, destLon]).addTo(map).bindPopup(escapeXml(destName));
+
+      var bounds = L.latLngBounds([AIRBNB_LAT, AIRBNB_LON], [destLat, destLon]);
+      map.fitBounds(bounds, { padding: [30, 30] });
+
+      paneLeafletMap = map;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function paneRow(label, valueHtml) {
@@ -885,12 +965,11 @@
       html += '</ul></div>';
     }
 
-    var mapUrl = mapEmbedUrl(v.lat, v.lon);
-    if (mapUrl) {
+    var hasMapCoords = (v.lat !== null && v.lat !== undefined && v.lon !== null && v.lon !== undefined);
+    if (hasMapCoords) {
       html += '<div class="pane-row" style="margin-top:8px;">' +
-        '<span class="pane-label">Map (pin = ' + v.name + '; your Airbnb is also visible in this view)</span>' +
-        '<iframe src="' + mapUrl + '" class="pane-map-frame" sandbox="allow-scripts" title="Map"></iframe>' +
-        '<span class="pane-drive" style="display:block;margin-top:3px;">Only the destination is pinned \u2014 use the address link above for turn-by-turn directions.</span>' +
+        '<span class="pane-label">Map (teal pin = Airbnb, marker = ' + escapeXml(v.name) + ')</span>' +
+        '<div id="pane-map" class="pane-leaflet-map"></div>' +
         '</div>';
     }
 
@@ -898,6 +977,17 @@
     document.getElementById("detail-pane").className = "is-open";
     document.getElementById("pane-overlay").className = "is-open";
     document.getElementById("detail-pane").scrollTop = 0;
+
+    if (hasMapCoords) {
+      var mapOk = renderPaneMap(v.lat, v.lon, v.name);
+      if (!mapOk) {
+        var mapDiv = document.getElementById("pane-map");
+        if (mapDiv) {
+          mapDiv.className = "pane-map-fallback";
+          mapDiv.innerHTML = "Map couldn't load. Use the address link above for directions.";
+        }
+      }
+    }
   }
 
   function closeVenuePane() {
