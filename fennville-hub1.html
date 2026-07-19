@@ -97,6 +97,7 @@
   .pane-sublist { margin: 6px 0 0 16px; padding: 0; font-size: 12px; color: #4A453F; }
   .pane-sublist li { margin-bottom: 3px; }
   .pane-unknown { color: #8C8880; font-style: italic; font-size: 11.5px; }
+  .pane-map-img { width: 100%; max-width: 320px; border: 1px solid #211E1C; margin-top: 4px; display: block; }
 
   .link-chip { display: inline-block; background: transparent; border: 1px solid #211E1C; padding: 5px 9px; font-size: 11px; color: #211E1C; text-decoration: none; margin: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
 
@@ -214,34 +215,76 @@
     <section class="panel">
       <div class="panel-head"><h2 class="panel-title">Destination Inventory Hub</h2></div>
       <div class="route-section">
-        <div class="route-title">Local Farms &amp; Artisans</div>
-        <button class="venue-btn" data-venue="fernwood">Fernwood Farm</button>
-        <button class="venue-btn" data-venue="evergreen">Evergreen Lane Goat Farm</button>
-        <button class="venue-btn" data-venue="bluestar">Bluestar Farm</button>
-        <button class="venue-btn" data-venue="cranes">Cranes Apple Orchard</button>
+        <div class="route-title">Local Farms & Artisans</div>
+        <button class="venue-btn" data-venue="fernwood">Fernwood Farm (Khnemu Studio) <span class="btn-drive">(~10 min (6.5 mi))</span></button>
+        <button class="venue-btn" data-venue="evergreen">Evergreen Lane Farm & Creamery <span class="btn-drive">(~8 min (5 mi))</span></button>
+        <button class="venue-btn" data-venue="bluestar">Blue Star Farms <span class="btn-drive">(~10 min (6.5 mi))</span></button>
+        <button class="venue-btn" data-venue="cranes">Crane's Pie Pantry Restaurant & Winery <span class="btn-drive">(~14 min (9.5 mi))</span></button>
+        <button class="venue-btn" data-venue="lyonsfruit">Lyons Fruit Market <span class="btn-drive">(~15 min)</span></button>
       </div>
       <div class="route-section">
-        <div class="route-title">Tasting Rooms &amp; Breweries</div>
-        <button class="venue-btn" data-venue="waypost">Waypost Brewing <span class="btn-drive">(10 min)</span></button>
-        <button class="venue-btn" data-venue="saugatuckbrew">Saugatuck Brewing <span class="btn-drive">(18 min)</span></button>
-        <button class="venue-btn" data-venue="mitten">Mitten Brewing <span class="btn-drive">(20 min)</span></button>
-        <button class="venue-btn" data-venue="threeblondes">Three Blondes <span class="btn-drive">(22 min)</span></button>
-        <button class="venue-btn" data-venue="biglake">Big Lake Brewing <span class="btn-drive">(28-30 min)</span></button>
-        <button class="venue-btn" data-venue="brewery424">Brewery 4 Two 4 <span class="btn-drive">(~30 min)</span></button>
-        <button class="venue-btn" data-venue="ourbrewing">Our Brewing Co. <span class="btn-drive">(~30 min)</span></button>
-        <button class="venue-btn" data-venue="rustyrocket">Rusty Rocket Brewing</button>
+        <div class="route-title">Cocktails & Wine</div>
+        <button class="venue-btn" data-venue="modales">Modales Wines <span class="btn-drive">(~15 min)</span></button>
+        <button class="venue-btn" data-venue="michiganwine">Michigan Wine Company <span class="btn-drive">(~15 min)</span></button>
+        <button class="venue-btn" data-venue="cottagewicks">The Cottage at Wicks <span class="btn-drive">(~20 min)</span></button>
+      </div>
+      <div class="route-section">
+        <div class="route-title">Tasting Rooms & Breweries</div>
+        <button class="venue-btn" data-venue="waypost">Waypost Brewing Company <span class="btn-drive">(~10 min (6.5 mi))</span></button>
+        <button class="venue-btn" data-venue="saugatuckbrew">Saugatuck Brewing Company <span class="btn-drive">(~16 min (11 mi))</span></button>
+        <button class="venue-btn" data-venue="mitten">The Mitten Brewing Company – Saugatuck <span class="btn-drive">(~20 min (12.5 mi))</span></button>
+        <button class="venue-btn" data-venue="threeblondes">Three Blondes Brewing <span class="btn-drive">(~18 min (11.5 mi))</span></button>
+        <button class="venue-btn" data-venue="biglake">Big Lake Brewing <span class="btn-drive">(~35 min (25 mi))</span></button>
+        <button class="venue-btn" data-venue="brewery424">Brewery 4 Two 4 <span class="btn-drive">(~35 min (27 mi))</span></button>
+        <button class="venue-btn" data-venue="ourbrewing">Our Brewing Company <span class="btn-drive">(~35 min (25 mi))</span></button>
+        <button class="venue-btn" data-venue="rustyrocket">Rusty Rocket Brewing <span class="btn-drive">(~25 min (18 mi))</span></button>
       </div>
       <div class="route-section">
         <div class="route-title">Best Playgrounds</div>
-        <button class="venue-btn" data-venue="westside">West Side County Park <span class="btn-drive">(2-3 min)</span></button>
-        <button class="venue-btn" data-venue="paradise">Paradise Park <span class="btn-drive">(10-12 min)</span></button>
+        <button class="venue-btn" data-venue="westside">West Side County Park <span class="btn-drive">(~2 min drive / 10 min walk (0.5 mi))</span></button>
+        <button class="venue-btn" data-venue="paradise">Paradise Park <span class="btn-drive">(~12 min (7.5 mi))</span></button>
       </div>
       <div class="route-section">
-        <div class="route-title">Best Nature Parks</div>
-        <button class="venue-btn" data-venue="piercove">Pier Cove <span class="btn-drive">(5 min)</span></button>
-        <button class="venue-btn" data-venue="waukena">Wau-Ke-Na Preserve <span class="btn-drive">(5-8 min)</span></button>
-        <button class="venue-btn" data-venue="newrichmond">New Richmond Bridge Park <span class="btn-drive">(15 min)</span></button>
-        <button class="venue-btn" data-venue="ovalbeach">Oval Beach</button>
+        <div class="route-title">Best Nature Parks & Beaches</div>
+        <button class="venue-btn" data-venue="piercove">Pier Cove Park <span class="btn-drive">(~3 min (1 mi))</span></button>
+        <button class="venue-btn" data-venue="waukena">Wau-Ke-Na (William Erby Smith Preserve) <span class="btn-drive">(~2 min (0.8 mi))</span></button>
+        <button class="venue-btn" data-venue="newrichmond">New Richmond Bridge Park <span class="btn-drive">(~15 min (10 mi))</span></button>
+        <button class="venue-btn" data-venue="ovalbeach">Oval Beach <span class="btn-drive">(~18-25 min (9.8-14 mi))</span></button>
+        <button class="venue-btn" data-venue="douglasbeach">Douglas Beach Park <span class="btn-drive">(~10-15 min)</span></button>
+      </div>
+      <div class="route-section">
+        <div class="route-title">Activities</div>
+        <button class="venue-btn" data-venue="saugatuckdunes">Saugatuck Dunes State Park <span class="btn-drive">(~20 min)</span></button>
+        <button class="venue-btn" data-venue="mtbaldhead">Mount Baldhead Park <span class="btn-drive">(~20 min)</span></button>
+        <button class="venue-btn" data-venue="duneRides">Saugatuck Dune Rides <span class="btn-drive">(~15 min)</span></button>
+        <button class="venue-btn" data-venue="antiquePavilion">Saugatuck Antique Pavilion <span class="btn-drive">(~15 min)</span></button>
+        <button class="venue-btn" data-venue="artBarn">Express Yourself Art Barn <span class="btn-drive">(~10-15 min)</span></button>
+        <button class="venue-btn" data-venue="saugatuckmarket">Saugatuck Farmers Market (The Market at SCA) <span class="btn-drive">(~15 min)</span></button>
+        <button class="venue-btn" data-venue="hollandmarket">Holland Farmers Market <span class="btn-drive">(~24 min (19.4 mi))</span></button>
+        <button class="venue-btn" data-venue="retroboat">Retro Boat Rentals & Pontoons <span class="btn-drive">(~20 min)</span></button>
+        <button class="venue-btn" data-venue="bluestarbarns">Blue Star Barns – Coffee & Bikes <span class="btn-drive">(~15 min)</span></button>
+      </div>
+      <div class="route-section">
+        <div class="route-title">Restaurants</div>
+        <button class="venue-btn" data-venue="borrowedtime">Borrowed Time <span class="btn-drive">(~12 min (8.1 mi))</span></button>
+        <button class="venue-btn" data-venue="kirbyhotel">The Kirby Hotel & J Paul's Dining Room <span class="btn-drive">(~10 min (7.8 mi))</span></button>
+        <button class="venue-btn" data-venue="farmhousedeli">The Farmhouse Deli & Pantry <span class="btn-drive">(~10 min (7.6 mi))</span></button>
+        <button class="venue-btn" data-venue="coast236">Coast 236 Restaurant & Bar <span class="btn-drive">(~13 min (9 mi))</span></button>
+        <button class="venue-btn" data-venue="southerner">The Southerner <span class="btn-drive">(~16 min (9.6 mi))</span></button>
+        <button class="venue-btn" data-venue="philsbar">Phil's Bar & Grille <span class="btn-drive">(~15 min (9.1 mi))</span></button>
+        <button class="venue-btn" data-venue="bowdies">Bowdie's Chophouse <span class="btn-drive">(~14 min (9 mi))</span></button>
+        <button class="venue-btn" data-venue="ladybird">Lady Bird <span class="btn-drive">(~14 min (9.1 mi))</span></button>
+        <button class="venue-btn" data-venue="singaporeroom">Singapore Room <span class="btn-drive">(~13 min (9 mi))</span></button>
+        <button class="venue-btn" data-venue="saugataco">SaugaTaco <span class="btn-drive">(~16 min (9.5 mi))</span></button>
+        <button class="venue-btn" data-venue="clearbrookgolf">Clearbrook Golf Club <span class="btn-drive">(~15 min (10.3 mi))</span></button>
+        <button class="venue-btn" data-venue="clearbrookgrill">Clearbrook Golf Club – The Grill Room Restaurant <span class="btn-drive">(~15 min (10.3 mi))</span></button>
+        <button class="venue-btn" data-venue="rootcafe">Root Cafe – Fennville <span class="btn-drive">(~12 min (9.6 mi))</span></button>
+        <button class="venue-btn" data-venue="glennstore">The Glenn Store <span class="btn-drive">(~3 min (2.1 mi))</span></button>
+        <button class="venue-btn" data-venue="seventysix">Seventy-Six <span class="btn-drive">(~23 min (19.1 mi))</span></button>
+        <button class="venue-btn" data-venue="butchsdrydock">Butch's Dry Dock <span class="btn-drive">(~25 min (19.3 mi))</span></button>
+        <button class="venue-btn" data-venue="grillhouse">The Grill House <span class="btn-drive">(~27 min (22.4 mi))</span></button>
+        <button class="venue-btn" data-venue="everydaypeople">Everyday People Cafe <span class="btn-drive">(~15 min)</span></button>
+        <button class="venue-btn" data-venue="saltoftheearth">Salt of the Earth <span class="btn-drive">(~12 min)</span></button>
       </div>
     </section>
 
@@ -254,7 +297,6 @@
         <a href="https://www.google.com/maps/search/Gas+Station" target="_blank" class="link-chip">Gas</a>
         <a href="https://www.google.com/maps/search/Grocery" target="_blank" class="link-chip">Grocery</a>
         <a href="https://www.google.com/maps/search/Cafe" target="_blank" class="link-chip">Cafe</a>
-        <button class="venue-btn" data-venue="dollarstores">Dollar Stores</button>
       </div>
     </section>
 
@@ -270,22 +312,14 @@
 <footer>// Legacy-compatibility build for older browsers/embedded displays //</footer>
 
 <script>
+
   // ---- Venue detail data ----
+  // Fields left as null are ones not verified from a reliable source; the pane
+  // shows a "not verified" note rather than displaying a guessed value.
   var VENUES = {
-    // ... existing venues ...
-    dollarstores: {
-      name: "Nearby Discount Stores", cat: "Family Dollar / Dollar Tree", drive: "Various",
-      address: "Fennville, South Haven, & Cheboygan",
-      desc: "Quick access to household essentials and groceries in the surrounding towns.",
-      amenities: [
-        "Fennville: Family Dollar (717 E Main St)",
-        "South Haven: Family Dollar (615 Phillips St)",
-        "South Haven: Dollar Tree (1220 Phoenix St)",
-        "Saugatuck: Dollar General (3465 Blue Star Hwy)"
-      ]
-    },
     fernwood: {
       name: "Fernwood Farm (Khnemu Studio)", cat: "Local Farm / Pottery Studio", drive: "~10 min (6.5 mi)",
+      lat: 42.5975, lon: -86.103,
       address: "6322 113th Ave, Fennville, MI 49408", phone: "(269) 686-6343",
       website: "https://khnemustudio.com/", tripadvisor: null,
       hours: "Wed-Sun 10:00am-5:00pm (June-Oct; check off-season)",
@@ -293,28 +327,64 @@
     },
     evergreen: {
       name: "Evergreen Lane Farm & Creamery", cat: "Local Farm / Creamery", drive: "~8 min (5 mi)",
+      lat: 42.5975, lon: -86.103,
       address: "1824 66th St, Fennville, MI 49408", phone: "(269) 686-6474",
       website: "https://evergreenlanefarm.com/", tripadvisor: null,
       hours: "Tue-Sat 12:00pm-5:00pm",
-      desc: "Organic creamery producing goat and cow's milk cheeses, next to a seasonal apple orchard. The on-site goat herd is friendly and interactive \u2014 always a hit with kids."
+      desc: "Organic creamery producing goat and cow's milk cheeses, next to a seasonal apple orchard. The on-site goat herd is friendly and interactive."
     },
     bluestar: {
-      name: "Blue Star Farms", cat: "Local Farm (Blueberries)", drive: "~11 min (6.5 mi)",
-      address: "2647 68th St, Fennville, MI 49408", phone: "(269) 543-4105",
-      website: "https://www.holland.org/listing/blue-star-blueberries", tripadvisor: null,
-      hours: "Daily 9:00am-6:00pm (July 4 - Labor Day)",
-      desc: "Family-owned farm offering u-pick and pre-picked blueberries. The farm store stocks blueberry jams, syrups, and baking mixes."
+      name: "Blue Star Farms", cat: "Local Farm (Blueberries)", drive: "~10 min (6.5 mi)",
+      lat: 42.5975, lon: -86.103,
+      address: "2647 68th St, Fennville, MI 49408", phone: "(269) 857-4278",
+      website: null, tripadvisor: null,
+      hours: "Mon-Sat 9:00am-6:00pm, Sun 9:00am-4:00pm",
+      desc: "A well-loved local farm specializing in blueberries, perfect for fresh picking during peak summer months.",
+      note: "Two different sources gave conflicting info for this farm: phone (269) 543-4105 vs (269) 857-4278, and hours \u201cdaily 9-6, July 4-Labor Day\u201d vs \u201cMon-Sat 9-6, Sun 9-4.\u201d Showing the more recent figures \u2014 worth confirming by phone before a special trip."
     },
     cranes: {
       name: "Crane's Pie Pantry Restaurant & Winery", cat: "Orchard / Restaurant / Winery", drive: "~14 min (9.5 mi)",
+      lat: 42.5975, lon: -86.103,
       address: "6054 124th Ave, Fennville, MI 49408", phone: "(269) 561-2297",
       website: "https://cranespiepantry.com/", tripadvisor: null,
       hours: "Daily 9:00am-6:00pm",
-      desc: "A Michigan staple combining a bakery, restaurant, and winery. Known for traditional fruit pies, small-batch hard cider, and a vintage agricultural atmosphere \u2014 expect a wait on fall weekends."
+      desc: "A Michigan staple combining a bakery, restaurant, and winery. Known for traditional fruit pies, small-batch hard cider, and a vintage agricultural atmosphere."
     },
-
+    lyonsfruit: {
+      name: "Lyons Fruit Market", cat: "Local Farm / Produce Stand", drive: "~15 min",
+      lat: 42.5975, lon: -86.103,
+      address: "6821 124th Ave, Fennville, MI 49408", phone: "(269) 543-4360",
+      website: "https://www.lyonsfruitfarm.com/", tripadvisor: null,
+      hours: "Daily 8:00am-7:00pm",
+      desc: "A local fruit and produce stand offering a wide variety of fresh, seasonal goods from the surrounding agricultural area."
+    },
+    modales: {
+      name: "Modales Wines", cat: "Winery", drive: "~15 min",
+      lat: 42.5975, lon: -86.103,
+      address: "2128 62nd St, Fennville, MI 49408", phone: "(269) 722-3505",
+      website: "http://modaleswines.com/", tripadvisor: null,
+      hours: "Daily 12:00pm-7:00pm",
+      desc: "A scenic winery in Fennville known for excellent tastings and a beautiful, expansive outdoor seating area."
+    },
+    michiganwine: {
+      name: "Michigan Wine Company", cat: "Winery / Cidery", drive: "~15 min",
+      lat: 42.5975, lon: -86.103,
+      address: "6781 124th Ave, Fennville, MI 49408", phone: "(269) 543-5011",
+      website: "http://www.michiganwineco.com/", tripadvisor: null,
+      hours: "Mon, Wed-Thu, Sun 12:00pm-6:00pm; Fri-Sat 11:00am-6:00pm; Closed Tue",
+      desc: "A cute, welcoming operation offering small-batch local wines and ciders in a relaxed tasting room."
+    },
+    cottagewicks: {
+      name: "The Cottage at Wicks", cat: "Cocktail Bar", drive: "~20 min",
+      lat: 42.654, lon: -86.2025,
+      address: "121 Mary St, Saugatuck, MI 49453", phone: "(269) 857-5958",
+      website: null, tripadvisor: null,
+      hours: "Wed-Thu 5:00pm-10:00pm; Fri-Sat 5:00pm-11:00pm; Closed Sun-Tue",
+      desc: "An intimate spot right in Saugatuck, highly regarded for an elevated, craft cocktail bar experience."
+    },
     waypost: {
       name: "Waypost Brewing Company", cat: "Brewery", drive: "~10 min (6.5 mi)",
+      lat: 42.5975, lon: -86.103,
       address: "1630 65th St, Fennville, MI 49408", phone: "(269) 496-5096",
       website: "https://waypostbrewing.com/", tripadvisor: null,
       hours: "Thu-Mon 12:00pm-7:00pm",
@@ -322,14 +392,16 @@
     },
     saugatuckbrew: {
       name: "Saugatuck Brewing Company", cat: "Brewery", drive: "~16 min (11 mi)",
+      lat: 42.638, lon: -86.209,
       address: "2948 Blue Star Hwy, Douglas, MI 49406", phone: "(269) 857-7222",
       website: "https://www.saugatuckbrewing.com/", tripadvisor: null,
       hours: "Sun-Thu 11:30am-8:00pm; Fri-Sat 11:30am-9:00pm",
-      desc: "The largest brewery in the immediate area. Massive tap list of classic and experimental beers, a full scratch kitchen, and ample seating (including the games-focused Barrel Room).",
+      desc: "The largest brewery in the immediate area. Massive tap list, a full scratch kitchen, and ample seating (including the games-focused Barrel Room).",
       amenities: ["Full scratch kitchen", "16+ taps, cider and wine", "Outdoor patio dining", "Barrel Room games", "Brew-on-premise program"]
     },
     mitten: {
-      name: "The Mitten Brewing Company \u2013 Saugatuck", cat: "Brewery / Pizzeria", drive: "~20 min (12.5 mi)",
+      name: "The Mitten Brewing Company \\u2013 Saugatuck", cat: "Brewery / Pizzeria", drive: "~20 min (12.5 mi)",
+      lat: 42.654, lon: -86.2025,
       address: "329 Water St, Saugatuck, MI 49453", phone: "(269) 455-5719",
       website: "https://www.mittenbrewing.com/saugatuck", tripadvisor: null,
       hours: "Daily 11:30am-9:00pm",
@@ -338,6 +410,7 @@
     },
     threeblondes: {
       name: "Three Blondes Brewing", cat: "Brewery / Restaurant", drive: "~18 min (11.5 mi)",
+      lat: 42.403, lon: -86.264,
       address: "1875 Phoenix St, South Haven, MI 49090", phone: "(269) 872-3911",
       website: "https://www.threeblondesbrewing.com/", tripadvisor: null,
       hours: "Sun-Thu 11:00am-9:00pm; Fri-Sat 11:00am-10:00pm",
@@ -346,6 +419,7 @@
     },
     biglake: {
       name: "Big Lake Brewing", cat: "Brewery", drive: "~35 min (25 mi)",
+      lat: 42.7875, lon: -86.1089,
       address: "13 W 7th St, Holland, MI 49423", phone: "(616) 796-8888",
       website: "https://biglakebrewing.com/", tripadvisor: null,
       hours: "Sun-Thu 11:00am-10:00pm; Fri-Sat 11:00am-11:00pm",
@@ -354,31 +428,34 @@
     },
     brewery424: {
       name: "Brewery 4 Two 4", cat: "Brewery", drive: "~35 min (27 mi)",
+      lat: 42.7875, lon: -86.1089,
       address: "321 Douglas Ave #120, Holland, MI 49424", phone: "(616) 377-7773",
       website: "https://brewery4two4.square.site/", tripadvisor: null,
       hours: "Mon-Thu 3:00pm-10:00pm; Fri 2:00pm-11:00pm; Sat 12:00pm-11:00pm; Sun 1:00pm-8:00pm",
-      desc: "A small, welcoming neighborhood brewery on Holland's north side with consistently excellent beer and a low-key atmosphere.",
+      desc: "A small, welcoming neighborhood brewery on Holland's north side with consistently excellent beer.",
       amenities: ["Pales, IPAs, saisons, stouts, barrel-aged", "Deli menu with local ingredients", "Neighborhood taproom feel"]
     },
     ourbrewing: {
       name: "Our Brewing Company", cat: "Nano-brewery", drive: "~35 min (25 mi)",
+      lat: 42.7875, lon: -86.1089,
       address: "76 E 8th St, Holland, MI 49423", phone: "(616) 994-8417",
       website: "https://www.ourbrewingcompany.com/", tripadvisor: null,
       hours: "Tue-Sat 2:00pm-12:00am; Sun-Mon 2:00pm-10:00pm",
-      desc: "Relaxed downtown Holland taproom, open since 2012. Small batches with local ingredients and unusual names. Bring-your-own-food policy from neighboring restaurants.",
+      desc: "Relaxed downtown Holland taproom, open since 2012. Small batches with local ingredients. Bring-your-own-food policy.",
       amenities: ["Front and back patios", "Trivia and board games", "Beer, wine, cider, cocktails", "Bring your own food"]
     },
     rustyrocket: {
       name: "Rusty Rocket Brewing", cat: "Brewery", drive: "~25 min (18 mi)",
+      lat: 42.493, lon: -86.095,
       address: "790 53rd St, Pullman, MI 49450", phone: "(269) 637-5252",
       website: "https://rustyrocketbrewing.com/", tripadvisor: null,
       hours: "Fri-Sat 12:00pm-9:00pm; Sun 12:00pm-6:00pm",
       desc: "A community-focused brewery built out of a passion for homebrewing. Laid-back vibe, highly creative rotating taps."
     },
-
     westside: {
       name: "West Side County Park", cat: "Playground / Beach", drive: "~2 min drive / 10 min walk (0.5 mi)",
-      address: "2152 Lakeshore Dr, Fennville, MI 49408", phone: null,
+      lat: 42.575, lon: -86.22,
+      address: "2152 Lakeshore Dr, Fennville, MI 49408", phone: "(269) 686-9088",
       website: "https://alleganparks.org/", tripadvisor: null,
       hours: "Daily 8:00am-10:00pm",
       desc: "11 acres with 630 feet of sandy Lake Michigan beach and dune stairways. Excellent if you want kids to play and then head to the beach afterward.",
@@ -386,30 +463,35 @@
     },
     paradise: {
       name: "Paradise Park", cat: "Community Park", drive: "~12 min (7.5 mi)",
-      address: null, phone: null, website: "https://www.fennville.gov/parksandrec", tripadvisor: null,
+      lat: 42.5975, lon: -86.103,
+      address: null, phone: null,
+      website: "https://www.fennville.gov/parksandrec", tripadvisor: null,
       hours: "Dawn to Dusk",
-      desc: "One of the nicest traditional neighborhood parks in Fennville \u2014 community playground, walking paths, soccer fields, and baseball diamonds. Note: an address of 4851 M-89 was suggested for this venue, but that appears to actually be a separate go-kart/mini-golf entertainment complex also named \u201cParadise Park.\u201d The neighborhood park described here is one of Fennville's own city parks \u2014 confirm the address with the city recreation page before heading out.",
+      desc: "One of the nicest traditional neighborhood parks in Fennville \u2014 community playground, walking paths, soccer fields, and baseball diamonds.",
+      note: "An address of 4851 M-89 was suggested for this venue, but that appears to actually be a separate go-kart/mini-golf entertainment complex also named \u201cParadise Park.\u201d The neighborhood park described here is one of Fennville's own city parks \u2014 confirm with the city recreation page before heading out.",
       amenities: ["Community playground", "Walking path", "Soccer fields", "Baseball diamonds", "Pavilion"]
     },
-
     piercove: {
       name: "Pier Cove Park", cat: "Nature Park / Beach", drive: "~3 min (1 mi)",
+      lat: 42.575, lon: -86.22,
       address: "2290 Lakeshore Dr, Fennville, MI 49408", phone: null,
       website: "https://www.gangesmi.org/", tripadvisor: null,
-      hours: "Daily 8:00am-10:00pm",
+      hours: "Open 24 hours",
       desc: "A small, scenic public beach where a shallow creek flows into Lake Michigan \u2014 great bluff views and a perfect wading spot for kids.",
       amenities: ["Small public beach", "Creek flowing into Lake Michigan", "Great for kids to splash", "Scenic bluff views"]
     },
     waukena: {
       name: "Wau-Ke-Na (William Erby Smith Preserve)", cat: "Nature Preserve", drive: "~2 min (0.8 mi)",
-      address: "2197 Lakeshore Dr, Fennville, MI 49408", phone: null,
-      website: "https://www.swmlc.org/", tripadvisor: null,
-      hours: "Dawn to Dusk",
-      desc: "Two distinct trail systems (North and South) winding through the dunes down to secluded Lake Michigan shoreline access. Leashed dogs welcome.",
+      lat: 42.575, lon: -86.22,
+      address: "2197 Lakeshore Dr, Fennville, MI 49408", phone: "(269) 324-1600",
+      website: "https://swmlc.org/project/wau-ke-na-north/", tripadvisor: null,
+      hours: "Dawn to Dusk (unlisted; typical preserve hours)",
+      desc: "Two distinct trail systems (North Tract and South Tract) winding through the dunes down to secluded Lake Michigan shoreline access. Leashed dogs welcome. Just a few minutes down Lakeshore Drive \u2014 the trails are a nice spot for a morning run before it gets hot.",
       amenities: ["Short trails through dunes", "Access to secluded Lake Michigan shoreline", "Dog friendly (leashed)", "Two trail systems (North and South)"]
     },
     newrichmond: {
       name: "New Richmond Bridge Park", cat: "Historic / Nature Park", drive: "~15 min (10 mi)",
+      lat: 42.6515, lon: -86.107,
       address: "3160 Old Allegan Rd, Fennville, MI 49408", phone: null,
       website: "https://www.allegancounty.org/", tripadvisor: null,
       hours: "Daily 8:00am-10:00pm",
@@ -417,17 +499,272 @@
       amenities: ["Historic swing bridge", "Boardwalk along the river", "Fishing piers", "Picnic area", "Boat launch"]
     },
     ovalbeach: {
-      name: "Oval Beach", cat: "Beach", drive: "~25 min (14 mi)",
-      address: "690 Perryman St, Saugatuck, MI 49453", phone: null,
-      website: "https://www.saugatuckcity.com/", tripadvisor: null,
+      name: "Oval Beach", cat: "Beach", drive: "~18-25 min (9.8-14 mi)",
+      lat: 42.6435, lon: -86.2135,
+      address: "690 Perryman St, Saugatuck, MI 49453", phone: "(269) 857-2603",
+      website: "http://saugatuck.com/", tripadvisor: null,
       hours: "Daily 8:00am-10:00pm",
-      desc: "Consistently rated one of the best beaches in the country \u2014 towering sand dunes, soft sand, and excellent swimming conditions. Paid parking in season; busy on summer weekends."
-    }
+      desc: "Consistently rated one of the best beaches in the country \u2014 towering sand dunes, soft sand, and excellent swimming conditions. Paid parking in season; busy on summer weekends.",
+      note: "Drive-time estimates varied between sources (18 vs 25 min) \u2014 likely just different routing/traffic assumptions, not a factual conflict."
+    },
+    douglasbeach: {
+      name: "Douglas Beach Park", cat: "Beach", drive: "~10-15 min",
+      lat: 42.638, lon: -86.209,
+      address: null, phone: "(269) 857-1701",
+      website: null, tripadvisor: null,
+      hours: "Daily 8:00am-10:00pm",
+      desc: "A quieter, slightly smaller sliver of beachfront than Oval Beach. Well-equipped with picnic tables, grills, and bathrooms."
+    },
+    saugatuckdunes: {
+      name: "Saugatuck Dunes State Park", cat: "Hiking", drive: "~20 min",
+      lat: 42.685, lon: -86.21,
+      address: null, phone: "(269) 637-2788",
+      website: null, tripadvisor: null,
+      hours: "Daily 8:00am-10:00pm",
+      desc: "Beautiful trails winding through coastal woods and dunes \u2014 a stellar spot to log some heavy cardio and trail running miles."
+    },
+    mtbaldhead: {
+      name: "Mount Baldhead Park", cat: "Hiking", drive: "~20 min",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-2603",
+      website: null, tripadvisor: null,
+      hours: "Daily 9:00am-10:00pm",
+      desc: "A steep set of steps leads up to an overlook summit \u2014 great for a burst of cardio with a payoff view over the Kalamazoo River and Lake Michigan."
+    },
+    duneRides: {
+      name: "Saugatuck Dune Rides", cat: "Guided Activity", drive: "~15 min",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-2253",
+      website: null, tripadvisor: null,
+      hours: "9:30am-5:20pm daily",
+      desc: "A rugged, guided dune-buggy trail ride over the coastal dunes \u2014 a fun way to learn about the local terrain."
+    },
+    antiquePavilion: {
+      name: "Saugatuck Antique Pavilion", cat: "Shopping", drive: "~15 min",
+      lat: 42.638, lon: -86.209,
+      address: null, phone: "(269) 857-6041",
+      website: null, tripadvisor: null,
+      hours: "Daily 10:00am-6:00pm",
+      desc: "A massive indoor facility \u2014 good hunting if you're keeping an eye out for unique decor or furnishings."
+    },
+    artBarn: {
+      name: "Express Yourself Art Barn", cat: "Kids Activity", drive: "~10-15 min",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-5566",
+      website: null, tripadvisor: null,
+      hours: "Daily 10:00am-5:00pm",
+      desc: "A hands-on studio for crafting and painting pottery \u2014 an easy couple of hours for a young kid to make something to bring home."
+    },
+    saugatuckmarket: {
+      name: "Saugatuck Farmers Market (The Market at SCA)", cat: "Farmers Market", drive: "~15 min",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-2399",
+      website: null, tripadvisor: null,
+      hours: "Fridays 9:00am-2:00pm",
+      desc: "A local farmers market held in Saugatuck."
+    },
+    hollandmarket: {
+      name: "Holland Farmers Market", cat: "Farmers Market", drive: "~24 min (19.4 mi)",
+      lat: 42.7875, lon: -86.1089,
+      address: null, phone: "(616) 355-1138",
+      website: null, tripadvisor: null,
+      hours: "Wednesdays & Saturdays 8:00am-2:00pm",
+      desc: "A large regional hub for fresh produce and baked goods, on 8th Street in Holland."
+    },
+    retroboat: {
+      name: "Retro Boat Rentals & Pontoons", cat: "Boat Rental", drive: "~20 min",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(616) 405-6688",
+      website: null, tripadvisor: null,
+      hours: "9:00am-9:00pm daily",
+      desc: "Rents classic, stylish boats out of Saugatuck \u2014 a relaxing way to spend an afternoon on the Kalamazoo River."
+    },
+    bluestarbarns: {
+      name: "Blue Star Barns \\u2013 Coffee & Bikes", cat: "Coffee Shop / Bike Hub", drive: "~15 min",
+      lat: 42.654, lon: -86.2025,
+      address: "3483 Blue Star Hwy, Saugatuck, MI 49453", phone: "(269) 906-1265",
+      website: "https://www.facebook.com/BlueStarBarns/", tripadvisor: null,
+      hours: "Mon-Thu 6:30am-4:00pm; Fri 6:30am-6:00pm; Sat 7:00am-6:00pm; Sun 7:00am-4:00pm",
+      desc: "A coffee shop and bike hub in one \u2014 a perfect fuel stop before a morning ride on the local cycling routes."
+    },
+    borrowedtime: {
+      name: "Borrowed Time", cat: "Restaurant", drive: "~12 min (8.1 mi)",
+      lat: 42.638, lon: -86.209,
+      address: null, phone: "(269) 455-5256",
+      website: "http://www.borrowedtimesaugatuck.com/", tripadvisor: null,
+      hours: "Mon, Wed, Thu 4-9pm; Fri 4-10pm; Sat 12-10pm; Sun 12-9pm; Closed Tue",
+      desc: "A restaurant located right in Douglas."
+    },
+    kirbyhotel: {
+      name: "The Kirby Hotel & J Paul's Dining Room", cat: "Restaurant / Hotel", drive: "~10 min (7.8 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-5472",
+      website: "http://www.thekirbyhotel.com/", tripadvisor: null,
+      hours: "Tue-Sun 5-9pm; Wed also 9am-5pm; Closed Mon",
+      desc: "Cozy quarters in an upscale Victorian hotel with a restaurant & wine bar, plus free breakfast."
+    },
+    farmhousedeli: {
+      name: "The Farmhouse Deli & Pantry", cat: "Deli", drive: "~10 min (7.6 mi)",
+      lat: 42.638, lon: -86.209,
+      address: null, phone: "(269) 455-5274",
+      website: "http://www.thefarmhousedeli.com/", tripadvisor: null,
+      hours: "Mon-Sat 9am-6pm; Closed Sun",
+      desc: "A deli and pantry in Douglas."
+    },
+    coast236: {
+      name: "Coast 236 Restaurant & Bar", cat: "Restaurant", drive: "~13 min (9 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 455-5112",
+      website: "https://www.coast236.com/", tripadvisor: null,
+      hours: "Wed-Sat 5-10pm; Sun 5-9pm; Closed Mon-Tue",
+      desc: "An airy spot with a seasonal patio for creative American eats & brunch, house and classic cocktails."
+    },
+    southerner: {
+      name: "The Southerner", cat: "Restaurant", drive: "~16 min (9.6 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-3555",
+      website: "http://www.thesouthernermi.com/", tripadvisor: null,
+      hours: "Mon, Fri-Sun 11am-10pm; Tue-Thu 5-10pm",
+      desc: "Southern-style dishes & cocktails at a relaxed lakeside venue with a comfy interior."
+    },
+    philsbar: {
+      name: "Phil's Bar & Grille", cat: "Restaurant / Bar", drive: "~15 min (9.1 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-1555",
+      website: "http://philsbarandgrille.com/", tripadvisor: null,
+      hours: "Mon-Thu 4-9pm; Fri-Sat 11:30am-10pm; Sun 11:30am-9pm",
+      desc: "A dynamic eatery with a long wood bar, a small diverse beer list, and creative flavors."
+    },
+    bowdies: {
+      name: "Bowdie's Chophouse", cat: "Steakhouse", drive: "~14 min (9 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 455-5481",
+      website: "http://bowdieschophouse.com/", tripadvisor: null,
+      hours: "Mon-Thu, Sun 5-10pm; Fri-Sat 5-11pm",
+      desc: "A posh, casual neighborhood nook with choice steak mains & creative cocktails, plus an outdoor patio."
+    },
+    ladybird: {
+      name: "Lady Bird", cat: "Restaurant", drive: "~14 min (9.1 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 354-2038",
+      website: "https://www.ladybirdsaugatuck.com/", tripadvisor: null,
+      hours: "Mon, Tue, Thu 11am-9pm; Fri 11am-10pm; Sat 10am-10pm; Sun 10am-8pm; Closed Wed",
+      desc: "A restaurant in Saugatuck."
+    },
+    singaporeroom: {
+      name: "Singapore Room", cat: "Restaurant", drive: "~13 min (9 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 354-2044",
+      website: "https://singaporeroom.com/", tripadvisor: null,
+      hours: "Mon, Wed, Thu, Sun 5-9:30pm; Fri-Sat 5-10pm; Closed Tue",
+      desc: "A restaurant in Saugatuck."
+    },
+    saugataco: {
+      name: "SaugaTaco", cat: "Restaurant", drive: "~16 min (9.5 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: null,
+      website: "http://saugataco.com/", tripadvisor: null,
+      hours: "Wed-Fri 4-8:30pm; Sat 12-8:30pm; Sun 12-8pm; Closed Mon-Tue",
+      desc: "A taco spot in Saugatuck."
+    },
+    clearbrookgolf: {
+      name: "Clearbrook Golf Club", cat: "Golf Course", drive: "~15 min (10.3 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-2000",
+      website: "http://www.clearbrookgolfclub.com/", tripadvisor: null,
+      hours: "Daily 7am-7pm",
+      desc: "The golf course property in Saugatuck. Public & member play."
+    },
+    clearbrookgrill: {
+      name: "Clearbrook Golf Club \\u2013 The Grill Room Restaurant", cat: "Restaurant", drive: "~15 min (10.3 mi)",
+      lat: 42.654, lon: -86.2025,
+      address: null, phone: "(269) 857-2000",
+      website: "http://www.clearbrookgolfclub.com/", tripadvisor: null,
+      hours: "Tue-Sat 5-9pm; Closed Sun-Mon",
+      desc: "The restaurant located at Clearbrook Golf Club."
+    },
+    rootcafe: {
+      name: "Root Cafe \\u2013 Fennville", cat: "Cafe", drive: "~12 min (9.6 mi)",
+      lat: 42.5975, lon: -86.103,
+      address: null, phone: "(269) 512-1171",
+      website: "http://www.rootfennville.com/", tripadvisor: null,
+      hours: "Mon-Thu, Sun 10am-6pm; Fri-Sat 10am-8pm",
+      desc: "A cafe located right in Fennville."
+    },
+    glennstore: {
+      name: "The Glenn Store", cat: "Pizza", drive: "~3 min (2.1 mi)",
+      lat: 42.56, lon: -86.196,
+      address: null, phone: "(269) 227-3233",
+      website: "http://www.theglennstore.com/", tripadvisor: null,
+      hours: "Mon-Thu, Sun 8am-8pm; Fri-Sat 8am-9pm",
+      desc: "An amazing spot for pizza located nearby in Glenn."
+    },
+    seventysix: {
+      name: "Seventy-Six", cat: "Restaurant", drive: "~23 min (19.1 mi)",
+      lat: 42.7875, lon: -86.1089,
+      address: null, phone: "(616) 994-8414",
+      website: "https://www.seventysixholland.com/", tripadvisor: null,
+      hours: "Tue-Thu 11am-9pm; Fri-Sat 11am-10pm; Closed Sun-Mon",
+      desc: "A stylish, casual-rustic eatery in Holland with modern & local American cuisine plus wine, cider & cocktails."
+    },
+    butchsdrydock: {
+      name: "Butch's Dry Dock", cat: "Restaurant", drive: "~25 min (19.3 mi)",
+      lat: 42.7875, lon: -86.1089,
+      address: null, phone: "(616) 396-8227",
+      website: "http://www.butchs.net/", tripadvisor: null,
+      hours: "Mon-Sat 4-9pm; Closed Sun",
+      desc: "A formal dining room & adjacent casual pub with traditional fare and extensive wine & beer lists, in Holland."
+    },
+    grillhouse: {
+      name: "The Grill House", cat: "Restaurant", drive: "~27 min (22.4 mi)",
+      lat: 42.5322, lon: -85.8494,
+      address: null, phone: "(269) 686-9192",
+      website: "http://www.grillhouse.net/", tripadvisor: null,
+      hours: "Tue-Thu, Sun 11am-8pm; Fri-Sat 11am-9pm; Closed Mon",
+      desc: "An eatery in Allegan set in a restored 1836 inn, offering grill-your-own steaks & seafood plus a pub with a fireplace."
+    },
+    everydaypeople: {
+      name: "Everyday People Cafe", cat: "Restaurant", drive: "~15 min",
+      lat: 42.638, lon: -86.209,
+      address: "11 W Center St, Douglas, MI 49406", phone: "(269) 857-4240",
+      website: "http://www.everydaypeoplecafe.com/", tripadvisor: null,
+      hours: "Mon, Thu, Sun 5-9:30pm; Fri-Sat 4-9:30pm; Closed Tue-Wed",
+      desc: "A snappy choice for creative fare in Douglas, with a thoughtful wine list and a great seasonal outdoor dining space."
+    },
+    saltoftheearth: {
+      name: "Salt of the Earth", cat: "Restaurant", drive: "~12 min",
+      lat: 42.5975, lon: -86.103,
+      address: "114 E Main St, Fennville, MI 49408", phone: "(269) 561-7258",
+      website: "http://www.saltoftheearthfennville.com/", tripadvisor: null,
+      hours: "Wed-Thu 5-9:30pm; Fri-Sat 4:30-10pm; Sun 4:30-9:30pm; Closed Mon-Tue",
+      desc: "A rustic-chic venue right in downtown Fennville \u2014 seasonal American cuisine, incredible fresh baked goods, and a full bar."
+    },
   };
-
-  // ... (rest of your script remains identical) ...
   function mapsUrl(address) {
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
+  }
+
+  var AIRBNB_LAT = 42.585;
+  var AIRBNB_LON = -86.205;
+
+  function staticMapUrl(destLat, destLon) {
+    if (destLat === null || destLat === undefined || destLon === null || destLon === undefined) {
+      return null;
+    }
+    var midLat = (AIRBNB_LAT + destLat) / 2;
+    var midLon = (AIRBNB_LON + destLon) / 2;
+    var dLat = Math.abs(AIRBNB_LAT - destLat);
+    var dLon = Math.abs(AIRBNB_LON - destLon);
+    var spread = dLat > dLon ? dLat : dLon;
+    var zoom = 14;
+    if (spread > 0.6) { zoom = 9; }
+    else if (spread > 0.3) { zoom = 10; }
+    else if (spread > 0.15) { zoom = 11; }
+    else if (spread > 0.07) { zoom = 12; }
+    else if (spread > 0.03) { zoom = 13; }
+    return "https://staticmap.openstreetmap.de/staticmap.php?center=" + midLat + "," + midLon +
+      "&zoom=" + zoom + "&size=320x200&maptype=mapnik&markers=" +
+      AIRBNB_LAT + "," + AIRBNB_LON + ",ol-marker-blue|" + destLat + "," + destLon + ",ol-marker";
   }
 
   function paneRow(label, valueHtml) {
@@ -470,6 +807,10 @@
       html += '<p class="pane-desc">' + v.desc + '</p>';
     }
 
+    if (v.note) {
+      html += '<p class="pane-desc" style="color:#8B2C24;">&#9888; ' + v.note + '</p>';
+    }
+
     if (v.amenities && v.amenities.length) {
       html += '<div class="pane-row" style="margin-top:8px;"><span class="pane-label">Amenities</span><ul class="pane-sublist">';
       var i;
@@ -477,6 +818,15 @@
         html += '<li>' + v.amenities[i] + '</li>';
       }
       html += '</ul></div>';
+    }
+
+    var mapUrl = staticMapUrl(v.lat, v.lon);
+    if (mapUrl) {
+      html += '<div class="pane-row" style="margin-top:8px;">' +
+        '<span class="pane-label">Map (blue pin = Airbnb, red pin = ' + v.name + ')</span>' +
+        '<img src="' + mapUrl + '" alt="Map from Airbnb to ' + v.name + '" class="pane-map-img" />' +
+        '<span class="pane-drive" style="display:block;margin-top:3px;">Pin location is approximate \\u2014 use the address link above for exact directions.</span>' +
+        '</div>';
     }
 
     document.getElementById("pane-body").innerHTML = html;
@@ -558,6 +908,10 @@
   var AIRNOW_KEY = '80781D70-714E-4225-977B-8E032C27AD62';
   var OWM_KEY = '95d28256d918534c0c26a5fb47fd0ab1';
 
+  // The device's own clock may be wrong (embedded/appliance clocks can drift or
+  // fail to sync). Once we get a real timestamp from a weather API response, we
+  // compute the offset between that and the device clock, and use the corrected
+  // time everywhere instead of trusting new Date() directly.
   var timeOffsetMs = 0;
   var timeOffsetKnown = false;
   function nowMs() {
@@ -1048,6 +1402,8 @@
   } else {
     init();
   }
+
 </script>
+
 </body>
 </html>
