@@ -306,12 +306,13 @@
       <div class="panel-head"><h2 class="panel-title">Nearby Essentials</h2></div>
       <div class="panel-body">
       <div class="route-section" style="margin-bottom:0;">
-        <a href="https://www.google.com/maps/search/Urgent+Care" target="_blank" class="link-chip">Urgent Care</a>
-        <a href="https://www.google.com/maps/search/Pharmacy" target="_blank" class="link-chip">Pharmacy</a>
-        <a href="https://www.google.com/maps/search/Meijer" target="_blank" class="link-chip">Meijer</a>
-        <a href="https://www.google.com/maps/search/Gas+Station" target="_blank" class="link-chip">Gas</a>
-        <a href="https://www.google.com/maps/search/Grocery" target="_blank" class="link-chip">Grocery</a>
-        <a href="https://www.google.com/maps/search/Cafe" target="_blank" class="link-chip">Cafe</a>
+        <button class="venue-btn" data-venue="glennstore">The Glenn Store</button>
+        <button class="venue-btn" data-venue="littlestore">The Little Store</button>
+        <button class="venue-btn" data-venue="meijersouthhaven">Meijer (South Haven)</button>
+        <button class="venue-btn" data-venue="meijerholland">Meijer (Holland)</button>
+        <button class="venue-btn" data-venue="walmartsouthhaven">Walmart Supercenter</button>
+        <button class="venue-btn" data-venue="bronsonhospital">Bronson South Haven Hospital</button>
+        <button class="venue-btn" data-venue="hollandhospital">Holland Hospital</button>
       </div>
       </div>
     </section>
@@ -708,12 +709,12 @@
       desc: "A cafe located right in Fennville."
     },
     glennstore: {
-      name: "The Glenn Store", cat: "Pizza", drive: "~3 min (2.1 mi)",
+      name: "The Glenn Store", cat: "Convenience Store / Deli", drive: "~3 min (2.1 mi)",
       lat: 42.56, lon: -86.196,
-      address: null, phone: "(269) 227-3233",
+      address: "1402 Blue Star Hwy, Glenn, MI 49416", phone: "(269) 227-3233",
       website: "http://www.theglennstore.com/", tripadvisor: null,
-      hours: "Mon-Thu, Sun 8am-8pm; Fri-Sat 8am-9pm",
-      desc: "An amazing spot for pizza located nearby in Glenn."
+      hours: "Mon-Thu & Sun 8:00am-8:00pm; Fri-Sat 8:00am-9:00pm",
+      desc: "A charming local convenience store and deli offering local brews, wine, and everyday essentials. Reviewers consistently praise the fresh, made-to-order pizzas and cheeseburgers."
     },
     seventysix: {
       name: "Seventy-Six", cat: "Restaurant", drive: "~23 min (19.1 mi)",
@@ -754,6 +755,55 @@
       website: "http://www.saltoftheearthfennville.com/", tripadvisor: null,
       hours: "Wed-Thu 5-9:30pm; Fri-Sat 4:30-10pm; Sun 4:30-9:30pm; Closed Mon-Tue",
       desc: "A rustic-chic venue right in downtown Fennville \u2014 seasonal American cuisine, incredible fresh baked goods, and a full bar."
+    },
+
+    littlestore: {
+      name: "The Little Store", cat: "Convenience Store", drive: null,
+      lat: 42.598, lon: -86.145,
+      address: "6586 122nd Ave, Fennville, MI 49408", phone: "(269) 543-8711",
+      website: null, tripadvisor: null,
+      hours: "Daily 10:00am-9:00pm",
+      desc: "A small-town convenience store with a full take-out kitchen, popular with locals and visitors looking for a quick bite near the Michigan coastline."
+    },
+    meijersouthhaven: {
+      name: "Meijer (South Haven)", cat: "Grocery / Supercenter", drive: null,
+      lat: 42.402, lon: -86.271,
+      address: "1223 Phoenix St, South Haven, MI 49090", phone: "(269) 639-3500",
+      website: "https://www.meijer.com/shopping/store-locator/271.html", tripadvisor: null,
+      hours: "Daily 6:00am-12:00am",
+      desc: "A large chain retailer with brand-name groceries, apparel, and electronics. This location is known for its well-stocked bakery and produce sections."
+    },
+    meijerholland: {
+      name: "Meijer (Holland)", cat: "Grocery / Supercenter", drive: null,
+      lat: 42.778, lon: -86.103,
+      address: "746 E 16th St, Holland, MI 49423", phone: "(616) 396-7221",
+      website: "https://www.meijer.com/shopping/store-locator/47.html", tripadvisor: null,
+      hours: "Daily 6:00am-12:00am",
+      desc: "A large chain supercenter offering full grocery services, pharmacy, electronics, and general merchandise for the Holland area."
+    },
+    walmartsouthhaven: {
+      name: "Walmart Supercenter", cat: "Big-box Retail", drive: null,
+      lat: 42.407, lon: -86.238,
+      address: "201 73rd St, South Haven, MI 49090", phone: "(269) 639-2260",
+      website: "https://www.walmart.com/store/1540-south-haven-mi", tripadvisor: null,
+      hours: "Daily 6:00am-11:00pm",
+      desc: "A one-stop shopping destination offering big-box retail goods, alongside specialized services like a Pharmacy, Vision Center, Bakery, and Deli."
+    },
+    bronsonhospital: {
+      name: "Bronson South Haven Hospital", cat: "Hospital", drive: null,
+      lat: 42.408, lon: -86.267,
+      address: "955 Bailey Ave, South Haven, MI 49090", phone: "(269) 637-5271",
+      website: "https://www.bronsonhealth.com/locations/bronson-south-haven-hospital", tripadvisor: null,
+      hours: "Open 24 hours",
+      desc: "A nationally recognized local hospital and Level IV Trauma Center providing 24/7 emergency care and accessible specialty medical services to the South Haven community."
+    },
+    hollandhospital: {
+      name: "Holland Hospital", cat: "Hospital", drive: null,
+      lat: 42.787, lon: -86.108,
+      address: "602 Michigan Ave, Holland, MI 49423", phone: "(616) 392-5141",
+      website: "https://www.hollandhospital.org/hh/home.aspx", tripadvisor: null,
+      hours: "Open 24 hours",
+      desc: "A primary medical facility in Holland providing comprehensive 24-hour emergency care alongside a wide variety of inpatient and outpatient medical services."
     },
   };
   function mapsUrl(address) {
