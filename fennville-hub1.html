@@ -2,99 +2,84 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Fennville Vacation Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fennville Vacation Dashboard (Legacy)</title>
 <link rel="apple-touch-icon" href="https://i.imgur.com/gtqPj7P.png">
 <link rel="icon" type="image/png" href="https://i.imgur.com/gtqPj7P.png">
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-title" content="Fennville Hub" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
-<!-- Leaflet CSS for Interactive Map -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
 <style>
-  /* Vintage-inspired fonts */
   @import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Cinzel:wght@600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600&display=swap');
 
   * { box-sizing: border-box; }
-  
   body {
     margin: 0;
     min-height: 100vh;
     background-color: #F4F1E1;
-    background-image: linear-gradient(to bottom, #F7F5E9 0%, #EBE7D3 100%);
     color: #211E1C;
-    font-family: 'Montserrat', sans-serif;
-    padding: 30px 16px 48px;
-    -webkit-font-smoothing: antialiased;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 22px 14px 40px;
   }
 
-  .header { max-width: 1000px; margin: 0 auto 30px; text-align: center; border-bottom: 2px solid #211E1C; padding-bottom: 20px; }
-  .eyebrow { font-family: 'Sacramento', cursive; font-size: 32px; color: #211E1C; margin: 0 0 -10px; font-weight: normal; }
-  h1 { font-family: 'Cinzel', serif; font-size: 34px; margin: 0 0 10px; line-height: 1.1; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-  @media (min-width: 600px) { h1 { font-size: 46px; } }
-  .sub { margin: 0 auto; color: #4A453F; max-width: 55ch; font-size: 15px; font-family: 'Libre Baskerville', serif; font-style: italic; }
+  .header { max-width: 1000px; margin: 0 auto 22px; text-align: center; border-bottom: 2px solid #211E1C; padding-bottom: 16px; }
+  .eyebrow { font-family: 'Sacramento', cursive; font-size: 26px; color: #211E1C; margin: 0 0 -6px; font-weight: normal; }
+  h1 { font-family: 'Cinzel', serif; font-size: 26px; margin: 0 0 8px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; }
+  .sub { margin: 0; color: #4A453F; font-size: 13px; font-family: 'Libre Baskerville', serif; font-style: italic; }
 
-  .flex-container { max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; }
-  .col-left, .col-right, .col-full { width: 100%; padding: 10px; }
-  @media (min-width: 850px) { .col-left { width: 50%; } .col-right { width: 50%; } }
-
-  .panel { background: #FCFBF7; border: 2px solid #211E1C; padding: 24px 20px 20px; margin-bottom: 10px; box-shadow: 4px 4px 0px rgba(33, 30, 28, 0.1); }
-  .panel-head { margin-bottom: 20px; border-top: 3px double #211E1C; border-bottom: 3px double #211E1C; padding: 12px 0; text-align: center; }
-  .panel-title { font-family: 'Cinzel', serif; font-size: 19px; margin: 0; font-weight: 700; color: #211E1C; letter-spacing: 1px; }
-
-  .weather-toolbar { text-align: center; margin: -8px 0 14px; }
-  .refresh-btn {
-    display: inline-flex; align-items: center; background: #EBE7D3; border: 1px solid #211E1C; border-style: dashed;
-    padding: 5px 12px; font-size: 11px; font-family: 'Courier New', Courier, monospace; color: #211E1C;
-    text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+  .col { max-width: 1000px; margin: 0 auto; }
+  .col:after { content: ""; display: block; clear: both; }
+  .colLeft, .colRight { float: left; width: 100%; }
+  @media (min-width: 850px) {
+    .colLeft { width: 54%; margin-right: 2%; }
+    .colRight { width: 44%; }
   }
-  .refresh-btn:hover { background: #211E1C; color: #F4F1E1; }
-  .auto-note { font-size: 10px; color: #5E5851; margin-left: 8px; font-family: 'Montserrat', sans-serif; }
 
-  .widget-row { display: flex; flex-wrap: wrap; margin: 0 -6px 16px -6px; }
-  .widget-card { background: transparent; border: 1px solid #D1CDC1; padding: 12px; position: relative; flex: 1; margin: 0 6px; min-width: 120px; text-align: center; }
-  .widget-card-full { flex: 1 1 100%; margin-top: 6px; margin-bottom: 6px; }
-  .widget-label { font-family: 'Montserrat', sans-serif; font-size: 10px; color: #5E5851; text-transform: uppercase; letter-spacing: 1.5px; display: block; margin-bottom: 6px; font-weight: 600; }
-  .widget-val { font-size: 18px; font-weight: 700; color: #211E1C; font-family: 'Libre Baskerville', serif; }
-  .widget-code { font-family: 'Courier New', Courier, monospace; font-size: 16px; color: #211E1C; font-weight: bold; border: 1px dashed #211E1C; display: inline-block; padding: 4px 10px; margin-top: 4px; }
+  .panel { background: #FCFBF7; border: 2px solid #211E1C; border-radius: 0; padding: 16px 14px 14px; margin-bottom: 16px; }
+  .panel-head { border-top: 3px double #211E1C; border-bottom: 3px double #211E1C; padding: 10px 0; margin-bottom: 12px; text-align: center; }
+  .panel-head:after { content: ""; display: block; clear: both; }
+  .panel-title { font-family: 'Cinzel', serif; font-size: 16px; margin: 0; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+  .refresh-btn { background: #EBE7D3; border: 1px dashed #211E1C; color: #211E1C; padding: 5px 11px; font-size: 11px; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; margin-top: 8px; }
+  .last-updated { font-size: 10px; color: #5E5851; text-align: center; margin: 6px 0 10px; font-family: 'Montserrat', sans-serif; }
 
-  .cond-row { display: flex; flex-wrap: wrap; margin: 0 -4px 16px -4px; }
-  .cond-card { flex: 1; min-width: 100px; border: 1px solid #D1CDC1; padding: 10px; text-align: center; margin: 0 4px 8px; }
-  .cond-label { font-family: 'Montserrat', sans-serif; font-size: 9px; color: #5E5851; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; font-weight: 600; }
-  .cond-val { font-family: 'Libre Baskerville', serif; font-size: 14px; font-weight: 700; color: #211E1C; }
+  .widget-row:after { content: ""; display: block; clear: both; }
+  .widget-row { margin-bottom: 12px; }
+  .widget-card { background: transparent; border: 1px solid #D1CDC1; padding: 10px; float: left; width: 48%; margin-right: 4%; margin-bottom: 8px; text-align: center; }
+  .widget-card.last { margin-right: 0; }
+  .widget-card.full { width: 100%; margin-right: 0; }
+  .widget-label { font-family: 'Montserrat', sans-serif; font-size: 9px; color: #5E5851; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; font-weight: bold; }
+  .widget-val { font-family: 'Libre Baskerville', serif; font-size: 16px; font-weight: bold; color: #211E1C; }
+  .widget-code { font-family: 'Courier New', Courier, monospace; font-size: 14px; color: #211E1C; font-weight: bold; border: 1px dashed #211E1C; padding: 3px 8px; display: inline-block; margin-top: 4px; }
 
-  .hour-row { display: flex; flex-wrap: wrap; margin: 8px -3px 16px -3px; }
-  .hour-card { flex: 1; min-width: 60px; border: 1px solid #D1CDC1; padding: 8px 4px; text-align: center; margin: 0 3px 8px; }
-  .hour-time { font-family: 'Montserrat', sans-serif; font-size: 10px; color: #5E5851; display: block; }
-  .hour-temp { font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 16px; display: block; margin: 4px 0; }
+  .route-section { background: transparent; border: 1px solid #D1CDC1; padding: 10px; margin-bottom: 12px; text-align: center; }
+  .route-title { font-family: 'Cinzel', serif; font-size: 12px; font-weight: bold; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #D1CDC1; padding-bottom: 6px; }
+
+  .link-chip { display: inline-block; background: transparent; border: 1px solid #211E1C; padding: 5px 9px; font-size: 11px; color: #211E1C; text-decoration: none; margin: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  .check-item { margin-bottom: 8px; font-size: 13px; line-height: 1.4; font-family: 'Libre Baskerville', serif; }
+
+  .day-row:after { content: ""; display: block; clear: both; }
+  .day-card { border: 1px solid #D1CDC1; padding: 8px 4px; text-align: center; float: left; width: 31.5%; margin-right: 2.25%; margin-bottom: 8px; min-height: 70px; }
+  .day-card.last { margin-right: 0; }
+  .day-name { font-family: 'Cinzel', serif; font-weight: bold; font-size: 11px; text-transform: uppercase; display: block; }
+  .day-aqi { font-family: 'Libre Baskerville', serif; font-weight: bold; font-size: 18px; margin: 4px 0; display: block; }
+
+  .hour-row:after { content: ""; display: block; clear: both; }
+  .hour-card { border: 1px solid #D1CDC1; padding: 6px 3px; text-align: center; float: left; width: 15.28%; margin-right: 1.6%; margin-bottom: 8px; }
+  .hour-card.last { margin-right: 0; }
+  .hour-time { font-family: 'Montserrat', sans-serif; font-size: 9px; color: #5E5851; display: block; }
+  .hour-temp { font-family: 'Libre Baskerville', serif; font-weight: bold; font-size: 14px; display: block; margin: 3px 0; }
   .hour-pop { font-family: 'Montserrat', sans-serif; font-size: 9px; color: #211E1C; display: block; }
 
-  .section-label { font-family: 'Cinzel', serif; font-size: 12px; color: #211E1C; text-transform: uppercase; letter-spacing: 1px; display: block; margin: 18px 0 8px; text-align: center; font-weight: 700; }
+  .cond-row:after { content: ""; display: block; clear: both; }
+  .cond-card { border: 1px solid #D1CDC1; padding: 8px; text-align: center; float: left; width: 23%; margin-right: 2.6%; margin-bottom: 8px; }
+  .cond-card.last { margin-right: 0; }
+  .cond-label { font-family: 'Montserrat', sans-serif; font-size: 8px; color: #5E5851; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 3px; font-weight: bold; }
+  .cond-val { font-family: 'Libre Baskerville', serif; font-size: 12px; font-weight: bold; display: block; }
 
-  .route-section { background: transparent; border: 1px solid #D1CDC1; padding: 14px; margin-bottom: 16px; text-align: center; }
-  .route-title { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 1px; color: #211E1C !important; border-bottom: 1px solid #D1CDC1; padding-bottom: 8px; }
+  .section-label { font-family: 'Cinzel', serif; font-size: 10px; color: #211E1C; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin: 12px 0 6px; text-align: center; font-weight: bold; }
 
-  .link-chip { display: inline-flex; align-items: center; background: transparent; border: 1px solid #211E1C; padding: 6px 12px; font-size: 11px; color: #211E1C; text-decoration: none; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; margin: 4px; }
-  .link-chip:hover { background: #211E1C; color: #F4F1E1; }
-  .link-chip.map-btn { font-family: 'Courier New', Courier, monospace; font-size: 12px; background: #EBE7D3; border-style: dashed; }
+  .alert-banner { background: transparent; border: 2px dashed #8B2C24; color: #8B2C24; padding: 10px; font-size: 12px; margin-bottom: 12px; line-height: 1.4; text-align: center; font-weight: bold; }
+  .success-banner { background: transparent; border: 1px solid #211E1C; border-top: 3px solid #211E1C; color: #211E1C; padding: 8px; font-size: 10px; text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Montserrat', sans-serif; }
 
-  .check-item { display: flex; align-items: flex-start; font-family: 'Libre Baskerville', serif; font-size: 14px; line-height: 1.5; margin-bottom: 12px; color: #211E1C; }
-  .check-item input { margin-top: 4px; margin-right: 12px; }
-
-  .day-grid { display: flex; flex-wrap: wrap; margin: 10px -4px 0 -4px; }
-  .day-card { border: 1px solid #D1CDC1; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: transparent; min-height: 80px; flex: 1; margin: 0 4px; min-width: 70px; }
-  .day-name { font-family: 'Cinzel', serif; font-weight: 700; font-size: 12px; text-transform: uppercase; }
-  .day-aqi { font-family: 'Libre Baskerville', serif; font-weight: 700; font-size: 22px; margin: 6px 0; }
-
-  .alert-banner { background: transparent; border: 2px dashed #8B2C24; color: #8B2C24; padding: 12px; font-size: 13px; margin-bottom: 16px; line-height: 1.4; text-align: center; font-weight: bold; }
-  .success-banner { background: transparent; border: 1px solid #211E1C; border-top: 3px solid #211E1C; color: #211E1C; padding: 10px; font-size: 11px; font-family: 'Montserrat', sans-serif; text-align: center; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
-
-  #map { height: 400px; width: 100%; border: 2px solid #211E1C; z-index: 1; }
-  .leaflet-popup-content-wrapper { border-radius: 0; font-family: 'Montserrat', sans-serif; }
-  
-  .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #5E5851; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; letter-spacing: 1px; }
+  footer { text-align: center; margin-top: 22px; font-size: 10px; color: #5E5851; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; letter-spacing: 0.5px; }
 </style>
 </head>
 <body>
@@ -102,117 +87,99 @@
 <div class="header">
   <p class="eyebrow">The West Michigan Travel Companion</p>
   <h1>Orchard Hill Farm Hub</h1>
-  <p class="sub">Saturday, July 18 — Tuesday, July 21, 2026</p>
+  <p class="sub">Saturday, July 18 - Tuesday, July 21, 2026 (Legacy Edition)</p>
 </div>
 
-<div class="flex-container">
-
-  <div class="col-left">
+<div class="col">
+  <div class="colLeft">
 
     <section class="panel">
-      <div class="panel-head">
-        <h2 class="panel-title">Airbnb Logistics</h2>
-      </div>
-
+      <div class="panel-head"><h2 class="panel-title">Airbnb Logistics</h2></div>
       <div class="widget-row">
         <div class="widget-card">
           <span class="widget-label">Address</span>
-          <div class="widget-val" style="font-size:15px;line-height:1.4;">1814 Lakeshore Dr<br>Fennville, MI 49408</div>
-          <a href="https://www.google.com/maps/search/?api=1&query=1814+Lakeshore+Drive+Fennville+MI" target="_blank" class="link-chip map-btn" style="margin-top:10px; display:inline-block;">Map Route</a>
+          <div class="widget-val" style="font-size:13px;line-height:1.3;">1814 Lakeshore Dr<br>Fennville, MI 49408</div>
+          <a href="https://www.google.com/maps/search/?api=1&query=1814+Lakeshore+Drive+Fennville+MI" target="_blank" class="link-chip" style="margin-top:6px;">Map Route</a>
         </div>
-        <div class="widget-card">
+        <div class="widget-card last">
           <span class="widget-label">Access Code</span>
           <div class="widget-code">2531</div>
-          <span class="widget-label" style="margin-top:10px;">Locks/Unlocks Door</span>
+          <span class="widget-label" style="margin-top:8px;">Locks/Unlocks Door</span>
         </div>
       </div>
-
       <div class="widget-row">
-        <div class="widget-card widget-card-full">
+        <div class="widget-card full">
           <span class="widget-label">Wi-Fi Connection</span>
-          <div class="widget-val" style="font-size:16px;">Network: <span style="border-bottom:1px solid #211E1C; font-style:italic;">hug2G379225</span></div>
-          <div class="widget-val" style="font-size:16px; margin-top:6px;">Password: <span style="border-bottom:1px solid #211E1C; font-style:italic;">wheel77switch</span></div>
+          <div class="widget-val" style="font-size:14px;">Network: hug2G379225</div>
+          <div class="widget-val" style="font-size:14px;margin-top:2px;">Password: wheel77switch</div>
         </div>
       </div>
-
-      <div class="widget-row" style="margin-bottom: 0;">
+      <div class="widget-row">
         <div class="widget-card">
           <span class="widget-label">Check-In</span>
-          <div class="widget-val" style="font-size:14px; font-family:'Montserrat', sans-serif;">Today @ 4:00 PM<br><span style="font-size:11px; color:#5E5851; font-weight:normal;" id="countdown-in">--</span></div>
+          <div class="widget-val" style="font-size:13px;">Today @ 4:00 PM<br><span style="font-size:11px;color:#5E5851;" id="countdown-in">--</span></div>
         </div>
-        <div class="widget-card">
+        <div class="widget-card last">
           <span class="widget-label">Checkout</span>
-          <div class="widget-val" style="font-size:14px; font-family:'Montserrat', sans-serif;">Tue, Jul 21 @ 11:00 AM<br><span style="font-size:11px; color:#5E5851; font-weight:normal;" id="countdown-out">--</span></div>
+          <div class="widget-val" style="font-size:13px;">Tue, Jul 21 @ 11:00 AM<br><span style="font-size:11px;color:#5E5851;" id="countdown-out">--</span></div>
         </div>
       </div>
     </section>
 
     <section class="panel">
-      <div class="panel-head">
-        <h2 class="panel-title">Cottage Rules</h2>
-      </div>
-      <div class="check-item"><input type="checkbox"> <span>Please don't park on the grass as we have a sprinkler system that will get damaged, park on the circular drive only</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please keep the cottage locked when you are not there and when you check-out</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please do not move furniture into other locations and return any items used into the location you found them</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please do not cut anything directly on the counters, use a cutting board</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please do not open the windows in the screened porch, they are delicate and can break easily</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please do not flush anything items besides TP down the toilet (we have a septic system)</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please do not smoke or invite any furry friends in the cottage</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please don't let kids sleep on the loft or play on the ladder</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please don't go into the basement or barn</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Please be respectful of our neighbors, quiet time is from 10pm to 7am in our neighborhood</span></div>
+      <div class="panel-head"><h2 class="panel-title">Cottage Rules</h2></div>
+      <div class="check-item">Please don't park on the grass - we have a sprinkler system. Park on the circular drive only.</div>
+      <div class="check-item">Please keep the cottage locked when you are not there and when you check out.</div>
+      <div class="check-item">Please do not cut anything directly on the counters - use a cutting board.</div>
+      <div class="check-item">Please do not open the windows in the screened porch - delicate and can break easily.</div>
+      <div class="check-item">Please do not flush anything besides TP down the toilet (septic system).</div>
+      <div class="check-item">Please don't let kids sleep on the loft or play on the ladder.</div>
+      <div class="check-item">Please don't go into the basement or barn.</div>
+      <div class="check-item">Quiet time is 10pm to 7am in our neighborhood.</div>
     </section>
 
     <section class="panel">
-      <div class="panel-head">
-        <h2 class="panel-title">Check-out Checklist</h2>
-      </div>
-      <div class="check-item"><input type="checkbox"> <span>Strip beds and place linens on the bedroom floor in each room</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Leave used bath towels in a pile on the bathroom floor</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Clean out fridge/freezer and dispose of your items</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Take the trash out into the bins and keep them near the road (pick-up day is Monday)</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Clean all dishes/ kitchen items and place them back where you found them</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Turn off all lights</span></div>
+      <div class="panel-head"><h2 class="panel-title">Check-out Checklist</h2></div>
+      <div class="check-item">Strip beds and place linens on the bedroom floor in each room.</div>
+      <div class="check-item">Leave used bath towels in a pile on the bathroom floor.</div>
+      <div class="check-item">Clean out fridge/freezer and dispose of your items.</div>
+      <div class="check-item">Take the trash out into the bins near the road (pick-up day is Monday).</div>
+      <div class="check-item">Clean all dishes/kitchen items and place them back where you found them.</div>
+      <div class="check-item">Turn off all lights.</div>
     </section>
+
   </div>
 
-  <div class="col-right">
+  <div class="colRight">
 
     <section class="panel" id="panel-weather">
       <div class="panel-head">
         <h2 class="panel-title">Fennville Weather</h2>
+        <button class="refresh-btn" id="weather-refresh-btn">Refresh</button>
       </div>
-      <div class="weather-toolbar">
-        <button class="refresh-btn" id="weather-refresh-btn">&#8635; Refresh</button>
-        <span class="auto-note">auto-updates every 15 min</span>
-      </div>
+      <p class="last-updated" id="last-updated">Not yet updated</p>
       <div id="live-weather-root">
-        <p style="font-size:12px; color:#5E5851; text-align:center; font-style:italic;">Querying Atmospheric Systems...</p>
+        <p style="font-size:12px;color:#5E5851;text-align:center;font-style:italic;">Querying weather and air quality systems...</p>
       </div>
     </section>
 
     <section class="panel">
-      <div class="panel-head">
-        <h2 class="panel-title">Destination Inventory Hub</h2>
-      </div>
-
+      <div class="panel-head"><h2 class="panel-title">Destination Inventory Hub</h2></div>
       <div class="route-section">
-        <div class="route-title">Local Farms & Artisans</div>
+        <div class="route-title">Local Farms &amp; Artisans</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Fernwood+Farm+Fennville" target="_blank" class="link-chip">Fernwood Farm</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Evergreen+Lane+Goat+Farm+Fennville" target="_blank" class="link-chip">Evergreen Lane Goat Farm</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Bluestar+Farm+Fennville" target="_blank" class="link-chip">Bluestar Farm</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Cranes+Pie+Pantry+Fennville" target="_blank" class="link-chip">Cranes Apple Orchard</a>
       </div>
-
       <div class="route-section">
-        <div class="route-title">Tasting Rooms & Breweries</div>
+        <div class="route-title">Tasting Rooms &amp; Breweries</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Modales+Wines+Fennville" target="_blank" class="link-chip">Modales Wines</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Michigan+Wine+Company+Fennville" target="_blank" class="link-chip">Michigan Wine Co.</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Rusty+Rocket+Brewing+Pullman" target="_blank" class="link-chip">Rusty Rocket Brewing</a>
       </div>
-
       <div class="route-section">
-        <div class="route-title">Shorelines & Preservation Beaches</div>
+        <div class="route-title">Shorelines &amp; Preservation Beaches</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Wau-Ke-Na+Preserve" target="_blank" class="link-chip">Wau-Ke-Na Preserve</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Westside+County+Park+Fennville" target="_blank" class="link-chip">Westside County Park</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Oval+Beach+Saugatuck" target="_blank" class="link-chip">Oval Beach</a>
@@ -220,11 +187,9 @@
     </section>
 
     <section class="panel">
-      <div class="panel-head">
-        <h2 class="panel-title">Nearby Essentials</h2>
-      </div>
-      <div class="route-section" style="margin-bottom: 0;">
-        <a href="https://www.google.com/maps/search/Urgent+Care" target="_blank" class="link-chip">Nearest Urgent Care</a>
+      <div class="panel-head"><h2 class="panel-title">Nearby Essentials</h2></div>
+      <div class="route-section" style="margin-bottom:0;">
+        <a href="https://www.google.com/maps/search/Urgent+Care" target="_blank" class="link-chip">Urgent Care</a>
         <a href="https://www.google.com/maps/search/Pharmacy" target="_blank" class="link-chip">Pharmacy</a>
         <a href="https://www.google.com/maps/search/Meijer" target="_blank" class="link-chip">Meijer</a>
         <a href="https://www.google.com/maps/search/Gas+Station" target="_blank" class="link-chip">Gas</a>
@@ -234,60 +199,16 @@
     </section>
 
   </div>
-
-  <div class="col-full">
-    <section class="panel">
-      <div class="panel-head">
-        <h2 class="panel-title">Interactive Map Explorer</h2>
-      </div>
-      <div id="map"></div>
-    </section>
-  </div>
 </div>
 
-<div class="footer">
-  // Built Securely // Client Execution // Offline Indexed //
-</div>
+<footer>// Legacy-compatibility build for older browsers/embedded displays //</footer>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-<!-- DATA INTEGRATION SCRIPT -->
 <script>
-  function initMap() {
-    var map = L.map('map').setView([42.5975, -86.1089], 11);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-    var locations = [
-      { name: "🏠 Airbnb (1814 Lakeshore Dr)", lat: 42.585, lon: -86.205, type: "Airbnb" },
-      { name: "🏖️ Oval Beach", lat: 42.663, lon: -86.216, type: "Beach" },
-      { name: "🏖️ Pier Cove Park", lat: 42.571, lon: -86.223, type: "Beach" },
-      { name: "🏖️ Westside County Park", lat: 42.551, lon: -86.230, type: "Beach" },
-      { name: "🍻 Rusty Rocket Brewing", lat: 42.493, lon: -86.095, type: "Brewery" },
-      { name: "🍻 Waypost Brewing", lat: 42.592, lon: -86.195, type: "Brewery" },
-      { name: "🍽️ Salt of the Earth", lat: 42.594, lon: -86.101, type: "Restaurant" },
-      { name: "🍽️ The Southerner", lat: 42.656, lon: -86.200, type: "Restaurant" },
-      { name: "🥾 Saugatuck Dunes State Park", lat: 42.685, lon: -86.210, type: "Hiking" },
-      { name: "🍎 Crane's Pie Pantry & Orchard", lat: 42.597, lon: -86.136, type: "Fruit Market" },
-      { name: "🍎 Dee's Lakeshore Farm", lat: 42.573, lon: -86.221, type: "Fruit Market" },
-      { name: "⛽ BP Gas Station (Fennville)", lat: 42.594, lon: -86.103, type: "Gas Station" }
-    ];
-
-    locations.forEach(function(loc) {
-      L.marker([loc.lat, loc.lon])
-        .addTo(map)
-        .bindPopup("<strong>" + loc.name + "</strong><br><span style='font-size:11px; text-transform:uppercase;'>" + loc.type + "</span>");
-    });
-  }
 
   function updateCountdowns() {
-    var targetCheckIn = new Date("2026-07-18T16:00:00-04:00").getTime();
-    var targetCheckOut = new Date("2026-07-21T11:00:00-04:00").getTime();
-    var now = new Date().getTime();
+    var targetCheckIn = new Date("2026-07-18T16:00:00-04:00");
+    var targetCheckOut = new Date("2026-07-21T11:00:00-04:00");
+    var now = new Date();
 
     var diffIn = targetCheckIn - now;
     var diffOut = targetCheckOut - now;
@@ -295,18 +216,20 @@
     var elIn = document.getElementById("countdown-in");
     var elOut = document.getElementById("countdown-out");
 
-    if(diffIn > 0) {
-      var hoursIn = Math.floor(diffIn / (1000 * 60 * 60));
-      var minsIn = Math.floor((diffIn % (1000 * 60 * 60)) / (1000 * 60));
-      elIn.innerText = "Starts in: " + hoursIn + "h " + minsIn + "m";
+    var hours, mins, days;
+
+    if (diffIn > 0) {
+      hours = Math.floor(diffIn / (1000 * 60 * 60));
+      mins = Math.floor((diffIn % (1000 * 60 * 60)) / (1000 * 60));
+      elIn.innerText = "Starts in: " + hours + "h " + mins + "m";
     } else {
       elIn.innerText = "Active Stay Window";
     }
 
-    if(diffOut > 0) {
-      var daysOut = Math.floor(diffOut / (1000 * 60 * 60 * 24));
-      var hoursOut = Math.floor((diffOut % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      elOut.innerText = "Remaining: " + daysOut + "d " + hoursOut + "h";
+    if (diffOut > 0) {
+      days = Math.floor(diffOut / (1000 * 60 * 60 * 24));
+      hours = Math.floor((diffOut % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      elOut.innerText = "Remaining: " + days + "d " + hours + "h";
     } else {
       elOut.innerText = "Checkout window elapsed";
     }
@@ -315,19 +238,18 @@
   setInterval(updateCountdowns, 60000);
   updateCountdowns();
 
-  // ---- Environmental data ----
   var CATEGORIES = [
     { max: 50, label: "Good", color: "#32623D" },
     { max: 100, label: "Moderate", color: "#B8860B" },
-    { max: 150, label: "Sensitive", color: "#B25A24" },
+    { max: 150, label: "Unhealthy (Sensitive)", color: "#B25A24" },
     { max: 200, label: "Unhealthy", color: "#8B2C24" },
     { max: 300, label: "Very Unhealthy", color: "#543063" },
-    { max: Infinity, label: "Hazardous", color: "#4A1A24" }
+    { max: 999999, label: "Hazardous", color: "#4A1A24" }
   ];
-
   function getCat(val) {
-    for (var i = 0; i < CATEGORIES.length; i++) {
-      if (val <= CATEGORIES[i].max) return CATEGORIES[i];
+    var i;
+    for (i = 0; i < CATEGORIES.length; i++) {
+      if (val <= CATEGORIES[i].max) { return CATEGORIES[i]; }
     }
     return CATEGORIES[CATEGORIES.length - 1];
   }
@@ -337,282 +259,447 @@
   var AIRNOW_KEY = '80781D70-714E-4225-977B-8E032C27AD62';
   var OWM_KEY = '95d28256d918534c0c26a5fb47fd0ab1';
 
+  var WEEKDAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   function fmtDayLabel(dateStr, idx) {
-    if (idx === 0) return "Today";
-    if (idx === 1) return "Tomorrow";
+    if (idx === 0) { return "Today"; }
+    if (idx === 1) { return "Tomorrow"; }
     var d = new Date(dateStr + "T12:00:00");
-    return d.toLocaleDateString(undefined, { weekday: "short" });
+    return WEEKDAYS_SHORT[d.getDay()];
   }
 
   function fmtHourLabel(unixSeconds) {
     var d = new Date(unixSeconds * 1000);
-    return d.toLocaleTimeString(undefined, { hour: "numeric" });
+    var h = d.getHours();
+    var ampm = h >= 12 ? "PM" : "AM";
+    var h12 = h % 12;
+    if (h12 === 0) { h12 = 12; }
+    return h12 + ampm;
   }
 
   function fmtClock(unixSeconds) {
     var d = new Date(unixSeconds * 1000);
-    return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    var h = d.getHours();
+    var m = d.getMinutes();
+    var ampm = h >= 12 ? "PM" : "AM";
+    var h12 = h % 12;
+    if (h12 === 0) { h12 = 12; }
+    var mm = m < 10 ? "0" + m : "" + m;
+    return h12 + ":" + mm + " " + ampm;
   }
 
   function fmtWindDir(deg) {
     var dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
     var idx = Math.round(deg / 45) % 8;
-    if (idx < 0) idx += 8;
+    if (idx < 0) { idx += 8; }
     return dirs[idx];
   }
 
   function uvLabel(uvi) {
-    if (uvi === null || uvi === undefined) return "--";
-    if (uvi < 3) return "Low";
-    if (uvi < 6) return "Moderate";
-    if (uvi < 8) return "High";
-    if (uvi < 11) return "Very High";
+    if (uvi === null || uvi === undefined) { return "--"; }
+    if (uvi < 3) { return "Low"; }
+    if (uvi < 6) { return "Moderate"; }
+    if (uvi < 8) { return "High"; }
+    if (uvi < 11) { return "Very High"; }
     return "Extreme";
   }
 
   var WEATHER_CODES = {
-    0: ["☀️", "Clear"], 1: ["🌤️", "M. Clear"], 2: ["⛅", "P. Cloudy"], 3: ["☁️", "Cloudy"],
-    45: ["🌫️", "Fog"], 48: ["🌫️", "Fog"],
-    51: ["🌦️", "Drizzle"], 61: ["🌧️", "Rain"], 71: ["🌨️", "Snow"], 80: ["🌦️", "Showers"],
-    95: ["⛈️", "T-storms"]
+    0: "Clear", 1: "Mostly Clear", 2: "Partly Cloudy", 3: "Cloudy",
+    45: "Fog", 48: "Fog",
+    51: "Drizzle", 53: "Drizzle", 55: "Drizzle",
+    56: "Frzg Drizzle", 57: "Frzg Drizzle",
+    61: "Rain", 63: "Rain", 65: "Heavy Rain",
+    66: "Frzg Rain", 67: "Frzg Rain",
+    71: "Snow", 73: "Snow", 75: "Heavy Snow", 77: "Snow Grains",
+    80: "Showers", 81: "Showers", 82: "Showers",
+    85: "Snow Showers", 86: "Snow Showers",
+    95: "T-storms", 96: "T-storms", 99: "T-storms"
   };
-
-  function weatherIconLabel(code) {
-    var group = code;
-    if (code > 51 && code < 60) group = 51;
-    if (code > 61 && code < 70) group = 61;
-    if (code > 71 && code < 80) group = 71;
-    if (code > 80 && code < 90) group = 80;
-    if (code > 95) group = 95;
-    return WEATHER_CODES[group] || ["🌡️", "—"];
+  function weatherLabel(code) {
+    var lbl = WEATHER_CODES[code];
+    return lbl ? lbl : "--";
   }
 
-  function getJson(url) {
-    return fetch(url).then(function (r) {
-      if (!r.ok) { throw new Error("HTTP " + r.status); }
-      return r.json();
-    });
+  function getJson(url, onSuccess, onError) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) { return; }
+      if (xhr.status < 200 || xhr.status >= 300) {
+        onError("HTTP " + xhr.status);
+        return;
+      }
+      var data;
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch (e) {
+        onError("Bad JSON");
+        return;
+      }
+      onSuccess(data);
+    };
+    xhr.onerror = function () { onError("Network error"); };
+    xhr.send();
   }
-
-  // ---- Rendering ----
 
   function renderCurrentAqi(airNowCurrent) {
     var curAqi = 0;
     var curCatName = "Good";
+    var i;
     if (airNowCurrent && airNowCurrent.length > 0) {
-      var aqiArray = airNowCurrent.map(function (d) { return d.AQI; });
-      curAqi = Math.max.apply(null, aqiArray);
-      for (var i = 0; i < airNowCurrent.length; i++) {
-        if (airNowCurrent[i].AQI === curAqi && airNowCurrent[i].Category) { curCatName = airNowCurrent[i].Category.Name; break; }
+      for (i = 0; i < airNowCurrent.length; i++) {
+        if (airNowCurrent[i].AQI > curAqi) { curAqi = airNowCurrent[i].AQI; }
+      }
+      for (i = 0; i < airNowCurrent.length; i++) {
+        if (airNowCurrent[i].AQI === curAqi && airNowCurrent[i].Category) {
+          curCatName = airNowCurrent[i].Category.Name;
+          break;
+        }
       }
     }
     var aqiCat = getCat(curAqi);
-    return '<div class="cond-card"><span class="cond-label">Air Quality</span><span class="cond-val" style="color:' + aqiCat.color + '">' + curAqi + " " + curCatName + '</span></div>';
+    return (
+      '<div class="cond-card">' +
+      '<span class="cond-label">Air Quality</span>' +
+      '<span class="cond-val" style="color:' + aqiCat.color + '">' + curAqi + " " + curCatName + "</span>" +
+      "</div>"
+    );
   }
 
   function renderCurrentConditions(current, airNowCurrent) {
-    var windTxt = (current.windSpeed !== null && current.windSpeed !== undefined) ? Math.round(current.windSpeed) + " mph " + fmtWindDir(current.windDeg) : "--";
-    var uviTxt = (current.uvi !== null && current.uvi !== undefined) ? current.uvi + " " + uvLabel(current.uvi) : "--";
+    var windTxt = (current.windSpeed !== null && current.windSpeed !== undefined)
+      ? Math.round(current.windSpeed) + " mph " + fmtWindDir(current.windDeg)
+      : "--";
+    var uviTxt = (current.uvi !== null && current.uvi !== undefined)
+      ? current.uvi + " " + uvLabel(current.uvi)
+      : "--";
     var sunriseTxt = current.sunrise ? fmtClock(current.sunrise) : "--";
     var sunsetTxt = current.sunset ? fmtClock(current.sunset) : "--";
 
     var html = "";
     html += '<div class="widget-row">';
-    html += '<div class="widget-card"><span class="widget-label">Current Temp</span><div class="widget-val" style="font-size:28px;">' + Math.round(current.temp) + '°F</div><span class="widget-label" style="margin-top:8px; font-weight:normal; text-transform:none;">' + (current.description || "") + '</span></div>';
-    html += '<div class="widget-card"><span class="widget-label">Feels Like / Humidity</span><div class="widget-val" style="font-size:20px;">' + Math.round(current.feelsLike) + '°F</div><span class="widget-label" style="margin-top:8px; font-weight:normal; text-transform:none;">Humidity: ' + current.humidity + '%</span></div>';
-    html += '</div>';
+    html += '<div class="widget-card"><span class="widget-label">Current Temp</span>';
+    html += '<div class="widget-val" style="font-size:24px;">' + Math.round(current.temp) + "&deg;F</div>";
+    html += '<span class="widget-label" style="margin-top:4px;text-transform:none;font-weight:normal;">' + (current.description || "") + "</span></div>";
+    html += '<div class="widget-card last"><span class="widget-label">Feels Like / Humidity</span>';
+    html += '<div class="widget-val" style="font-size:17px;">' + Math.round(current.feelsLike) + "&deg;F</div>";
+    html += '<span class="widget-label" style="margin-top:4px;text-transform:none;font-weight:normal;">Humidity: ' + current.humidity + "%</span></div>";
+    html += "</div>";
 
     html += '<div class="cond-row">';
     html += renderCurrentAqi(airNowCurrent);
-    html += '<div class="cond-card"><span class="cond-label">Wind</span><span class="cond-val">' + windTxt + '</span></div>';
-    html += '<div class="cond-card"><span class="cond-label">UV Index</span><span class="cond-val">' + uviTxt + '</span></div>';
-    html += '<div class="cond-card"><span class="cond-label">Sunrise / Sunset</span><span class="cond-val" style="font-size:12px;">' + sunriseTxt + ' / ' + sunsetTxt + '</span></div>';
-    html += '</div>';
+    html += '<div class="cond-card"><span class="cond-label">Wind</span><span class="cond-val">' + windTxt + "</span></div>";
+    html += '<div class="cond-card"><span class="cond-label">UV Index</span><span class="cond-val">' + uviTxt + "</span></div>";
+    html += '<div class="cond-card last"><span class="cond-label">Sunrise/Sunset</span><span class="cond-val" style="font-size:10px;">' + sunriseTxt + " / " + sunsetTxt + "</span></div>";
+    html += "</div>";
 
     return html;
   }
 
   function renderHourly(hourly) {
     if (!hourly || hourly.length === 0) {
-      return '<div style="font-size:12px;color:#5E5851;text-align:center;">Hourly forecast unavailable.</div>';
+      return '<div style="font-size:12px;color:#5E5851;padding:6px 0;text-align:center;">Hourly forecast unavailable.</div>';
     }
     var n = Math.min(6, hourly.length);
-    var cards = hourly.slice(0, n).map(function (h) {
-      var popTxt = (h.pop !== null && h.pop !== undefined) ? Math.round(h.pop) + "%" : "";
-      return '<div class="hour-card"><span class="hour-time">' + fmtHourLabel(h.dt) + '</span><span class="hour-temp">' + Math.round(h.temp) + '°</span><span class="hour-pop">' + popTxt + '</span></div>';
-    }).join("");
-    return '<span class="section-label">Hourly Forecast</span><div class="hour-row">' + cards + '</div>';
+    var cards = "";
+    var i, h, popTxt;
+    for (i = 0; i < n; i++) {
+      h = hourly[i];
+      popTxt = (h.pop !== null && h.pop !== undefined) ? Math.round(h.pop) + "%" : "";
+      cards +=
+        '<div class="hour-card' + (i === n - 1 ? " last" : "") + '">' +
+        '<span class="hour-time">' + fmtHourLabel(h.dt) + "</span>" +
+        '<span class="hour-temp">' + Math.round(h.temp) + "&deg;</span>" +
+        '<span class="hour-pop">' + popTxt + "</span>" +
+        "</div>";
+    }
+    return '<span class="section-label">Hourly Forecast</span><div class="hour-row">' + cards + "</div>";
   }
 
   function renderAqiForecast(days) {
-    if (!days || days.length === 0) return '';
-    var cards = days.map(function (d) {
-      var cat = getCat(d.avgAqi);
-      return '<div class="day-card"><span class="day-name">' + d.label + '</span><span class="day-aqi" style="color:' + cat.color + '">' + d.avgAqi + '</span><span style="font-size:9px; font-family:\'Montserrat\', sans-serif; font-weight:bold; color:#5E5851; text-transform:uppercase;">' + cat.label + '</span></div>';
-    }).join("");
-    return '<span class="section-label">3-Day AQI Forecast</span><div class="day-grid">' + cards + '</div>';
+    if (!days || days.length === 0) {
+      return '<div style="font-size:12px;color:#5E5851;padding:6px 0;text-align:center;">AQI forecast unavailable.</div>';
+    }
+    var cards = "";
+    var i, cat;
+    for (i = 0; i < days.length; i++) {
+      cat = getCat(days[i].avgAqi);
+      cards +=
+        '<div class="day-card' + (i === days.length - 1 ? " last" : "") + '">' +
+        '<span class="day-name">' + days[i].label + "</span>" +
+        '<span class="day-aqi" style="color:' + cat.color + '">' + days[i].avgAqi + "</span>" +
+        '<span style="font-size:9px;color:#5E5851;">' + cat.label + "</span>" +
+        "</div>";
+    }
+    return '<span class="section-label">3-Day AQI Forecast (avg)</span><div class="day-row">' + cards + "</div>";
   }
 
   function renderDailyForecast(days) {
-    if (!days || days.length === 0) return '';
-    var cards = days.map(function (d) {
-      var iconInfo = d.code !== null && d.code !== undefined ? weatherIconLabel(d.code) : (d.owmDesc ? ["", d.owmDesc] : ["", ""]);
-      var precipStr = d.precip !== null && d.precip !== undefined ? " &middot; " + d.precip + "%💧" : "";
-      return '<div class="day-card"><span class="day-name">' + d.label + '</span><span style="font-size:22px; margin:4px 0;">' + iconInfo[0] + '</span><span class="day-aqi" style="font-size:16px; margin:2px 0;">' + d.hi + '° / ' + d.lo + '°</span><span style="font-size:10px; font-family:\'Montserrat\', sans-serif; color:#5E5851;">' + iconInfo[1] + precipStr + '</span></div>';
-    }).join("");
-    return '<span class="section-label">Daily Forecast</span><div class="day-grid">' + cards + '</div>';
+    if (!days || days.length === 0) {
+      return '<div style="font-size:12px;color:#5E5851;padding:6px 0;text-align:center;">Daily forecast unavailable.</div>';
+    }
+    var cards = "";
+    var i, label;
+    for (i = 0; i < days.length; i++) {
+      label = weatherLabel(days[i].code);
+      cards +=
+        '<div class="day-card' + (i === days.length - 1 ? " last" : "") + '">' +
+        '<span class="day-name">' + days[i].label + "</span>" +
+        '<span class="day-aqi" style="font-size:14px;">' + days[i].hi + "&deg; / " + days[i].lo + "&deg;</span>" +
+        '<span style="font-size:9px;color:#5E5851;">' + label + (days[i].precip !== null && days[i].precip !== undefined ? " - " + days[i].precip + "%" : "") + "</span>" +
+        "</div>";
+    }
+    return '<span class="section-label">Daily Forecast</span><div class="day-row">' + cards + "</div>";
   }
 
-  // ---- Data loading ----
-
-  function loadAirNowCurrent() {
-    return getJson("https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=" + LAT + "&longitude=" + LON + "&distance=50&API_KEY=" + AIRNOW_KEY);
+  function loadAirNowCurrent(onSuccess, onError) {
+    var url = "https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=" + LAT +
+      "&longitude=" + LON + "&distance=50&API_KEY=" + AIRNOW_KEY;
+    getJson(url, onSuccess, onError);
   }
 
-  function loadAqiForecast() {
-    return getJson("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + LAT + "&longitude=" + LON + "&hourly=us_aqi&forecast_days=3&timezone=America%2FDetroit").then(function (data) {
-      var times = data.hourly.time;
-      var aqi = data.hourly.us_aqi;
-      var byDate = {};
-      times.forEach(function (t, i) {
-        var date = t.split("T")[0];
-        if (!byDate[date]) byDate[date] = [];
-        if (aqi[i] != null) byDate[date].push(aqi[i]);
-      });
-      return Object.keys(byDate).slice(0, 3).map(function (date, idx) {
-        var vals = byDate[date];
-        var sum = 0;
-        for (var i = 0; i < vals.length; i++) sum += vals[i];
-        return { date: date, label: fmtDayLabel(date, idx), avgAqi: Math.round(vals.length ? sum / vals.length : 0) };
-      });
-    });
+  function loadAqiForecast(onSuccess, onError) {
+    var url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + LAT + "&longitude=" + LON +
+      "&hourly=us_aqi&forecast_days=3&timezone=America%2FDetroit";
+    getJson(url, function (data) {
+      try {
+        var times = data.hourly.time;
+        var aqi = data.hourly.us_aqi;
+        var byDate = {};
+        var i, date;
+        for (i = 0; i < times.length; i++) {
+          date = times[i].split("T")[0];
+          if (!byDate[date]) { byDate[date] = []; }
+          if (aqi[i] !== null && aqi[i] !== undefined) { byDate[date].push(aqi[i]); }
+        }
+        var keys = [];
+        for (var k in byDate) { if (byDate.hasOwnProperty(k)) { keys.push(k); } }
+        keys.sort();
+        keys = keys.slice(0, 3);
+        var out = [];
+        var vals, sum, j, avg;
+        for (i = 0; i < keys.length; i++) {
+          vals = byDate[keys[i]];
+          sum = 0;
+          for (j = 0; j < vals.length; j++) { sum += vals[j]; }
+          avg = vals.length ? Math.round(sum / vals.length) : 0;
+          out.push({ date: keys[i], label: fmtDayLabel(keys[i], i), avgAqi: avg });
+        }
+        onSuccess(out);
+      } catch (e) {
+        onError("Parse error");
+      }
+    }, onError);
   }
 
-  // UV backup source (OWM free tier often omits UV)
-  function loadUvFromOpenMeteo() {
-    return getJson("https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON + "&hourly=uv_index&daily=uv_index_max&timezone=America%2FDetroit&forecast_days=3").then(function (data) {
-      var nowHour = new Date().getHours();
-      var currentUvi = data.hourly && data.hourly.uv_index ? data.hourly.uv_index[nowHour] : null;
-      return { currentUvi: currentUvi };
-    }).catch(function () { return { currentUvi: null }; });
+  function loadUvFromOpenMeteo(onSuccess, onError) {
+    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON +
+      "&hourly=uv_index&daily=uv_index_max&timezone=America%2FDetroit&forecast_days=3";
+    getJson(url, function (data) {
+      try {
+        var nowHour = new Date().getHours();
+        var currentUvi = data.hourly && data.hourly.uv_index ? data.hourly.uv_index[nowHour] : null;
+        var dailyMax = (data.daily && data.daily.uv_index_max) ? data.daily.uv_index_max : [];
+        onSuccess({ currentUvi: currentUvi, dailyMax: dailyMax });
+      } catch (e) {
+        onError("Parse error");
+      }
+    }, onError);
   }
 
-  // Try OWM One Call 3.0 first; fall back to free 2.5 Current + 5-day/3-hour Forecast.
-  function loadWeatherBundle() {
-    var oneCallUrl = "https://api.openweathermap.org/data/3.0/onecall?lat=" + LAT + "&lon=" + LON + "&units=imperial&exclude=minutely,alerts&appid=" + OWM_KEY;
+  function loadWeatherBundle(onSuccess, onError) {
+    var oneCallUrl = "https://api.openweathermap.org/data/3.0/onecall?lat=" + LAT + "&lon=" + LON +
+      "&units=imperial&exclude=minutely,alerts&appid=" + OWM_KEY;
 
-    return getJson(oneCallUrl).then(function (data) {
-      var c = data.current;
-      var current = {
-        temp: c.temp, feelsLike: c.feels_like, humidity: c.humidity,
-        windSpeed: c.wind_speed, windDeg: c.wind_deg, uvi: c.uvi,
-        sunrise: c.sunrise, sunset: c.sunset,
-        description: (c.weather && c.weather[0]) ? c.weather[0].description : ""
-      };
-      var hourly = data.hourly.slice(0, 6).map(function (h) {
-        return { dt: h.dt, temp: h.temp, pop: (h.pop !== null && h.pop !== undefined) ? h.pop * 100 : null };
-      });
-      var daily = data.daily.slice(0, 3).map(function (d, idx) {
-        return {
-          label: fmtDayLabel(new Date(d.dt * 1000).toISOString().split("T")[0], idx),
-          code: null,
-          hi: Math.round(d.temp.max), lo: Math.round(d.temp.min),
-          precip: (d.pop !== null && d.pop !== undefined) ? Math.round(d.pop * 100) : null,
-          owmDesc: (d.weather && d.weather[0]) ? d.weather[0].main : ""
-        };
-      });
-      return { current: current, hourly: hourly, daily: daily, source: "onecall" };
-    }).catch(function () {
-      var currentUrl = "https://api.openweathermap.org/data/2.5/weather?lat=" + LAT + "&lon=" + LON + "&units=imperial&appid=" + OWM_KEY;
-      var forecastUrl = "https://api.openweathermap.org/data/2.5/forecast?lat=" + LAT + "&lon=" + LON + "&units=imperial&appid=" + OWM_KEY;
-
-      return Promise.all([getJson(currentUrl), getJson(forecastUrl).catch(function () { return null; })]).then(function (results) {
-        var currentData = results[0];
-        var forecastData = results[1];
-
+    getJson(oneCallUrl, function (data) {
+      try {
+        var c = data.current;
         var current = {
-          temp: currentData.main.temp, feelsLike: currentData.main.feels_like, humidity: currentData.main.humidity,
-          windSpeed: currentData.wind ? currentData.wind.speed : null, windDeg: currentData.wind ? currentData.wind.deg : null,
+          temp: c.temp,
+          feelsLike: c.feels_like,
+          humidity: c.humidity,
+          windSpeed: c.wind_speed,
+          windDeg: c.wind_deg,
+          uvi: c.uvi,
+          sunrise: c.sunrise,
+          sunset: c.sunset,
+          description: (c.weather && c.weather[0]) ? c.weather[0].description : ""
+        };
+
+        var hourly = [];
+        var i;
+        for (i = 0; i < data.hourly.length && i < 6; i++) {
+          hourly.push({
+            dt: data.hourly[i].dt,
+            temp: data.hourly[i].temp,
+            pop: data.hourly[i].pop !== null && data.hourly[i].pop !== undefined ? data.hourly[i].pop * 100 : null
+          });
+        }
+
+        var daily = [];
+        for (i = 0; i < data.daily.length && i < 3; i++) {
+          daily.push({
+            label: fmtDayLabel(new Date(data.daily[i].dt * 1000).toISOString().split("T")[0], i),
+            code: null,
+            hi: Math.round(data.daily[i].temp.max),
+            lo: Math.round(data.daily[i].temp.min),
+            precip: data.daily[i].pop !== null && data.daily[i].pop !== undefined ? Math.round(data.daily[i].pop * 100) : null
+          });
+        }
+
+        onSuccess({ current: current, hourly: hourly, daily: daily, source: "onecall" });
+      } catch (e) {
+        onError("Parse error (One Call)");
+      }
+    }, function (oneCallErr) {
+      var currentUrl = "https://api.openweathermap.org/data/2.5/weather?lat=" + LAT + "&lon=" + LON +
+        "&units=imperial&appid=" + OWM_KEY;
+      var forecastUrl = "https://api.openweathermap.org/data/2.5/forecast?lat=" + LAT + "&lon=" + LON +
+        "&units=imperial&appid=" + OWM_KEY;
+
+      var currentData = null, forecastData = null;
+      var currentOk = false, forecastOk = false;
+      var pending = 2;
+
+      function done() {
+        pending--;
+        if (pending > 0) { return; }
+        if (!currentOk) {
+          onError("OWM current weather failed (both One Call and 2.5 fallback)");
+          return;
+        }
+        var current = {
+          temp: currentData.main.temp,
+          feelsLike: currentData.main.feels_like,
+          humidity: currentData.main.humidity,
+          windSpeed: currentData.wind ? currentData.wind.speed : null,
+          windDeg: currentData.wind ? currentData.wind.deg : null,
           uvi: null,
-          sunrise: currentData.sys ? currentData.sys.sunrise : null, sunset: currentData.sys ? currentData.sys.sunset : null,
+          sunrise: currentData.sys ? currentData.sys.sunrise : null,
+          sunset: currentData.sys ? currentData.sys.sunset : null,
           description: (currentData.weather && currentData.weather[0]) ? currentData.weather[0].description : ""
         };
 
         var hourly = [];
         var daily = [];
-        if (forecastData && forecastData.list) {
+        if (forecastOk && forecastData.list) {
           var list = forecastData.list;
-          hourly = list.slice(0, 6).map(function (item) {
-            return { dt: item.dt, temp: item.main.temp, pop: (item.pop !== null && item.pop !== undefined) ? item.pop * 100 : null };
-          });
-
+          var i;
+          for (i = 0; i < list.length && i < 6; i++) {
+            hourly.push({
+              dt: list[i].dt,
+              temp: list[i].main.temp,
+              pop: list[i].pop !== null && list[i].pop !== undefined ? list[i].pop * 100 : null
+            });
+          }
           var byDate = {};
           var dateKeys = [];
-          list.forEach(function (item) {
-            var dateStr = new Date(item.dt * 1000).toISOString().split("T")[0];
+          for (i = 0; i < list.length; i++) {
+            var dateStr = new Date(list[i].dt * 1000).toISOString().split("T")[0];
             if (!byDate[dateStr]) {
-              byDate[dateStr] = { hi: item.main.temp_max, lo: item.main.temp_min, pop: item.pop || 0 };
+              byDate[dateStr] = { hi: list[i].main.temp_max, lo: list[i].main.temp_min, pop: list[i].pop || 0 };
               dateKeys.push(dateStr);
             } else {
-              if (item.main.temp_max > byDate[dateStr].hi) byDate[dateStr].hi = item.main.temp_max;
-              if (item.main.temp_min < byDate[dateStr].lo) byDate[dateStr].lo = item.main.temp_min;
-              if (item.pop > byDate[dateStr].pop) byDate[dateStr].pop = item.pop;
+              if (list[i].main.temp_max > byDate[dateStr].hi) { byDate[dateStr].hi = list[i].main.temp_max; }
+              if (list[i].main.temp_min < byDate[dateStr].lo) { byDate[dateStr].lo = list[i].main.temp_min; }
+              if (list[i].pop > byDate[dateStr].pop) { byDate[dateStr].pop = list[i].pop; }
             }
-          });
-          daily = dateKeys.slice(0, 3).map(function (dateStr, idx) {
-            return { label: fmtDayLabel(dateStr, idx), code: null, hi: Math.round(byDate[dateStr].hi), lo: Math.round(byDate[dateStr].lo), precip: Math.round(byDate[dateStr].pop * 100) };
-          });
+          }
+          for (i = 0; i < dateKeys.length && i < 3; i++) {
+            daily.push({
+              label: fmtDayLabel(dateKeys[i], i),
+              code: null,
+              hi: Math.round(byDate[dateKeys[i]].hi),
+              lo: Math.round(byDate[dateKeys[i]].lo),
+              precip: Math.round(byDate[dateKeys[i]].pop * 100)
+            });
+          }
         }
 
-        return { current: current, hourly: hourly, daily: daily, source: "fallback25" };
-      });
-    });
-  }
+        onSuccess({ current: current, hourly: hourly, daily: daily, source: "fallback25" });
+      }
 
-  function fetchSettled(promises) {
-    return Promise.all(promises.map(function (p) {
-      return p.then(function (v) { return { status: "fulfilled", value: v }; }).catch(function (e) { return { status: "rejected", reason: e }; });
-    }));
+      getJson(currentUrl, function (data) { currentData = data; currentOk = true; done(); }, function () { done(); });
+      getJson(forecastUrl, function (data) { forecastData = data; forecastOk = true; done(); }, function () { done(); });
+    });
   }
 
   function loadEnvironmentalMetrics() {
     var root = document.getElementById("live-weather-root");
 
-    fetchSettled([loadWeatherBundle(), loadAirNowCurrent(), loadAqiForecast(), loadUvFromOpenMeteo()]).then(function (results) {
-      var weatherRes = results[0], airNowRes = results[1], aqiForecastRes = results[2], uvRes = results[3];
+    var pending = 3;
+    var weatherBundle = null, weatherOk = false;
+    var airNowData = null, airNowOk = false;
+    var aqiForecastDays = null, aqiForecastOk = false;
+    var uvData = null, uvOk = false;
+
+    function checkDone() {
+      pending--;
+      if (pending > 0) { return; }
+
       var html = "";
 
-      if (weatherRes.status === "fulfilled") {
-        var bundle = weatherRes.value;
-        if ((bundle.current.uvi === null || bundle.current.uvi === undefined) && uvRes.status === "fulfilled" && uvRes.value.currentUvi !== null) {
-          bundle.current.uvi = uvRes.value.currentUvi;
+      if (weatherOk) {
+        if ((weatherBundle.current.uvi === null || weatherBundle.current.uvi === undefined) && uvOk && uvData.currentUvi !== null) {
+          weatherBundle.current.uvi = uvData.currentUvi;
         }
-        html += '<div class="success-banner">Live conditions synced (' + (bundle.source === "onecall" ? "OpenWeatherMap One Call" : "OpenWeatherMap 2.5") + ')</div>';
-        html += renderCurrentConditions(bundle.current, airNowRes.status === "fulfilled" ? airNowRes.value : null);
-        html += renderHourly(bundle.hourly);
-        html += renderDailyForecast(bundle.daily);
+        html += '<div class="success-banner">Live conditions synced (' + (weatherBundle.source === "onecall" ? "OpenWeatherMap One Call" : "OpenWeatherMap 2.5") + ' + AirNow)</div>';
+        html += renderCurrentConditions(weatherBundle.current, airNowOk ? airNowData : null);
+        html += renderHourly(weatherBundle.hourly);
+        html += renderDailyForecast(weatherBundle.daily);
       } else {
         html += '<div class="alert-banner">Couldn\'t load current weather right now.</div>';
       }
 
-      if (aqiForecastRes.status === "fulfilled") {
-        html += renderAqiForecast(aqiForecastRes.value);
+      if (aqiForecastOk) {
+        html += renderAqiForecast(aqiForecastDays);
       } else {
         html += '<div class="alert-banner">Couldn\'t load the 3-day AQI forecast right now.</div>';
       }
 
       root.innerHTML = html;
-    });
+
+      var stamp = document.getElementById("last-updated");
+      if (stamp) {
+        stamp.innerText = "Last updated " + fmtClock(Math.floor(new Date().getTime() / 1000));
+      }
+    }
+
+    loadWeatherBundle(function (bundle) {
+      weatherBundle = bundle; weatherOk = true; checkDone();
+    }, function () { checkDone(); });
+
+    loadAirNowCurrent(function (data) {
+      airNowData = data; airNowOk = true;
+      checkDone();
+    }, function () { checkDone(); });
+
+    loadAqiForecast(function (days) {
+      aqiForecastDays = days; aqiForecastOk = true; checkDone();
+    }, function () { checkDone(); });
+
+    loadUvFromOpenMeteo(function (data) {
+      uvData = data; uvOk = true;
+    }, function () {});
   }
 
-  window.addEventListener("DOMContentLoaded", function () {
-    initMap();
+  function init() {
     loadEnvironmentalMetrics();
     setInterval(loadEnvironmentalMetrics, 15 * 60 * 1000);
 
     var btn = document.getElementById("weather-refresh-btn");
-    if (btn) { btn.onclick = function () { loadEnvironmentalMetrics(); }; }
-  });
+    if (btn) {
+      btn.onclick = function () { loadEnvironmentalMetrics(); };
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
 </script>
 
 </body>
