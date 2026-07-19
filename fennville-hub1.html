@@ -208,10 +208,10 @@
   function updateCountdowns() {
     var targetCheckIn = new Date("2026-07-18T16:00:00-04:00");
     var targetCheckOut = new Date("2026-07-21T11:00:00-04:00");
-    var now = new Date();
+    var now = nowMs();
 
-    var diffIn = targetCheckIn - now;
-    var diffOut = targetCheckOut - now;
+    var diffIn = targetCheckIn.getTime() - now;
+    var diffOut = targetCheckOut.getTime() - now;
 
     var elIn = document.getElementById("countdown-in");
     var elOut = document.getElementById("countdown-out");
@@ -259,6 +259,16 @@
   var AIRNOW_KEY = '80781D70-714E-4225-977B-8E032C27AD62';
   var OWM_KEY = '95d28256d918534c0c26a5fb47fd0ab1';
 
+  // The device's own clock may be wrong (embedded/appliance clocks can drift or
+  // fail to sync). Once we get a real timestamp from a weather API response, we
+  // compute the offset between that and the device clock, and use the corrected
+  // time everywhere instead of trusting new Date() directly.
+  var timeOffsetMs = 0;
+  var timeOffsetKnown = false;
+  function nowMs() {
+    return new Date().getTime() + timeOffsetMs;
+  }
+
   var WEEKDAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   function fmtDayLabel(dateStr, idx) {
@@ -302,6 +312,27 @@
     if (uvi < 8) { return "High"; }
     if (uvi < 11) { return "Very High"; }
     return "Extreme";
+  }
+
+  var WEATHER_MAIN_EMOJI = {
+    Clear: "☀️",
+    Clouds: "☁️",
+    Rain: "🌧️",
+    Drizzle: "🌦️",
+    Thunderstorm: "⛈️",
+    Snow: "🌨️",
+    Mist: "🌫️",
+    Fog: "🌫️",
+    Haze: "🌫️",
+    Smoke: "🌫️",
+    Dust: "🌫️",
+    Sand: "🌫️",
+    Squall: "💨",
+    Tornado: "🌪️"
+  };
+  function owmEmoji(main) {
+    var e = WEATHER_MAIN_EMOJI[main];
+    return e ? e : "";
   }
 
   var WEATHER_CODES = {
@@ -380,6 +411,7 @@
     var html = "";
     html += '<div class="widget-row">';
     html += '<div class="widget-card"><span class="widget-label">Current Temp</span>';
+    html += '<div style="font-size:22px;margin:2px 0;">' + owmEmoji(current.main) + "</div>";
     html += '<div class="widget-val" style="font-size:24px;">' + Math.round(current.temp) + "&deg;F</div>";
     html += '<span class="widget-label" style="margin-top:4px;text-transform:none;font-weight:normal;">' + (current.description || "") + "</span></div>";
     html += '<div class="widget-card last"><span class="widget-label">Feels Like / Humidity</span>';
@@ -410,6 +442,7 @@
       cards +=
         '<div class="hour-card' + (i === n - 1 ? " last" : "") + '">' +
         '<span class="hour-time">' + fmtHourLabel(h.dt) + "</span>" +
+        '<span style="font-size:16px;display:block;margin:2px 0;">' + owmEmoji(h.main) + "</span>" +
         '<span class="hour-temp">' + Math.round(h.temp) + "&deg;</span>" +
         '<span class="hour-pop">' + popTxt + "</span>" +
         "</div>";
@@ -440,12 +473,14 @@
       return '<div style="font-size:12px;color:#5E5851;padding:6px 0;text-align:center;">Daily forecast unavailable.</div>';
     }
     var cards = "";
-    var i, label;
+    var i, label, emoji;
     for (i = 0; i < days.length; i++) {
-      label = weatherLabel(days[i].code);
+      label = days[i].main ? days[i].main : weatherLabel(days[i].code);
+      emoji = owmEmoji(days[i].main);
       cards +=
         '<div class="day-card' + (i === days.length - 1 ? " last" : "") + '">' +
         '<span class="day-name">' + days[i].label + "</span>" +
+        '<span style="font-size:20px;display:block;margin:3px 0;">' + emoji + "</span>" +
         '<span class="day-aqi" style="font-size:14px;">' + days[i].hi + "&deg; / " + days[i].lo + "&deg;</span>" +
         '<span style="font-size:9px;color:#5E5851;">' + label + (days[i].precip !== null && days[i].precip !== undefined ? " - " + days[i].precip + "%" : "") + "</span>" +
         "</div>";
@@ -524,7 +559,8 @@
           uvi: c.uvi,
           sunrise: c.sunrise,
           sunset: c.sunset,
-          description: (c.weather && c.weather[0]) ? c.weather[0].description : ""
+          description: (c.weather && c.weather[0]) ? c.weather[0].description : "",
+          main: (c.weather && c.weather[0]) ? c.weather[0].main : ""
         };
 
         var hourly = [];
@@ -533,7 +569,8 @@
           hourly.push({
             dt: data.hourly[i].dt,
             temp: data.hourly[i].temp,
-            pop: data.hourly[i].pop !== null && data.hourly[i].pop !== undefined ? data.hourly[i].pop * 100 : null
+            pop: data.hourly[i].pop !== null && data.hourly[i].pop !== undefined ? data.hourly[i].pop * 100 : null,
+            main: (data.hourly[i].weather && data.hourly[i].weather[0]) ? data.hourly[i].weather[0].main : ""
           });
         }
 
@@ -544,11 +581,12 @@
             code: null,
             hi: Math.round(data.daily[i].temp.max),
             lo: Math.round(data.daily[i].temp.min),
-            precip: data.daily[i].pop !== null && data.daily[i].pop !== undefined ? Math.round(data.daily[i].pop * 100) : null
+            precip: data.daily[i].pop !== null && data.daily[i].pop !== undefined ? Math.round(data.daily[i].pop * 100) : null,
+            main: (data.daily[i].weather && data.daily[i].weather[0]) ? data.daily[i].weather[0].main : ""
           });
         }
 
-        onSuccess({ current: current, hourly: hourly, daily: daily, source: "onecall" });
+        onSuccess({ current: current, hourly: hourly, daily: daily, source: "onecall", serverDt: c.dt });
       } catch (e) {
         onError("Parse error (One Call)");
       }
@@ -578,7 +616,8 @@
           uvi: null,
           sunrise: currentData.sys ? currentData.sys.sunrise : null,
           sunset: currentData.sys ? currentData.sys.sunset : null,
-          description: (currentData.weather && currentData.weather[0]) ? currentData.weather[0].description : ""
+          description: (currentData.weather && currentData.weather[0]) ? currentData.weather[0].description : "",
+          main: (currentData.weather && currentData.weather[0]) ? currentData.weather[0].main : ""
         };
 
         var hourly = [];
@@ -590,20 +629,28 @@
             hourly.push({
               dt: list[i].dt,
               temp: list[i].main.temp,
-              pop: list[i].pop !== null && list[i].pop !== undefined ? list[i].pop * 100 : null
+              pop: list[i].pop !== null && list[i].pop !== undefined ? list[i].pop * 100 : null,
+              main: (list[i].weather && list[i].weather[0]) ? list[i].weather[0].main : ""
             });
           }
           var byDate = {};
           var dateKeys = [];
           for (i = 0; i < list.length; i++) {
             var dateStr = new Date(list[i].dt * 1000).toISOString().split("T")[0];
+            var itemHour = new Date(list[i].dt * 1000).getHours();
+            var itemMain = (list[i].weather && list[i].weather[0]) ? list[i].weather[0].main : "";
             if (!byDate[dateStr]) {
-              byDate[dateStr] = { hi: list[i].main.temp_max, lo: list[i].main.temp_min, pop: list[i].pop || 0 };
+              byDate[dateStr] = { hi: list[i].main.temp_max, lo: list[i].main.temp_min, pop: list[i].pop || 0, main: itemMain, mainHourDist: Math.abs(itemHour - 14) };
               dateKeys.push(dateStr);
             } else {
               if (list[i].main.temp_max > byDate[dateStr].hi) { byDate[dateStr].hi = list[i].main.temp_max; }
               if (list[i].main.temp_min < byDate[dateStr].lo) { byDate[dateStr].lo = list[i].main.temp_min; }
               if (list[i].pop > byDate[dateStr].pop) { byDate[dateStr].pop = list[i].pop; }
+              // Prefer the condition closest to 2pm as representative of the day
+              if (Math.abs(itemHour - 14) < byDate[dateStr].mainHourDist) {
+                byDate[dateStr].main = itemMain;
+                byDate[dateStr].mainHourDist = Math.abs(itemHour - 14);
+              }
             }
           }
           for (i = 0; i < dateKeys.length && i < 3; i++) {
@@ -612,12 +659,13 @@
               code: null,
               hi: Math.round(byDate[dateKeys[i]].hi),
               lo: Math.round(byDate[dateKeys[i]].lo),
-              precip: Math.round(byDate[dateKeys[i]].pop * 100)
+              precip: Math.round(byDate[dateKeys[i]].pop * 100),
+              main: byDate[dateKeys[i]].main
             });
           }
         }
 
-        onSuccess({ current: current, hourly: hourly, daily: daily, source: "fallback25" });
+        onSuccess({ current: current, hourly: hourly, daily: daily, source: "fallback25", serverDt: currentData.dt });
       }
 
       getJson(currentUrl, function (data) { currentData = data; currentOk = true; done(); }, function () { done(); });
@@ -641,6 +689,11 @@
       var html = "";
 
       if (weatherOk) {
+        if (weatherBundle.serverDt) {
+          timeOffsetMs = (weatherBundle.serverDt * 1000) - new Date().getTime();
+          timeOffsetKnown = true;
+          updateCountdowns();
+        }
         if ((weatherBundle.current.uvi === null || weatherBundle.current.uvi === undefined) && uvOk && uvData.currentUvi !== null) {
           weatherBundle.current.uvi = uvData.currentUvi;
         }
@@ -662,7 +715,7 @@
 
       var stamp = document.getElementById("last-updated");
       if (stamp) {
-        stamp.innerText = "Last updated " + fmtClock(Math.floor(new Date().getTime() / 1000));
+        stamp.innerText = "Last updated " + fmtClock(Math.floor(nowMs() / 1000)) + (timeOffsetKnown ? "" : " (device clock, may be inaccurate)");
       }
     }
 
