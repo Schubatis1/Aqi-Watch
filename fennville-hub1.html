@@ -97,7 +97,7 @@
   .pane-sublist { margin: 6px 0 0 16px; padding: 0; font-size: 12px; color: #4A453F; }
   .pane-sublist li { margin-bottom: 3px; }
   .pane-unknown { color: #8C8880; font-style: italic; font-size: 11.5px; }
-  .pane-map-img { width: 100%; max-width: 320px; border: 1px solid #211E1C; margin-top: 4px; display: block; }
+  .pane-map-frame { width: 100%; max-width: 320px; height: 220px; border: 1px solid #211E1C; margin-top: 4px; display: block; }
 
   .link-chip { display: inline-block; background: transparent; border: 1px solid #211E1C; padding: 5px 9px; font-size: 11px; color: #211E1C; text-decoration: none; margin: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
 
@@ -400,7 +400,7 @@
       amenities: ["Full scratch kitchen", "16+ taps, cider and wine", "Outdoor patio dining", "Barrel Room games", "Brew-on-premise program"]
     },
     mitten: {
-      name: "The Mitten Brewing Company \\u2013 Saugatuck", cat: "Brewery / Pizzeria", drive: "~20 min (12.5 mi)",
+      name: "The Mitten Brewing Company – Saugatuck", cat: "Brewery / Pizzeria", drive: "~20 min (12.5 mi)",
       lat: 42.654, lon: -86.2025,
       address: "329 Water St, Saugatuck, MI 49453", phone: "(269) 455-5719",
       website: "https://www.mittenbrewing.com/saugatuck", tripadvisor: null,
@@ -580,7 +580,7 @@
       desc: "Rents classic, stylish boats out of Saugatuck \u2014 a relaxing way to spend an afternoon on the Kalamazoo River."
     },
     bluestarbarns: {
-      name: "Blue Star Barns \\u2013 Coffee & Bikes", cat: "Coffee Shop / Bike Hub", drive: "~15 min",
+      name: "Blue Star Barns – Coffee & Bikes", cat: "Coffee Shop / Bike Hub", drive: "~15 min",
       lat: 42.654, lon: -86.2025,
       address: "3483 Blue Star Hwy, Saugatuck, MI 49453", phone: "(269) 906-1265",
       website: "https://www.facebook.com/BlueStarBarns/", tripadvisor: null,
@@ -676,7 +676,7 @@
       desc: "The golf course property in Saugatuck. Public & member play."
     },
     clearbrookgrill: {
-      name: "Clearbrook Golf Club \\u2013 The Grill Room Restaurant", cat: "Restaurant", drive: "~15 min (10.3 mi)",
+      name: "Clearbrook Golf Club – The Grill Room Restaurant", cat: "Restaurant", drive: "~15 min (10.3 mi)",
       lat: 42.654, lon: -86.2025,
       address: null, phone: "(269) 857-2000",
       website: "http://www.clearbrookgolfclub.com/", tripadvisor: null,
@@ -684,7 +684,7 @@
       desc: "The restaurant located at Clearbrook Golf Club."
     },
     rootcafe: {
-      name: "Root Cafe \\u2013 Fennville", cat: "Cafe", drive: "~12 min (9.6 mi)",
+      name: "Root Cafe – Fennville", cat: "Cafe", drive: "~12 min (9.6 mi)",
       lat: 42.5975, lon: -86.103,
       address: null, phone: "(269) 512-1171",
       website: "http://www.rootfennville.com/", tripadvisor: null,
@@ -747,24 +747,23 @@
   var AIRBNB_LAT = 42.585;
   var AIRBNB_LON = -86.205;
 
-  function staticMapUrl(destLat, destLon) {
+  function padRange(a, b, minPad) {
+    var lo = a < b ? a : b;
+    var hi = a > b ? a : b;
+    var span = hi - lo;
+    var pad = span * 0.3;
+    if (pad < minPad) { pad = minPad; }
+    return [lo - pad, hi + pad];
+  }
+
+  function mapEmbedUrl(destLat, destLon) {
     if (destLat === null || destLat === undefined || destLon === null || destLon === undefined) {
       return null;
     }
-    var midLat = (AIRBNB_LAT + destLat) / 2;
-    var midLon = (AIRBNB_LON + destLon) / 2;
-    var dLat = Math.abs(AIRBNB_LAT - destLat);
-    var dLon = Math.abs(AIRBNB_LON - destLon);
-    var spread = dLat > dLon ? dLat : dLon;
-    var zoom = 14;
-    if (spread > 0.6) { zoom = 9; }
-    else if (spread > 0.3) { zoom = 10; }
-    else if (spread > 0.15) { zoom = 11; }
-    else if (spread > 0.07) { zoom = 12; }
-    else if (spread > 0.03) { zoom = 13; }
-    return "https://staticmap.openstreetmap.de/staticmap.php?center=" + midLat + "," + midLon +
-      "&zoom=" + zoom + "&size=320x200&maptype=mapnik&markers=" +
-      AIRBNB_LAT + "," + AIRBNB_LON + ",ol-marker-blue|" + destLat + "," + destLon + ",ol-marker";
+    var lonRange = padRange(AIRBNB_LON, destLon, 0.01);
+    var latRange = padRange(AIRBNB_LAT, destLat, 0.01);
+    var bbox = lonRange[0] + "," + latRange[0] + "," + lonRange[1] + "," + latRange[1];
+    return "https://www.openstreetmap.org/export/embed.html?bbox=" + bbox + "&layer=mapnik&marker=" + destLat + "," + destLon;
   }
 
   function paneRow(label, valueHtml) {
@@ -820,12 +819,12 @@
       html += '</ul></div>';
     }
 
-    var mapUrl = staticMapUrl(v.lat, v.lon);
+    var mapUrl = mapEmbedUrl(v.lat, v.lon);
     if (mapUrl) {
       html += '<div class="pane-row" style="margin-top:8px;">' +
-        '<span class="pane-label">Map (blue pin = Airbnb, red pin = ' + v.name + ')</span>' +
-        '<img src="' + mapUrl + '" alt="Map from Airbnb to ' + v.name + '" class="pane-map-img" />' +
-        '<span class="pane-drive" style="display:block;margin-top:3px;">Pin location is approximate \\u2014 use the address link above for exact directions.</span>' +
+        '<span class="pane-label">Map (pin = ' + v.name + '; your Airbnb is also visible in this view)</span>' +
+        '<iframe src="' + mapUrl + '" class="pane-map-frame" sandbox="allow-scripts" title="Map"></iframe>' +
+        '<span class="pane-drive" style="display:block;margin-top:3px;">Only the destination is pinned \u2014 use the address link above for turn-by-turn directions.</span>' +
         '</div>';
     }
 
