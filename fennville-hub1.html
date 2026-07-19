@@ -22,7 +22,8 @@
 
   .header { max-width: 1000px; margin: 0 auto; text-align: center; padding-bottom: 6px; }
   .section-divider { display: block; max-width: 420px; width: 70%; height: auto; margin: 4px auto 22px; }
-  .title-flourish { height: 14px; width: auto; vertical-align: middle; margin-left: 6px; }
+  .title-sun { height: 15px; width: 15px; vertical-align: middle; margin-left: 6px; }
+  .title-icon { height: 15px; width: 15px; vertical-align: middle; margin-left: 6px; }
   .eyebrow { font-family: 'Sacramento', cursive; font-size: 26px; color: #211E1C; margin: 0 0 -6px; font-weight: normal; }
   h1 { font-family: 'Cinzel', serif; font-size: 26px; margin: 0 0 8px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; }
   .sub { margin: 0; color: #4A453F; font-size: 13px; font-family: 'Libre Baskerville', serif; font-style: italic; }
@@ -36,15 +37,15 @@
   }
 
   .panel { background: #FCFBF7; border: 2px solid #211E1C; border-radius: 0; padding: 16px 14px 14px; margin-bottom: 16px; }
-  .panel-head { border-top: 3px double #211E1C; border-bottom: 3px double #211E1C; padding: 10px 0; margin-bottom: 12px; text-align: center; cursor: pointer; -webkit-user-select: none; user-select: none; }
+  .panel-head { border-top: 3px double #211E1C; border-bottom: 3px double #211E1C; padding: 10px 0; margin-bottom: 8px; text-align: center; cursor: pointer; -webkit-user-select: none; user-select: none; }
   .panel-title:before { content: "\2212 "; }
   .panel.is-collapsed .panel-head { margin-bottom: 0; }
   .panel.is-collapsed .panel-title:before { content: "+ "; }
   .panel.is-collapsed .panel-body { display: none; }
   .panel-head:after { content: ""; display: block; clear: both; }
   .panel-title { font-family: 'Cinzel', serif; font-size: 16px; margin: 0; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
-  .refresh-btn { background: #EBE7D3; border: 1px dashed #211E1C; color: #211E1C; padding: 5px 11px; font-size: 11px; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; margin-top: 8px; }
-  .last-updated { font-size: 10px; color: #5E5851; text-align: center; margin: 6px 0 10px; font-family: 'Montserrat', sans-serif; }
+  .refresh-btn { background: #EBE7D3; border: 1px dashed #211E1C; color: #211E1C; padding: 5px 11px; font-size: 11px; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; margin-top: 3px; }
+  .last-updated { font-size: 10px; color: #5E5851; text-align: center; margin: 2px 0 6px; font-family: 'Montserrat', sans-serif; }
 
   .widget-row:after { content: ""; display: block; clear: both; }
   .widget-row { margin-bottom: 12px; }
@@ -188,7 +189,7 @@
 
     <section class="panel" id="panel-weather">
       <div class="panel-head">
-        <h2 class="panel-title">Fennville Weather <img src="https://i.imgur.com/1c5XoPx_d.webp?maxwidth=1520&fidelity=grand" alt="" class="title-flourish" /></h2>
+        <h2 class="panel-title">Fennville Weather <svg class="title-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5" fill="#211E1C"/><g stroke="#211E1C" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/><line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/></g></svg></h2>
         <button class="refresh-btn" id="weather-refresh-btn">Refresh</button>
       </div>
       <div class="panel-body">
@@ -200,7 +201,7 @@
     </section>
 
     <section class="panel is-collapsed">
-      <div class="panel-head"><h2 class="panel-title">Cottage Rules</h2></div>
+      <div class="panel-head"><h2 class="panel-title">Cottage Rules <svg class="title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="3" x2="12" y2="21" stroke="#211E1C" stroke-width="1.6"/><line x1="5" y1="7" x2="19" y2="7" stroke="#211E1C" stroke-width="1.6"/><path d="M5 7 L2 13 A3 3 0 0 0 8 13 Z" fill="none" stroke="#211E1C" stroke-width="1.3"/><path d="M19 7 L16 13 A3 3 0 0 0 22 13 Z" fill="none" stroke="#211E1C" stroke-width="1.3"/><line x1="8" y1="21" x2="16" y2="21" stroke="#211E1C" stroke-width="1.6"/></svg></h2></div>
       <div class="panel-body">
       <div class="check-item">Please don't park on the grass - we have a sprinkler system. Park on the circular drive only.</div>
       <div class="check-item">Please keep the cottage locked when you are not there and when you check out.</div>
@@ -214,7 +215,7 @@
     </section>
 
     <section class="panel is-collapsed">
-      <div class="panel-head"><h2 class="panel-title">Check-out Checklist</h2></div>
+      <div class="panel-head"><h2 class="panel-title">Check-out Checklist <svg class="title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="2" width="16" height="20" rx="1" fill="none" stroke="#211E1C" stroke-width="1.4"/><rect x="9" y="1" width="6" height="3" rx="0.5" fill="#211E1C"/><path d="M7 9 l2 2 l4 -4" fill="none" stroke="#211E1C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="7" y1="15" x2="17" y2="15" stroke="#211E1C" stroke-width="1.2"/><line x1="7" y1="18" x2="14" y2="18" stroke="#211E1C" stroke-width="1.2"/></svg></h2></div>
       <div class="panel-body">
       <div class="check-item">Strip beds and place linens on the bedroom floor in each room.</div>
       <div class="check-item">Leave used bath towels in a pile on the bathroom floor.</div>
@@ -231,7 +232,7 @@
   <div class="colRight">
 
     <section class="panel is-collapsed">
-      <div class="panel-head"><h2 class="panel-title">Destination Inventory Hub</h2></div>
+      <div class="panel-head"><h2 class="panel-title">Local Favorites <svg class="title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 7h12v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" fill="none" stroke="#211E1C" stroke-width="1.5"/><path d="M16 9h2.5a2.5 2.5 0 0 1 0 5H16" fill="none" stroke="#211E1C" stroke-width="1.5"/><line x1="4" y1="7" x2="16" y2="7" stroke="#211E1C" stroke-width="1.5"/><path d="M6.5 7c-0.5-1.3 0.5-1.8 0-3.2" stroke="#211E1C" stroke-width="1.1" fill="none" stroke-linecap="round"/><path d="M10 7c-0.5-1.3 0.5-1.8 0-3.2" stroke="#211E1C" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg></h2></div>
       <div class="panel-body">
       <div class="route-section">
         <div class="route-title">Local Farms & Artisans</div>
@@ -309,7 +310,7 @@
     </section>
 
     <section class="panel is-collapsed">
-      <div class="panel-head"><h2 class="panel-title">Nearby Essentials</h2></div>
+      <div class="panel-head"><h2 class="panel-title">Nearby Essentials <svg class="title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 8h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8z" fill="none" stroke="#211E1C" stroke-width="1.5"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="#211E1C" stroke-width="1.5"/></svg></h2></div>
       <div class="panel-body">
       <div class="route-section" style="margin-bottom:0;">
         <button class="venue-btn" data-venue="glennstore">The Glenn Store</button>
