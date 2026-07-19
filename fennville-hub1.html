@@ -51,14 +51,52 @@
   .route-section { background: transparent; border: 1px solid #D1CDC1; padding: 10px; margin-bottom: 12px; text-align: center; }
   .route-title { font-family: 'Cinzel', serif; font-size: 12px; font-weight: bold; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #D1CDC1; padding-bottom: 6px; }
 
-  .venue-item { text-align: left; margin-bottom: 10px; }
-  .venue-item:last-child { margin-bottom: 0; }
-  .venue-name-link { font-weight: bold; color: #211E1C; text-decoration: none; border-bottom: 1px dashed #211E1C; font-size: 12.5px; }
-  .venue-drive { font-size: 10px; color: #5E5851; }
-  .venue-note { font-size: 11px; color: #4A453F; font-style: italic; margin: 2px 0 0; line-height: 1.4; }
-  .venue-sublist { margin: 4px 0 0 16px; padding: 0; font-size: 11px; color: #4A453F; }
-  .venue-sublist li { margin-bottom: 2px; }
-  .closed-tag { color: #8B2C24; font-weight: bold; font-size: 9px; text-transform: uppercase; margin-left: 5px; }
+  .venue-btn {
+    display: inline-block; background: transparent; border: 1px solid #211E1C;
+    padding: 5px 9px; font-size: 11px; color: #211E1C; margin: 2px;
+    text-transform: uppercase; letter-spacing: 0.3px; cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .venue-btn:hover { background: #211E1C; color: #F4F1E1; }
+  .venue-btn .btn-drive { font-size: 9px; color: #5E5851; text-transform: none; }
+  .venue-btn:hover .btn-drive { color: #D1CDC1; }
+  .venue-btn.is-closed { border-style: dashed; color: #8B2C24; border-color: #8B2C24; }
+  .venue-btn.is-closed:hover { background: #8B2C24; color: #F4F1E1; }
+
+  #pane-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(33,30,28,0.45); z-index: 900;
+  }
+  #detail-pane {
+    display: none; position: fixed; top: 0; right: 0; width: 88%; max-width: 380px;
+    height: 100%; background: #FCFBF7; border-left: 2px solid #211E1C;
+    z-index: 901; overflow-y: auto; padding: 18px 16px 30px;
+  }
+  #detail-pane.is-open, #pane-overlay.is-open { display: block; }
+  .pane-close {
+    float: right; background: #EBE7D3; border: 1px dashed #211E1C; color: #211E1C;
+    font-size: 14px; padding: 3px 9px; font-family: 'Courier New', Courier, monospace;
+  }
+  .pane-title {
+    font-family: 'Cinzel', serif; font-size: 17px; font-weight: bold; margin: 0 0 2px;
+    text-transform: uppercase; letter-spacing: 0.5px; padding-right: 46px; line-height: 1.25;
+  }
+  .pane-drive { font-size: 11px; color: #5E5851; margin: 0 0 10px; }
+  .pane-closed-banner {
+    border: 2px dashed #8B2C24; color: #8B2C24; padding: 7px; font-size: 11px;
+    text-align: center; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;
+  }
+  .pane-row { border-top: 1px solid #D1CDC1; padding: 8px 0; }
+  .pane-label {
+    font-size: 9px; color: #5E5851; text-transform: uppercase; letter-spacing: 1px;
+    display: block; margin-bottom: 3px; font-weight: bold;
+  }
+  .pane-val { font-size: 12.5px; color: #211E1C; font-family: 'Libre Baskerville', serif; line-height: 1.5; }
+  .pane-val a { color: #211E1C; }
+  .pane-desc { font-size: 12px; color: #4A453F; font-style: italic; line-height: 1.5; margin: 10px 0 0; }
+  .pane-sublist { margin: 6px 0 0 16px; padding: 0; font-size: 12px; color: #4A453F; }
+  .pane-sublist li { margin-bottom: 3px; }
+  .pane-unknown { color: #8C8880; font-style: italic; font-size: 11.5px; }
 
   .link-chip { display: inline-block; background: transparent; border: 1px solid #211E1C; padding: 5px 9px; font-size: 11px; color: #211E1C; text-decoration: none; margin: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
 
@@ -155,7 +193,7 @@
       <div class="check-item">Take the trash out into the bins near the road (pick-up day is Monday).</div>
       <div class="check-item">Clean all dishes/kitchen items and place them back where you found them.</div>
       <div class="check-item">Turn off all lights.</div>
-      <div class="check-item">Give Nana a big hug &#10084;&#65039;</div>
+      <div class="check-item">Give Nana a big hug !!!</div>
     </section>
 
   </div>
@@ -177,112 +215,33 @@
       <div class="panel-head"><h2 class="panel-title">Destination Inventory Hub</h2></div>
       <div class="route-section">
         <div class="route-title">Local Farms &amp; Artisans</div>
-        <a href="https://www.google.com/maps/search/?api=1&query=Fernwood+Farm+Fennville" target="_blank" class="link-chip">Fernwood Farm</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Evergreen+Lane+Goat+Farm+Fennville" target="_blank" class="link-chip">Evergreen Lane Goat Farm</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Bluestar+Farm+Fennville" target="_blank" class="link-chip">Bluestar Farm</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Cranes+Pie+Pantry+Fennville" target="_blank" class="link-chip">Cranes Apple Orchard</a>
+        <button class="venue-btn" data-venue="fernwood">Fernwood Farm</button>
+        <button class="venue-btn" data-venue="evergreen">Evergreen Lane Goat Farm</button>
+        <button class="venue-btn" data-venue="bluestar">Bluestar Farm</button>
+        <button class="venue-btn" data-venue="cranes">Cranes Apple Orchard</button>
       </div>
       <div class="route-section">
         <div class="route-title">Tasting Rooms &amp; Breweries</div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Waypost+Brewing+Company+Fennville" target="_blank" class="venue-name-link">Waypost Brewing Company</a> <span class="venue-drive">(10 min)</span>
-          <p class="venue-note">Farm brewery specializing in lagers and saisons with a beautiful berry-farm setting.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Guardian+Brewing+Company+Saugatuck" target="_blank" class="venue-name-link">Guardian Brewing Company</a> <span class="venue-drive">(15 min)</span><span class="closed-tag">Closed</span>
-          <p class="venue-note">Excellent beer, scratch kitchen, spacious outdoor seating. (Permanently closed &mdash; kept for reference.)</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Saugatuck+Brewing+Company+Douglas" target="_blank" class="venue-name-link">Saugatuck Brewing Company</a> <span class="venue-drive">(18 min)</span>
-          <p class="venue-note">Largest brewery in the area with a full restaurant and broad tap list.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=The+Mitten+Brewing+Company+Saugatuck" target="_blank" class="venue-name-link">The Mitten Brewing Company &ndash; Saugatuck</a> <span class="venue-drive">(20 min)</span>
-          <p class="venue-note">Downtown location known for gourmet pizzas and Michigan craft beer.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Three+Blondes+Brewing+South+Haven" target="_blank" class="venue-name-link">Three Blondes Brewing</a> <span class="venue-drive">(22 min)</span>
-          <p class="venue-note">Great food, creative beers, lively downtown atmosphere.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Big+Lake+Brewing+Holland" target="_blank" class="venue-name-link">Big Lake Brewing</a> <span class="venue-drive">(28&ndash;30 min)</span>
-          <p class="venue-note">One of West Michigan's best-known breweries with an extensive tap list.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Brewery+4+Two+4+Holland" target="_blank" class="venue-name-link">Brewery 4 Two 4</a> <span class="venue-drive">(~30 min)</span>
-          <p class="venue-note">Small neighborhood brewery with consistently excellent beer.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Hopland+Brewstillery+Holland" target="_blank" class="venue-name-link">Hopland Brewstillery</a> <span class="venue-drive">(~30 min)</span><span class="closed-tag">Closed</span>
-          <p class="venue-note">Brewery and distillery producing experimental beers and spirits. (Permanently closed &mdash; kept for reference.)</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Our+Brewing+Company+Holland" target="_blank" class="venue-name-link">Our Brewing Company</a> <span class="venue-drive">(~30 min)</span>
-          <p class="venue-note">Relaxed downtown taproom with rotating small-batch beers.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Rusty+Rocket+Brewing+Pullman" target="_blank" class="venue-name-link">Rusty Rocket Brewing</a>
-        </div>
+        <button class="venue-btn" data-venue="waypost">Waypost Brewing <span class="btn-drive">(10 min)</span></button>
+        <button class="venue-btn" data-venue="saugatuckbrew">Saugatuck Brewing <span class="btn-drive">(18 min)</span></button>
+        <button class="venue-btn" data-venue="mitten">Mitten Brewing <span class="btn-drive">(20 min)</span></button>
+        <button class="venue-btn" data-venue="threeblondes">Three Blondes <span class="btn-drive">(22 min)</span></button>
+        <button class="venue-btn" data-venue="biglake">Big Lake Brewing <span class="btn-drive">(28-30 min)</span></button>
+        <button class="venue-btn" data-venue="brewery424">Brewery 4 Two 4 <span class="btn-drive">(~30 min)</span></button>
+        <button class="venue-btn" data-venue="ourbrewing">Our Brewing Co. <span class="btn-drive">(~30 min)</span></button>
+        <button class="venue-btn" data-venue="rustyrocket">Rusty Rocket Brewing</button>
       </div>
       <div class="route-section">
         <div class="route-title">Best Playgrounds</div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=West+Side+County+Park+Fennville" target="_blank" class="venue-name-link">West Side County Park</a> <span class="venue-drive">(2&ndash;3 min)</span>
-          <ul class="venue-sublist">
-            <li>Large fenced playground</li>
-            <li>Lake Michigan beach</li>
-            <li>Two pavilions</li>
-            <li>Restrooms</li>
-            <li>Great sunset spot</li>
-          </ul>
-          <p class="venue-note">Excellent if you want kids to play and then head to the beach afterward.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Paradise+Park+Fennville" target="_blank" class="venue-name-link">Paradise Park</a> <span class="venue-drive">(10&ndash;12 min)</span>
-          <ul class="venue-sublist">
-            <li>Community playground</li>
-            <li>Walking path</li>
-            <li>Soccer fields</li>
-            <li>Baseball diamonds</li>
-            <li>Pavilion</li>
-          </ul>
-          <p class="venue-note">One of the nicest traditional neighborhood parks in Fennville.</p>
-        </div>
+        <button class="venue-btn" data-venue="westside">West Side County Park <span class="btn-drive">(2-3 min)</span></button>
+        <button class="venue-btn" data-venue="paradise">Paradise Park <span class="btn-drive">(10-12 min)</span></button>
       </div>
       <div class="route-section">
         <div class="route-title">Best Nature Parks</div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Pier+Cove+Park" target="_blank" class="venue-name-link">Pier Cove</a> <span class="venue-drive">(5 min)</span>
-          <ul class="venue-sublist">
-            <li>Small public beach</li>
-            <li>Creek flowing into Lake Michigan</li>
-            <li>Great for kids to splash where the creek meets the lake</li>
-            <li>Scenic bluff views</li>
-          </ul>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Wau-Ke-Na+Preserve+Fennville" target="_blank" class="venue-name-link">Wau-Ke-Na William Erby Smith Preserve</a> <span class="venue-drive">(5&ndash;8 min)</span>
-          <ul class="venue-sublist">
-            <li>Short trails through dunes</li>
-            <li>Access to secluded Lake Michigan shoreline</li>
-            <li>Dog friendly (leashed)</li>
-            <li>Two trail systems (North and South)</li>
-          </ul>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=New+Richmond+Bridge+Park" target="_blank" class="venue-name-link">New Richmond Bridge Park</a> <span class="venue-drive">(15 min)</span>
-          <ul class="venue-sublist">
-            <li>Historic swing bridge</li>
-            <li>Boardwalk along the Kalamazoo River</li>
-            <li>Fishing piers</li>
-            <li>Picnic area</li>
-            <li>Boat launch</li>
-          </ul>
-          <p class="venue-note">Fun if your kids like watching boats or trains.</p>
-        </div>
-        <div class="venue-item">
-          <a href="https://www.google.com/maps/search/?api=1&query=Oval+Beach+Saugatuck" target="_blank" class="venue-name-link">Oval Beach</a>
-        </div>
+        <button class="venue-btn" data-venue="piercove">Pier Cove <span class="btn-drive">(5 min)</span></button>
+        <button class="venue-btn" data-venue="waukena">Wau-Ke-Na Preserve <span class="btn-drive">(5-8 min)</span></button>
+        <button class="venue-btn" data-venue="newrichmond">New Richmond Bridge Park <span class="btn-drive">(15 min)</span></button>
+        <button class="venue-btn" data-venue="ovalbeach">Oval Beach</button>
       </div>
     </section>
 
@@ -301,9 +260,238 @@
   </div>
 </div>
 
+<div id="pane-overlay"></div>
+<div id="detail-pane">
+  <button class="pane-close" id="pane-close-btn">X</button>
+  <div id="pane-body"></div>
+</div>
+
 <footer>// Legacy-compatibility build for older browsers/embedded displays //</footer>
 
 <script>
+
+  // ---- Venue detail data ----
+  // Fields left as null are ones not verified from a reliable source; the pane
+  // shows a "not verified" note rather than displaying a guessed value.
+  var VENUES = {
+    fernwood: {
+      name: "Fernwood Farm (Khnemu Studio)", cat: "Local Farm / Pottery Studio", drive: "~10 min (6.5 mi)",
+      address: "6322 113th Ave, Fennville, MI 49408", phone: "(269) 686-6343",
+      website: "https://khnemustudio.com/", tripadvisor: null,
+      hours: "Wed-Sun 10:00am-5:00pm (June-Oct; check off-season)",
+      desc: "A restored 1890s estate that functions as a solar-powered pottery studio and gallery. Browse handmade ceramics, explore the 30-acre farm, and visit the resident peacocks and alpacas."
+    },
+    evergreen: {
+      name: "Evergreen Lane Farm & Creamery", cat: "Local Farm / Creamery", drive: "~8 min (5 mi)",
+      address: "1824 66th St, Fennville, MI 49408", phone: "(269) 686-6474",
+      website: "https://evergreenlanefarm.com/", tripadvisor: null,
+      hours: "Tue-Sat 12:00pm-5:00pm",
+      desc: "Organic creamery producing goat and cow's milk cheeses, next to a seasonal apple orchard. The on-site goat herd is friendly and interactive \u2014 always a hit with kids."
+    },
+    bluestar: {
+      name: "Blue Star Farms", cat: "Local Farm (Blueberries)", drive: "~11 min (6.5 mi)",
+      address: "2647 68th St, Fennville, MI 49408", phone: "(269) 543-4105",
+      website: "https://www.holland.org/listing/blue-star-blueberries", tripadvisor: null,
+      hours: "Daily 9:00am-6:00pm (July 4 - Labor Day)",
+      desc: "Family-owned farm offering u-pick and pre-picked blueberries. The farm store stocks blueberry jams, syrups, and baking mixes."
+    },
+    cranes: {
+      name: "Crane's Pie Pantry Restaurant & Winery", cat: "Orchard / Restaurant / Winery", drive: "~14 min (9.5 mi)",
+      address: "6054 124th Ave, Fennville, MI 49408", phone: "(269) 561-2297",
+      website: "https://cranespiepantry.com/", tripadvisor: null,
+      hours: "Daily 9:00am-6:00pm",
+      desc: "A Michigan staple combining a bakery, restaurant, and winery. Known for traditional fruit pies, small-batch hard cider, and a vintage agricultural atmosphere \u2014 expect a wait on fall weekends."
+    },
+
+    waypost: {
+      name: "Waypost Brewing Company", cat: "Brewery", drive: "~10 min (6.5 mi)",
+      address: "1630 65th St, Fennville, MI 49408", phone: "(269) 496-5096",
+      website: "https://waypostbrewing.com/", tripadvisor: null,
+      hours: "Thu-Mon 12:00pm-7:00pm",
+      desc: "A true farm brewery specializing in crisp lagers and farmhouse saisons, set on a working berry farm with expansive outdoor seating."
+    },
+    saugatuckbrew: {
+      name: "Saugatuck Brewing Company", cat: "Brewery", drive: "~16 min (11 mi)",
+      address: "2948 Blue Star Hwy, Douglas, MI 49406", phone: "(269) 857-7222",
+      website: "https://www.saugatuckbrewing.com/", tripadvisor: null,
+      hours: "Sun-Thu 11:30am-8:00pm; Fri-Sat 11:30am-9:00pm",
+      desc: "The largest brewery in the immediate area. Massive tap list of classic and experimental beers, a full scratch kitchen, and ample seating (including the games-focused Barrel Room).",
+      amenities: ["Full scratch kitchen", "16+ taps, cider and wine", "Outdoor patio dining", "Barrel Room games", "Brew-on-premise program"]
+    },
+    mitten: {
+      name: "The Mitten Brewing Company \u2013 Saugatuck", cat: "Brewery / Pizzeria", drive: "~20 min (12.5 mi)",
+      address: "329 Water St, Saugatuck, MI 49453", phone: "(269) 455-5719",
+      website: "https://www.mittenbrewing.com/saugatuck", tripadvisor: null,
+      hours: "Daily 11:30am-9:00pm",
+      desc: "A baseball-themed Michigan microbrewery right in downtown Saugatuck. Highly regarded for artisan pizzas paired with craft ales.",
+      amenities: ["Wraparound deck", "Picnic tables", "Fire pit", "Takeout available (good for beach picnics)"]
+    },
+    threeblondes: {
+      name: "Three Blondes Brewing", cat: "Brewery / Restaurant", drive: "~18 min (11.5 mi)",
+      address: "1875 Phoenix St, South Haven, MI 49090", phone: "(269) 872-3911",
+      website: "https://www.threeblondesbrewing.com/", tripadvisor: null,
+      hours: "Sun-Thu 11:00am-9:00pm; Fri-Sat 11:00am-10:00pm",
+      desc: "Family-friendly microbrewery on the edge of South Haven. Great food, creative beers, lively atmosphere.",
+      amenities: ["Large outdoor patio + outdoor bar", "Kids menu, high chairs, changing tables", "Mini arcade upstairs", "Gluten-free, vegetarian, and vegan options", "No dogs (no health-code variance)"]
+    },
+    biglake: {
+      name: "Big Lake Brewing", cat: "Brewery", drive: "~35 min (25 mi)",
+      address: "13 W 7th St, Holland, MI 49423", phone: "(616) 796-8888",
+      website: "https://biglakebrewing.com/", tripadvisor: null,
+      hours: "Sun-Thu 11:00am-10:00pm; Fri-Sat 11:00am-11:00pm",
+      desc: "One of West Michigan's best-known breweries, with an extensive tap list and a great downtown Holland patio.",
+      amenities: ["Downtown Holland location", "Outdoor seating", "Good for kids", "Full menu"]
+    },
+    brewery424: {
+      name: "Brewery 4 Two 4", cat: "Brewery", drive: "~35 min (27 mi)",
+      address: "321 Douglas Ave #120, Holland, MI 49424", phone: "(616) 377-7773",
+      website: "https://brewery4two4.square.site/", tripadvisor: null,
+      hours: "Mon-Thu 3:00pm-10:00pm; Fri 2:00pm-11:00pm; Sat 12:00pm-11:00pm; Sun 1:00pm-8:00pm",
+      desc: "A small, welcoming neighborhood brewery on Holland's north side with consistently excellent beer and a low-key atmosphere.",
+      amenities: ["Pales, IPAs, saisons, stouts, barrel-aged", "Deli menu with local ingredients", "Neighborhood taproom feel"]
+    },
+    ourbrewing: {
+      name: "Our Brewing Company", cat: "Nano-brewery", drive: "~35 min (25 mi)",
+      address: "76 E 8th St, Holland, MI 49423", phone: "(616) 994-8417",
+      website: "https://www.ourbrewingcompany.com/", tripadvisor: null,
+      hours: "Tue-Sat 2:00pm-12:00am; Sun-Mon 2:00pm-10:00pm",
+      desc: "Relaxed downtown Holland taproom, open since 2012. Small batches with local ingredients and unusual names. Bring-your-own-food policy from neighboring restaurants.",
+      amenities: ["Front and back patios", "Trivia and board games", "Beer, wine, cider, cocktails", "Bring your own food"]
+    },
+    rustyrocket: {
+      name: "Rusty Rocket Brewing", cat: "Brewery", drive: "~25 min (18 mi)",
+      address: "790 53rd St, Pullman, MI 49450", phone: "(269) 637-5252",
+      website: "https://rustyrocketbrewing.com/", tripadvisor: null,
+      hours: "Fri-Sat 12:00pm-9:00pm; Sun 12:00pm-6:00pm",
+      desc: "A community-focused brewery built out of a passion for homebrewing. Laid-back vibe, highly creative rotating taps."
+    },
+
+    westside: {
+      name: "West Side County Park", cat: "Playground / Beach", drive: "~2 min drive / 10 min walk (0.5 mi)",
+      address: "2152 Lakeshore Dr, Fennville, MI 49408", phone: null,
+      website: "https://alleganparks.org/", tripadvisor: null,
+      hours: "Daily 8:00am-10:00pm",
+      desc: "11 acres with 630 feet of sandy Lake Michigan beach and dune stairways. Excellent if you want kids to play and then head to the beach afterward.",
+      amenities: ["Large fenced playground", "Lake Michigan beach", "Two pavilions", "Restrooms", "Great sunset spot"]
+    },
+    paradise: {
+      name: "Paradise Park", cat: "Community Park", drive: "~12 min (7.5 mi)",
+      address: null, phone: null, website: "https://www.fennville.gov/parksandrec", tripadvisor: null,
+      hours: "Dawn to Dusk",
+      desc: "One of the nicest traditional neighborhood parks in Fennville \u2014 community playground, walking paths, soccer fields, and baseball diamonds. Note: an address of 4851 M-89 was suggested for this venue, but that appears to actually be a separate go-kart/mini-golf entertainment complex also named \u201cParadise Park.\u201d The neighborhood park described here is one of Fennville's own city parks \u2014 confirm the address with the city recreation page before heading out.",
+      amenities: ["Community playground", "Walking path", "Soccer fields", "Baseball diamonds", "Pavilion"]
+    },
+
+    piercove: {
+      name: "Pier Cove Park", cat: "Nature Park / Beach", drive: "~3 min (1 mi)",
+      address: "2290 Lakeshore Dr, Fennville, MI 49408", phone: null,
+      website: "https://www.gangesmi.org/", tripadvisor: null,
+      hours: "Daily 8:00am-10:00pm",
+      desc: "A small, scenic public beach where a shallow creek flows into Lake Michigan \u2014 great bluff views and a perfect wading spot for kids.",
+      amenities: ["Small public beach", "Creek flowing into Lake Michigan", "Great for kids to splash", "Scenic bluff views"]
+    },
+    waukena: {
+      name: "Wau-Ke-Na (William Erby Smith Preserve)", cat: "Nature Preserve", drive: "~2 min (0.8 mi)",
+      address: "2197 Lakeshore Dr, Fennville, MI 49408", phone: null,
+      website: "https://www.swmlc.org/", tripadvisor: null,
+      hours: "Dawn to Dusk",
+      desc: "Two distinct trail systems (North and South) winding through the dunes down to secluded Lake Michigan shoreline access. Leashed dogs welcome.",
+      amenities: ["Short trails through dunes", "Access to secluded Lake Michigan shoreline", "Dog friendly (leashed)", "Two trail systems (North and South)"]
+    },
+    newrichmond: {
+      name: "New Richmond Bridge Park", cat: "Historic / Nature Park", drive: "~15 min (10 mi)",
+      address: "3160 Old Allegan Rd, Fennville, MI 49408", phone: null,
+      website: "https://www.allegancounty.org/", tripadvisor: null,
+      hours: "Daily 8:00am-10:00pm",
+      desc: "Centered on a fully restored 400-foot swing bridge over the Kalamazoo River (built 1879, National Register of Historic Places). A parallel railroad bridge sees 30-40 trains a day \u2014 fun if your kids like watching boats or trains.",
+      amenities: ["Historic swing bridge", "Boardwalk along the river", "Fishing piers", "Picnic area", "Boat launch"]
+    },
+    ovalbeach: {
+      name: "Oval Beach", cat: "Beach", drive: "~25 min (14 mi)",
+      address: "690 Perryman St, Saugatuck, MI 49453", phone: null,
+      website: "https://www.saugatuckcity.com/", tripadvisor: null,
+      hours: "Daily 8:00am-10:00pm",
+      desc: "Consistently rated one of the best beaches in the country \u2014 towering sand dunes, soft sand, and excellent swimming conditions. Paid parking in season; busy on summer weekends."
+    }
+  };
+
+  function mapsUrl(address) {
+    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address);
+  }
+
+  function paneRow(label, valueHtml) {
+    return '<div class="pane-row"><span class="pane-label">' + label + '</span><div class="pane-val">' + valueHtml + '</div></div>';
+  }
+
+  function openVenuePane(key) {
+    var v = VENUES[key];
+    if (!v) { return; }
+
+    var html = "";
+    html += '<h3 class="pane-title">' + v.name + '</h3>';
+    html += '<p class="pane-drive">' + v.cat + (v.drive ? " &middot; " + v.drive + " from the Airbnb" : "") + '</p>';
+
+    if (v.closed) {
+      html += '<div class="pane-closed-banner">Permanently Closed</div>';
+    }
+
+    html += paneRow("Address", v.address
+      ? '<a href="' + mapsUrl(v.address) + '" target="_blank">' + v.address + '</a>'
+      : '<span class="pane-unknown">Not listed</span>');
+
+    html += paneRow("Hours", v.hours
+      ? v.hours
+      : '<span class="pane-unknown">Not verified \u2014 check the website or call ahead</span>');
+
+    html += paneRow("Phone", v.phone
+      ? '<a href="tel:' + v.phone.replace(/[^0-9]/g, "") + '">' + v.phone + '</a>'
+      : '<span class="pane-unknown">Not verified</span>');
+
+    html += paneRow("Website", v.website
+      ? '<a href="' + v.website + '" target="_blank">' + v.website.replace("https://", "").replace("http://", "") + '</a>'
+      : '<span class="pane-unknown">Not verified</span>');
+
+    html += paneRow("TripAdvisor", v.tripadvisor
+      ? '<a href="' + v.tripadvisor + '" target="_blank">View reviews</a>'
+      : '<a href="https://www.tripadvisor.com/Search?q=' + encodeURIComponent(v.name) + '" target="_blank">Search TripAdvisor</a>');
+
+    if (v.desc) {
+      html += '<p class="pane-desc">' + v.desc + '</p>';
+    }
+
+    if (v.amenities && v.amenities.length) {
+      html += '<div class="pane-row" style="margin-top:8px;"><span class="pane-label">Amenities</span><ul class="pane-sublist">';
+      var i;
+      for (i = 0; i < v.amenities.length; i++) {
+        html += '<li>' + v.amenities[i] + '</li>';
+      }
+      html += '</ul></div>';
+    }
+
+    document.getElementById("pane-body").innerHTML = html;
+    document.getElementById("detail-pane").className = "is-open";
+    document.getElementById("pane-overlay").className = "is-open";
+    document.getElementById("detail-pane").scrollTop = 0;
+  }
+
+  function closeVenuePane() {
+    document.getElementById("detail-pane").className = "";
+    document.getElementById("pane-overlay").className = "";
+  }
+
+  function initVenuePane() {
+    var btns = document.querySelectorAll(".venue-btn");
+    var i;
+    for (i = 0; i < btns.length; i++) {
+      btns[i].onclick = (function (btn) {
+        return function () { openVenuePane(btn.getAttribute("data-venue")); };
+      })(btns[i]);
+    }
+    var closeBtn = document.getElementById("pane-close-btn");
+    if (closeBtn) { closeBtn.onclick = closeVenuePane; }
+    var overlay = document.getElementById("pane-overlay");
+    if (overlay) { overlay.onclick = closeVenuePane; }
+  }
 
   function updateCountdowns() {
     var targetCheckIn = new Date("2026-07-18T16:00:00-04:00");
@@ -838,6 +1026,7 @@
   }
 
   function init() {
+    initVenuePane();
     loadEnvironmentalMetrics();
     setInterval(loadEnvironmentalMetrics, 15 * 60 * 1000);
 
