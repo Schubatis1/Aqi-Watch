@@ -9,8 +9,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="Fennville Hub" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+<!-- Leaflet CSS for Interactive Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
 <style>
-  /* Importing vintage-inspired fonts: a script, a sturdy serif, and a clean sans-serif */
+  /* Vintage-inspired fonts */
   @import url('https://fonts.googleapis.com/css2?family=Sacramento&family=Cinzel:wght@600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;600&display=swap');
 
   * { box-sizing: border-box; }
@@ -33,13 +37,22 @@
   @media (min-width: 600px) { h1 { font-size: 46px; } }
   .sub { margin: 0 auto; color: #4A453F; max-width: 55ch; font-size: 15px; font-family: 'Libre Baskerville', serif; font-style: italic; }
 
-  /* Flex Layout (2016 compatible) */
-  .flex-container { max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; margin-left: -10px; margin-right: -10px; }
-  .col-left, .col-right { width: 100%; padding: 0 10px; margin-bottom: 20px; }
+  /* Flex Layout Fixed for Centering */
+  .flex-container { 
+    max-width: 1000px; 
+    margin: 0 auto; 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; /* Centers items horizontally */
+  }
+  .col-left, .col-right, .col-full { 
+    width: 100%; 
+    padding: 10px; 
+  }
   
   @media (min-width: 850px) { 
-    .col-left { width: 55%; margin-bottom: 0; } 
-    .col-right { width: 45%; margin-bottom: 0; } 
+    .col-left { width: 50%; } /* Perfect 50/50 split for balance */
+    .col-right { width: 50%; } 
   }
 
   /* Panels (Signage style) */
@@ -47,10 +60,9 @@
     background: #FCFBF7; 
     border: 2px solid #211E1C; 
     padding: 24px 20px 20px; 
-    margin-bottom: 24px; 
-    box-shadow: 4px 4px 0px rgba(33, 30, 28, 0.1); /* Hard shadow for physical card look */
+    margin-bottom: 10px; 
+    box-shadow: 4px 4px 0px rgba(33, 30, 28, 0.1); 
   }
-  .panel:last-child { margin-bottom: 0; }
   
   .panel-head { 
     margin-bottom: 20px; 
@@ -119,7 +131,7 @@
     margin: 0 0 10px; 
     text-transform: uppercase; 
     letter-spacing: 1px; 
-    color: #211E1C !important; /* Overriding previous inline colors for a uniform stamp look */
+    color: #211E1C !important;
     border-bottom: 1px solid #D1CDC1;
     padding-bottom: 8px;
   }
@@ -176,6 +188,15 @@
   .alert-banner { background: transparent; border: 2px dashed #8B2C24; color: #8B2C24; padding: 12px; font-size: 13px; margin-bottom: 16px; line-height: 1.4; text-align: center; font-weight: bold; }
   .success-banner { background: transparent; border: 1px solid #211E1C; border-top: 3px solid #211E1C; color: #211E1C; padding: 10px; font-size: 11px; font-family: 'Montserrat', sans-serif; text-align: center; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
 
+  /* Map Container */
+  #map { 
+    height: 400px; 
+    width: 100%; 
+    border: 2px solid #211E1C; 
+    z-index: 1; /* prevents overlapping header issues */
+  }
+  .leaflet-popup-content-wrapper { border-radius: 0; font-family: 'Montserrat', sans-serif; }
+  
   .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #5E5851; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; letter-spacing: 1px; }
 </style>
 </head>
@@ -231,36 +252,38 @@
       </div>
     </section>
 
-    <!-- House Rules & Operational Knowledge -->
+    <!-- House Rules Panel -->
     <section class="panel">
       <div class="panel-head">
-        <h2 class="panel-title">House Rules & Quirks</h2>
+        <h2 class="panel-title">Cottage Rules</h2>
       </div>
-      <div class="check-item"><input type="checkbox"> <span><strong>Driveway Only:</strong> Park exclusively on the circular drive. No grass parking (underground sprinkler hazard).</span></div>
-      <div class="check-item"><input type="checkbox"> <span><strong>Septic Safe:</strong> Absolutely nothing down toilets except toilet paper. Old farm plumbing.</span></div>
-      <div class="check-item"><input type="checkbox"> <span><strong>Counters:</strong> Never chop straight on counter surfaces. Use provided cutting boards.</span></div>
-      <div class="check-item"><input type="checkbox"> <span><strong>Porch Windows:</strong> Do not open screened porch frames; mechanisms are incredibly delicate.</span></div>
-      <div class="check-item"><input type="checkbox"> <span><strong>Loft Restriction:</strong> Zero playing or sleeping permitted on the loft access ladder.</span></div>
-      <div class="check-item"><input type="checkbox"> <span><strong>Out of Bounds:</strong> Basement and barn structures are entirely off-limits.</span></div>
-      <div class="check-item"><input type="checkbox"> <span><strong>Quiet Windows:</strong> Local municipal noise ordinances enforced 10 PM – 7 AM.</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please don't park on the grass as we have a sprinkler system that will get damaged, park on the circular drive only</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please keep the cottage locked when you are not there and when you check-out</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please do not move furniture into other locations and return any items used into the location you found them</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please do not cut anything directly on the counters, use a cutting board</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please do not open the windows in the screened porch, they are delicate and can break easily</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please do not flush anything items besides TP down the toilet (we have a septic system)</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please do not smoke or invite any furry friends in the cottage</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please don’t let kids sleep on the loft or play on the ladder</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please don’t go into the basement or barn</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Please be respectful of our neighbors, quiet time is from 10pm to 7am in our neighborhood</span></div>
     </section>
 
     <!-- Checkout Protocol Panel -->
     <section class="panel">
       <div class="panel-head">
-        <h2 class="panel-title">Checkout Checklist (Strict 11 AM)</h2>
+        <h2 class="panel-title">Check-out Checklist</h2>
       </div>
-      <p style="font-size: 13px; color: #4A453F; margin: -10px 0 16px 0; font-style: italic; text-align: center;">Cleaner has a tight turnaround window. Please execute the following before turning keys:</p>
-      <div class="check-item"><input type="checkbox"> <span>Strip beds completely.</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Consolidate and pile dirty towels onto bathroom floors.</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Clear out all customized food items from the refrigerator and freezer units.</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Ensure all kitchen dishes are thoroughly cleaned.</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Haul all indoor trash out to the exterior roll bins <strong>(Trash day is Monday morning)</strong>.</span></div>
-      <div class="check-item"><input type="checkbox"> <span>Kill all internal overhead lights and securely lock all exterior escape thresholds.</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Strip beds and place linens on the bedroom floor in each room</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Leave used bath towels in a pile on the bathroom floor</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Clean out fridge/freezer and dispose of your items</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Take the trash out into the bins and keep them near the road (pick-up day is Monday)</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Clean all dishes/ kitchen items and place them back where you found them</span></div>
+      <div class="check-item"><input type="checkbox"> <span>Turn off all lights</span></div>
     </section>
   </div>
 
-  <!-- RIGHT COLUMN: ROUTES, EXPERIENCES, & LIVE ENVIRO DATA -->
+  <!-- RIGHT COLUMN: WEATHER, DESTINATIONS & MISC -->
   <div class="col-right">
 
     <!-- Live Environmental Conditions -->
@@ -270,34 +293,6 @@
       </div>
       <div id="live-weather-root">
         <p style="font-size:12px; color:#5E5851; text-align:center; font-style:italic;">Querying Atmospheric Systems...</p>
-      </div>
-    </section>
-
-    <!-- The Transit Route Plan & Stops -->
-    <section class="panel">
-      <div class="panel-head">
-        <h2 class="panel-title">Route Options & Planned Stops</h2>
-      </div>
-
-      <div class="route-section">
-        <div class="route-title">Lansing Route (Outdoor Focus)</div>
-        <a href="https://www.google.com/maps/search/?api=1&query=Horrocks+Farm+Market+Lansing" target="_blank" class="link-chip">Horrocks Market (7a-10p)</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Old+Nation+Brewing+Williamston" target="_blank" class="link-chip">Old Nation Brewing</a>
-      </div>
-
-      <div class="route-section">
-        <div class="route-title">Portage Route (Indoor Safe Alternatives)</div>
-        <a href="https://www.google.com/maps/search/?api=1&query=Air+Zoo+Portage+MI" target="_blank" class="link-chip">Air Zoo Aerospace ($19.50)</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=One+Well+Brewing+Kalamazoo" target="_blank" class="link-chip">One Well Brewing</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Latitude+42+Brewing+Portage" target="_blank" class="link-chip">Latitude 42</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Presidential+Brewing+Portage" target="_blank" class="link-chip">Presidential Brewing</a>
-      </div>
-
-      <div class="route-section">
-        <div class="route-title">Grand Rapids Route (Scenery & Culture)</div>
-        <a href="https://www.google.com/maps/search/?api=1&query=Frederik+Meijer+Gardens+Grand+Rapids" target="_blank" class="link-chip">Meijer Gardens ($25.00)</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Brewery+Vivant+Grand+Rapids" target="_blank" class="link-chip">Brewery Vivant</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=The+Mitten+Brewing+Grand+Rapids" target="_blank" class="link-chip">Mitten Brewing Co.</a>
       </div>
     </section>
 
@@ -311,7 +306,7 @@
         <div class="route-title">Local Farms & Artisans</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Fernwood+Farm+Fennville" target="_blank" class="link-chip">Fernwood Farm</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Evergreen+Lane+Goat+Farm+Fennville" target="_blank" class="link-chip">Evergreen Lane Goat Farm</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Bluestar+Farm+Fennville" target="_blank" class="link-chip">Bluestar Farm (Blueberries)</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=Bluestar+Farm+Fennville" target="_blank" class="link-chip">Bluestar Farm</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Cranes+Pie+Pantry+Fennville" target="_blank" class="link-chip">Cranes Apple Orchard</a>
       </div>
 
@@ -319,28 +314,42 @@
         <div class="route-title">Tasting Rooms & Breweries</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Modales+Wines+Fennville" target="_blank" class="link-chip">Modales Wines</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Michigan+Wine+Company+Fennville" target="_blank" class="link-chip">Michigan Wine Co.</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Fenn+Valley+Vineyards" target="_blank" class="link-chip">Fennville Winery</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Rusty+Rocket+Brewing+Pullman" target="_blank" class="link-chip">Rusty Rocket Brewing</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Three+Blondes+Brewing+South+Haven" target="_blank" class="link-chip">3 Blondes Brewing</a>
       </div>
 
       <div class="route-section">
         <div class="route-title">Shorelines & Preservation Beaches</div>
         <a href="https://www.google.com/maps/search/?api=1&query=Wau-Ke-Na+Preserve" target="_blank" class="link-chip">Wau-Ke-Na Preserve</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Westside+County+Park+Fennville" target="_blank" class="link-chip">Westside County Park</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Pier+Cove+Park" target="_blank" class="link-chip">Pier Cove</a>
         <a href="https://www.google.com/maps/search/?api=1&query=Oval+Beach+Saugatuck" target="_blank" class="link-chip">Oval Beach</a>
-      </div>
-
-      <div class="route-section">
-        <div class="route-title">Family & Rainy Day Kids Activities</div>
-        <a href="https://expressyourselfartbarn.com/" target="_blank" class="link-chip">Express Yourself Art Barn</a>
-        <a href="https://www.mittenmuseum.com/" target="_blank" class="link-chip">Mitten Museum</a>
-        <a href="https://hollandaquatic.org/" target="_blank" class="link-chip">Holland Aquatic Center</a>
-        <a href="https://www.rocketarcade.com/" target="_blank" class="link-chip">Rocket Arcade</a>
       </div>
     </section>
 
+    <!-- Misc / Nearby Section -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Nearby Essentials</h2>
+      </div>
+      <div class="route-section" style="margin-bottom: 0;">
+        <a href="https://www.google.com/maps/search/Urgent+Care" target="_blank" class="link-chip">Nearest Urgent Care</a>
+        <a href="https://www.google.com/maps/search/Pharmacy" target="_blank" class="link-chip">Pharmacy</a>
+        <a href="https://www.google.com/maps/search/Meijer" target="_blank" class="link-chip">Meijer</a>
+        <a href="https://www.google.com/maps/search/Gas+Station" target="_blank" class="link-chip">Gas</a>
+        <a href="https://www.google.com/maps/search/Grocery" target="_blank" class="link-chip">Grocery</a>
+        <a href="https://www.google.com/maps/search/Cafe" target="_blank" class="link-chip">Cafe</a>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- FULL WIDTH COLUMN: INTERACTIVE MAP -->
+  <div class="col-full">
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Interactive Map Explorer</h2>
+      </div>
+      <div id="map"></div>
+    </section>
   </div>
 </div>
 
@@ -348,9 +357,47 @@
   // Built Securely // Client Execution // Offline Indexed //
 </div>
 
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <!-- DATA INTEGRATION SCRIPT -->
 <script>
-  // Dynamic Real-time Countdown Calculations
+  // ---- Interactive Map Initialization ----
+  function initMap() {
+    // Default center near Fennville
+    var map = L.map('map').setView([42.5975, -86.1089], 11);
+
+    // Standard OpenStreetMap tiles (no API key required)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Categories array
+    var locations = [
+      { name: "🏠 Airbnb (1814 Lakeshore Dr)", lat: 42.585, lon: -86.205, type: "Airbnb" },
+      { name: "🏖️ Oval Beach", lat: 42.663, lon: -86.216, type: "Beach" },
+      { name: "🏖️ Pier Cove Park", lat: 42.571, lon: -86.223, type: "Beach" },
+      { name: "🏖️ Westside County Park", lat: 42.551, lon: -86.230, type: "Beach" },
+      { name: "🍻 Rusty Rocket Brewing", lat: 42.493, lon: -86.095, type: "Brewery" },
+      { name: "🍻 Waypost Brewing", lat: 42.592, lon: -86.195, type: "Brewery" },
+      { name: "🍽️ Salt of the Earth", lat: 42.594, lon: -86.101, type: "Restaurant" },
+      { name: "🍽️ The Southerner", lat: 42.656, lon: -86.200, type: "Restaurant" },
+      { name: "🥾 Saugatuck Dunes State Park", lat: 42.685, lon: -86.210, type: "Hiking" },
+      { name: "🍎 Crane's Pie Pantry & Orchard", lat: 42.597, lon: -86.136, type: "Fruit Market" },
+      { name: "🍎 Dee's Lakeshore Farm", lat: 42.573, lon: -86.221, type: "Fruit Market" },
+      { name: "⛽ BP Gas Station (Fennville)", lat: 42.594, lon: -86.103, type: "Gas Station" }
+    ];
+
+    // Add pins to map
+    locations.forEach(function(loc) {
+      L.marker([loc.lat, loc.lon])
+        .addTo(map)
+        .bindPopup("<strong>" + loc.name + "</strong><br><span style='font-size:11px; text-transform:uppercase;'>" + loc.type + "</span>");
+    });
+  }
+
+  // ---- Dynamic Real-time Countdown Calculations ----
   function updateCountdowns() {
     var targetCheckIn = new Date("2026-07-18T16:00:00-04:00").getTime();
     var targetCheckOut = new Date("2026-07-21T11:00:00-04:00").getTime();
@@ -382,21 +429,19 @@
   setInterval(updateCountdowns, 60000);
   updateCountdowns();
 
-  // ---- Environmental data: AirNow for "current", Open-Meteo for 3-day forecast ----
+  // ---- Environmental Data ----
   var CATEGORIES = [
-    { max: 50, label: "Good", color: "#32623D" }, // Muted green
-    { max: 100, label: "Moderate", color: "#B8860B" }, // Muted gold
-    { max: 150, label: "Sensitive", color: "#B25A24" }, // Muted rust
-    { max: 200, label: "Unhealthy", color: "#8B2C24" }, // Muted red
-    { max: 300, label: "Very Unhealthy", color: "#543063" }, // Muted purple
+    { max: 50, label: "Good", color: "#32623D" },
+    { max: 100, label: "Moderate", color: "#B8860B" },
+    { max: 150, label: "Sensitive", color: "#B25A24" },
+    { max: 200, label: "Unhealthy", color: "#8B2C24" },
+    { max: 300, label: "Very Unhealthy", color: "#543063" },
     { max: Infinity, label: "Hazardous", color: "#4A1A24" }
   ];
 
   function getCat(val) {
     for (var i = 0; i < CATEGORIES.length; i++) {
-      if (val <= CATEGORIES[i].max) {
-        return CATEGORIES[i];
-      }
+      if (val <= CATEGORIES[i].max) return CATEGORIES[i];
     }
     return CATEGORIES[CATEGORIES.length - 1];
   }
@@ -415,82 +460,52 @@
   var WEATHER_CODES = {
     0: ["☀️", "Clear"], 1: ["🌤️", "M. Clear"], 2: ["⛅", "P. Cloudy"], 3: ["☁️", "Cloudy"],
     45: ["🌫️", "Fog"], 48: ["🌫️", "Fog"],
-    51: ["🌦️", "Drizzle"], 53: ["🌦️", "Drizzle"], 55: ["🌦️", "Drizzle"],
-    56: ["🌧️", "F. Drizzle"], 57: ["🌧️", "F. Drizzle"],
-    61: ["🌧️", "Rain"], 63: ["🌧️", "Rain"], 65: ["🌧️", "H. Rain"],
-    66: ["🌧️", "F. Rain"], 67: ["🌧️", "F. Rain"],
-    71: ["🌨️", "Snow"], 73: ["🌨️", "Snow"], 75: ["🌨️", "H. Snow"], 77: ["🌨️", "S. Grains"],
-    80: ["🌦️", "Showers"], 81: ["🌦️", "Showers"], 82: ["🌦️", "Showers"],
-    85: ["🌨️", "S. Showers"], 86: ["🌨️", "S. Showers"],
-    95: ["⛈️", "T-storms"], 96: ["⛈️", "T-storms"], 99: ["⛈️", "T-storms"]
+    51: ["🌦️", "Drizzle"], 61: ["🌧️", "Rain"], 71: ["🌨️", "Snow"], 80: ["🌦️", "Showers"],
+    95: ["⛈️", "T-storms"]
   };
 
   function weatherIconLabel(code) { 
-    return WEATHER_CODES[code] || ["🌡️", "—"]; 
+    var group = code;
+    if(code > 51 && code < 60) group = 51;
+    if(code > 61 && code < 70) group = 61;
+    if(code > 71 && code < 80) group = 71;
+    if(code > 80 && code < 90) group = 80;
+    if(code > 95) group = 95;
+    return WEATHER_CODES[group] || ["🌡️", "—"]; 
   }
 
   function loadWeather() {
-    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON + "&current=temperature_2m,relative_humidity_2m&temperature_unit=fahrenheit&timezone=America%2FDetroit";
-    return fetch(url).then(function(r) { 
-      if (!r.ok) throw new Error("Weather HTTP " + r.status); 
-      return r.json(); 
-    });
+    return fetch("https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON + "&current=temperature_2m,relative_humidity_2m&temperature_unit=fahrenheit&timezone=America%2FDetroit").then(function(r) { return r.json(); });
   }
 
   function loadWeatherForecast() {
-    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=America%2FDetroit&forecast_days=3";
-    return fetch(url).then(function(r) { 
-      if (!r.ok) throw new Error("Weather forecast HTTP " + r.status); 
-      return r.json(); 
-    }).then(function(data) {
+    return fetch("https://api.open-meteo.com/v1/forecast?latitude=" + LAT + "&longitude=" + LON + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=America%2FDetroit&forecast_days=3").then(function(r) { return r.json(); }).then(function(data) {
         var d = data.daily;
         return d.time.slice(0, 3).map(function(date, idx) {
-          return {
-            date: date, 
-            label: fmtDayLabel(date, idx),
-            code: d.weather_code[idx],
-            hi: Math.round(d.temperature_2m_max[idx]),
-            lo: Math.round(d.temperature_2m_min[idx]),
-            precip: d.precipitation_probability_max[idx]
-          };
+          return { date: date, label: fmtDayLabel(date, idx), code: d.weather_code[idx], hi: Math.round(d.temperature_2m_max[idx]), lo: Math.round(d.temperature_2m_min[idx]), precip: d.precipitation_probability_max[idx] };
         });
       });
   }
 
   function loadAirNowCurrent() {
-    var url = "https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=" + LAT + "&longitude=" + LON + "&distance=50&API_KEY=" + AIRNOW_KEY;
-    return fetch(url).then(function(r) { 
-      if (!r.ok) throw new Error("AirNow HTTP " + r.status); 
-      return r.json(); 
-    });
+    return fetch("https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=" + LAT + "&longitude=" + LON + "&distance=50&API_KEY=" + AIRNOW_KEY).then(function(r) { return r.json(); });
   }
 
   function loadForecast() {
-    var url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + LAT + "&longitude=" + LON + "&hourly=us_aqi&forecast_days=3&timezone=America%2FDetroit";
-    return fetch(url).then(function(r) { 
-      if (!r.ok) throw new Error("Forecast HTTP " + r.status); 
-      return r.json(); 
-    }).then(function(data) {
+    return fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + LAT + "&longitude=" + LON + "&hourly=us_aqi&forecast_days=3&timezone=America%2FDetroit").then(function(r) { return r.json(); }).then(function(data) {
         var times = data.hourly.time;
         var aqi = data.hourly.us_aqi;
         var byDate = {};
-        
         times.forEach(function(t, i) {
           var date = t.split("T")[0];
           if (!byDate[date]) byDate[date] = [];
           if (aqi[i] != null) byDate[date].push(aqi[i]);
         });
-        
         return Object.keys(byDate).slice(0, 3).map(function(date, idx) {
           var vals = byDate[date];
           var sum = 0;
-          for (var i = 0; i < vals.length; i++) { sum += vals[i]; }
-          var avg = vals.length ? sum / vals.length : 0;
-          return { 
-            date: date, 
-            label: fmtDayLabel(date, idx), 
-            avgAqi: Math.round(avg) 
-          };
+          for (var i = 0; i < vals.length; i++) sum += vals[i];
+          return { date: date, label: fmtDayLabel(date, idx), avgAqi: Math.round(vals.length ? sum / vals.length : 0) };
         });
       });
   }
@@ -498,122 +513,59 @@
   function renderWeatherAndCurrentAqi(weatherData, airNowCurrent) {
     var curTemp = Math.round(weatherData.current.temperature_2m);
     var curHumidity = weatherData.current.relative_humidity_2m;
-
     var curAqi = 0;
     var curCatName = "Good";
-    
     if (airNowCurrent && airNowCurrent.length > 0) {
       var aqiArray = airNowCurrent.map(function(d) { return d.AQI; });
       curAqi = Math.max.apply(null, aqiArray);
-      
-      var primary;
       for (var i = 0; i < airNowCurrent.length; i++) {
-        if (airNowCurrent[i].AQI === curAqi) {
-          primary = airNowCurrent[i];
-          break;
-        }
+        if (airNowCurrent[i].AQI === curAqi) { curCatName = airNowCurrent[i].Category.Name; break; }
       }
-      if (primary && primary.Category) curCatName = primary.Category.Name;
     }
-    
     var aqiCat = getCat(curAqi);
-
-    return '<div class="widget-row">' +
-             '<div class="widget-card">' +
-               '<span class="widget-label">Current Temp</span>' +
-               '<div class="widget-val" style="font-size:28px;">' + curTemp + '°F</div>' +
-               '<span class="widget-label" style="margin-top:8px; font-weight:normal; text-transform:none;">Humidity: ' + curHumidity + '%</span>' +
-             '</div>' +
-             '<div class="widget-card">' +
-               '<span class="widget-label">Air Quality Now</span>' +
-               '<div class="widget-val" style="font-size:28px; color:' + aqiCat.color + '">' + curAqi + '</div>' +
-               '<span class="widget-label" style="margin-top:8px; font-weight:700; color:' + aqiCat.color + '">' + curCatName + '</span>' +
-             '</div>' +
-           '</div>';
+    return '<div class="widget-row"><div class="widget-card"><span class="widget-label">Current Temp</span><div class="widget-val" style="font-size:28px;">' + curTemp + '°F</div><span class="widget-label" style="margin-top:8px; font-weight:normal; text-transform:none;">Humidity: ' + curHumidity + '%</span></div><div class="widget-card"><span class="widget-label">Air Quality Now</span><div class="widget-val" style="font-size:28px; color:' + aqiCat.color + '">' + curAqi + '</div><span class="widget-label" style="margin-top:8px; font-weight:700; color:' + aqiCat.color + '">' + curCatName + '</span></div></div>';
   }
 
   function renderForecast(days) {
-    if (!days || days.length === 0) {
-      return '<div style="width:100%; font-size:12px; color:#5E5851; padding:8px; text-align:center;">Forecast temporarily unavailable.</div>';
-    }
+    if (!days || days.length === 0) return '';
     var cards = days.map(function(d) {
       var cat = getCat(d.avgAqi);
-      return '<div class="day-card">' +
-               '<span class="day-name">' + d.label + '</span>' +
-               '<span class="day-aqi" style="color:' + cat.color + '">' + d.avgAqi + '</span>' +
-               '<span style="font-size:9px; font-family:\'Montserrat\', sans-serif; font-weight:bold; color:#5E5851; text-transform:uppercase;">' + cat.label + '</span>' +
-             '</div>';
+      return '<div class="day-card"><span class="day-name">' + d.label + '</span><span class="day-aqi" style="color:' + cat.color + '">' + d.avgAqi + '</span><span style="font-size:9px; font-family:\'Montserrat\', sans-serif; font-weight:bold; color:#5E5851; text-transform:uppercase;">' + cat.label + '</span></div>';
     }).join("");
     return '<span class="widget-label" style="margin-bottom:8px; display:block; text-align:center;">3-Day AQI Forecast</span><div class="day-grid">' + cards + '</div>';
   }
 
   function renderWeatherForecast(days) {
-    if (!days || days.length === 0) {
-      return '<div style="width: 100%; font-size:12px; color:#5E5851; padding:8px; text-align:center;">Weather forecast temporarily unavailable.</div>';
-    }
+    if (!days || days.length === 0) return '';
     var cards = days.map(function(d) {
       var iconInfo = weatherIconLabel(d.code);
-      var icon = iconInfo[0];
-      var label = iconInfo[1];
       var precipStr = d.precip != null ? " &middot; " + d.precip + "%💧" : "";
-      
-      return '<div class="day-card">' +
-               '<span class="day-name">' + d.label + '</span>' +
-               '<span style="font-size:24px; margin:4px 0;">' + icon + '</span>' +
-               '<span class="day-aqi" style="font-size:16px; margin:2px 0;">' + d.hi + '° / ' + d.lo + '°</span>' +
-               '<span style="font-size:10px; font-family:\'Montserrat\', sans-serif; color:#5E5851;">' + label + precipStr + '</span>' +
-             '</div>';
+      return '<div class="day-card"><span class="day-name">' + d.label + '</span><span style="font-size:24px; margin:4px 0;">' + iconInfo[0] + '</span><span class="day-aqi" style="font-size:16px; margin:2px 0;">' + d.hi + '° / ' + d.lo + '°</span><span style="font-size:10px; font-family:\'Montserrat\', sans-serif; color:#5E5851;">' + iconInfo[1] + precipStr + '</span></div>';
     }).join("");
     return '<span class="widget-label" style="margin:20px 0 8px; display:block; text-align:center;">72-Hour Weather Forecast</span><div class="day-grid">' + cards + '</div>';
   }
 
-  // ES5 Promise.allSettled Polyfill logic for 2016 clients
   function fetchSettled(promises) {
-    return Promise.all(promises.map(function(promise) {
-      return promise.then(function(value) {
-        return { status: "fulfilled", value: value };
-      }).catch(function(error) {
-        return { status: "rejected", reason: error };
-      });
+    return Promise.all(promises.map(function(p) {
+      return p.then(function(v) { return { status: "fulfilled", value: v }; }).catch(function(e) { return { status: "rejected", reason: e }; });
     }));
   }
 
-  function loadEnvironmentalMetrics() {
+  window.addEventListener("DOMContentLoaded", function() {
+    initMap(); // Initialize interactive map
+
     var root = document.getElementById("live-weather-root");
-    var requests = [loadWeather(), loadAirNowCurrent(), loadForecast(), loadWeatherForecast()];
-
-    fetchSettled(requests).then(function(results) {
-      var weatherResult = results[0];
-      var airNowResult = results[1];
-      var forecastResult = results[2];
-      var weatherForecastResult = results[3];
-
+    fetchSettled([loadWeather(), loadAirNowCurrent(), loadForecast(), loadWeatherForecast()]).then(function(results) {
       var html = "";
-
-      if (weatherResult.status === "fulfilled" && airNowResult.status === "fulfilled") {
+      if (results[0].status === "fulfilled" && results[1].status === "fulfilled") {
         html += '<div class="success-banner">Live conditions synced</div>';
-        html += renderWeatherAndCurrentAqi(weatherResult.value, airNowResult.value);
-      } else {
-        html += '<div class="alert-banner">COULD NOT LOAD CURRENT CONDITIONS</div>';
+        html += renderWeatherAndCurrentAqi(results[0].value, results[1].value);
       }
-
-      if (forecastResult.status === "fulfilled") {
-        html += renderForecast(forecastResult.value);
-      } else {
-        html += '<div class="alert-banner" style="margin-top:12px;">COULD NOT LOAD AQI FORECAST</div>';
-      }
-
-      if (weatherForecastResult.status === "fulfilled") {
-        html += renderWeatherForecast(weatherForecastResult.value);
-      } else {
-        html += '<div class="alert-banner" style="margin-top:12px;">COULD NOT LOAD WEATHER FORECAST</div>';
-      }
-
+      if (results[2].status === "fulfilled") html += renderForecast(results[2].value);
+      if (results[3].status === "fulfilled") html += renderWeatherForecast(results[3].value);
       root.innerHTML = html;
     });
-  }
-
-  window.addEventListener("DOMContentLoaded", loadEnvironmentalMetrics);
+  });
 </script>
 
 </body>
