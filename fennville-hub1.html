@@ -51,6 +51,15 @@
   .route-section { background: transparent; border: 1px solid #D1CDC1; padding: 10px; margin-bottom: 12px; text-align: center; }
   .route-title { font-family: 'Cinzel', serif; font-size: 12px; font-weight: bold; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #D1CDC1; padding-bottom: 6px; }
 
+  .venue-item { text-align: left; margin-bottom: 10px; }
+  .venue-item:last-child { margin-bottom: 0; }
+  .venue-name-link { font-weight: bold; color: #211E1C; text-decoration: none; border-bottom: 1px dashed #211E1C; font-size: 12.5px; }
+  .venue-drive { font-size: 10px; color: #5E5851; }
+  .venue-note { font-size: 11px; color: #4A453F; font-style: italic; margin: 2px 0 0; line-height: 1.4; }
+  .venue-sublist { margin: 4px 0 0 16px; padding: 0; font-size: 11px; color: #4A453F; }
+  .venue-sublist li { margin-bottom: 2px; }
+  .closed-tag { color: #8B2C24; font-weight: bold; font-size: 9px; text-transform: uppercase; margin-left: 5px; }
+
   .link-chip { display: inline-block; background: transparent; border: 1px solid #211E1C; padding: 5px 9px; font-size: 11px; color: #211E1C; text-decoration: none; margin: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
 
   .check-item { margin-bottom: 8px; font-size: 13px; line-height: 1.4; font-family: 'Libre Baskerville', serif; }
@@ -146,6 +155,7 @@
       <div class="check-item">Take the trash out into the bins near the road (pick-up day is Monday).</div>
       <div class="check-item">Clean all dishes/kitchen items and place them back where you found them.</div>
       <div class="check-item">Turn off all lights.</div>
+      <div class="check-item">Give Nana a big hug &#10084;&#65039;</div>
     </section>
 
   </div>
@@ -174,15 +184,105 @@
       </div>
       <div class="route-section">
         <div class="route-title">Tasting Rooms &amp; Breweries</div>
-        <a href="https://www.google.com/maps/search/?api=1&query=Modales+Wines+Fennville" target="_blank" class="link-chip">Modales Wines</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Michigan+Wine+Company+Fennville" target="_blank" class="link-chip">Michigan Wine Co.</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Rusty+Rocket+Brewing+Pullman" target="_blank" class="link-chip">Rusty Rocket Brewing</a>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Waypost+Brewing+Company+Fennville" target="_blank" class="venue-name-link">Waypost Brewing Company</a> <span class="venue-drive">(10 min)</span>
+          <p class="venue-note">Farm brewery specializing in lagers and saisons with a beautiful berry-farm setting.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Guardian+Brewing+Company+Saugatuck" target="_blank" class="venue-name-link">Guardian Brewing Company</a> <span class="venue-drive">(15 min)</span><span class="closed-tag">Closed</span>
+          <p class="venue-note">Excellent beer, scratch kitchen, spacious outdoor seating. (Permanently closed &mdash; kept for reference.)</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Saugatuck+Brewing+Company+Douglas" target="_blank" class="venue-name-link">Saugatuck Brewing Company</a> <span class="venue-drive">(18 min)</span>
+          <p class="venue-note">Largest brewery in the area with a full restaurant and broad tap list.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=The+Mitten+Brewing+Company+Saugatuck" target="_blank" class="venue-name-link">The Mitten Brewing Company &ndash; Saugatuck</a> <span class="venue-drive">(20 min)</span>
+          <p class="venue-note">Downtown location known for gourmet pizzas and Michigan craft beer.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Three+Blondes+Brewing+South+Haven" target="_blank" class="venue-name-link">Three Blondes Brewing</a> <span class="venue-drive">(22 min)</span>
+          <p class="venue-note">Great food, creative beers, lively downtown atmosphere.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Big+Lake+Brewing+Holland" target="_blank" class="venue-name-link">Big Lake Brewing</a> <span class="venue-drive">(28&ndash;30 min)</span>
+          <p class="venue-note">One of West Michigan's best-known breweries with an extensive tap list.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Brewery+4+Two+4+Holland" target="_blank" class="venue-name-link">Brewery 4 Two 4</a> <span class="venue-drive">(~30 min)</span>
+          <p class="venue-note">Small neighborhood brewery with consistently excellent beer.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Hopland+Brewstillery+Holland" target="_blank" class="venue-name-link">Hopland Brewstillery</a> <span class="venue-drive">(~30 min)</span><span class="closed-tag">Closed</span>
+          <p class="venue-note">Brewery and distillery producing experimental beers and spirits. (Permanently closed &mdash; kept for reference.)</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Our+Brewing+Company+Holland" target="_blank" class="venue-name-link">Our Brewing Company</a> <span class="venue-drive">(~30 min)</span>
+          <p class="venue-note">Relaxed downtown taproom with rotating small-batch beers.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Rusty+Rocket+Brewing+Pullman" target="_blank" class="venue-name-link">Rusty Rocket Brewing</a>
+        </div>
       </div>
       <div class="route-section">
-        <div class="route-title">Shorelines &amp; Preservation Beaches</div>
-        <a href="https://www.google.com/maps/search/?api=1&query=Wau-Ke-Na+Preserve" target="_blank" class="link-chip">Wau-Ke-Na Preserve</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Westside+County+Park+Fennville" target="_blank" class="link-chip">Westside County Park</a>
-        <a href="https://www.google.com/maps/search/?api=1&query=Oval+Beach+Saugatuck" target="_blank" class="link-chip">Oval Beach</a>
+        <div class="route-title">Best Playgrounds</div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=West+Side+County+Park+Fennville" target="_blank" class="venue-name-link">West Side County Park</a> <span class="venue-drive">(2&ndash;3 min)</span>
+          <ul class="venue-sublist">
+            <li>Large fenced playground</li>
+            <li>Lake Michigan beach</li>
+            <li>Two pavilions</li>
+            <li>Restrooms</li>
+            <li>Great sunset spot</li>
+          </ul>
+          <p class="venue-note">Excellent if you want kids to play and then head to the beach afterward.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Paradise+Park+Fennville" target="_blank" class="venue-name-link">Paradise Park</a> <span class="venue-drive">(10&ndash;12 min)</span>
+          <ul class="venue-sublist">
+            <li>Community playground</li>
+            <li>Walking path</li>
+            <li>Soccer fields</li>
+            <li>Baseball diamonds</li>
+            <li>Pavilion</li>
+          </ul>
+          <p class="venue-note">One of the nicest traditional neighborhood parks in Fennville.</p>
+        </div>
+      </div>
+      <div class="route-section">
+        <div class="route-title">Best Nature Parks</div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Pier+Cove+Park" target="_blank" class="venue-name-link">Pier Cove</a> <span class="venue-drive">(5 min)</span>
+          <ul class="venue-sublist">
+            <li>Small public beach</li>
+            <li>Creek flowing into Lake Michigan</li>
+            <li>Great for kids to splash where the creek meets the lake</li>
+            <li>Scenic bluff views</li>
+          </ul>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Wau-Ke-Na+Preserve+Fennville" target="_blank" class="venue-name-link">Wau-Ke-Na William Erby Smith Preserve</a> <span class="venue-drive">(5&ndash;8 min)</span>
+          <ul class="venue-sublist">
+            <li>Short trails through dunes</li>
+            <li>Access to secluded Lake Michigan shoreline</li>
+            <li>Dog friendly (leashed)</li>
+            <li>Two trail systems (North and South)</li>
+          </ul>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=New+Richmond+Bridge+Park" target="_blank" class="venue-name-link">New Richmond Bridge Park</a> <span class="venue-drive">(15 min)</span>
+          <ul class="venue-sublist">
+            <li>Historic swing bridge</li>
+            <li>Boardwalk along the Kalamazoo River</li>
+            <li>Fishing piers</li>
+            <li>Picnic area</li>
+            <li>Boat launch</li>
+          </ul>
+          <p class="venue-note">Fun if your kids like watching boats or trains.</p>
+        </div>
+        <div class="venue-item">
+          <a href="https://www.google.com/maps/search/?api=1&query=Oval+Beach+Saugatuck" target="_blank" class="venue-name-link">Oval Beach</a>
+        </div>
       </div>
     </section>
 
