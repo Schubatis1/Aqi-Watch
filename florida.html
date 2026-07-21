@@ -64,9 +64,22 @@
   }
   .card h2{
     font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;
-    margin:0 0 16px;display:flex;align-items:center;gap:8px;letter-spacing:-.01em;
+    margin:0;display:flex;align-items:center;gap:8px;letter-spacing:-.01em;
+    cursor:pointer;user-select:none;padding-bottom:16px;
   }
+  .card.collapsed h2{padding-bottom:0;}
   .card h2 .ic{font-size:16px;}
+  .card h2 .chev{
+    margin-left:auto;font-size:12px;color:var(--ink-dim);
+    transition:transform .2s ease;flex:none;
+  }
+  .card h2 .h2-controls{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .card.collapsed h2 .chev{transform:rotate(-90deg);}
+  .card-body{
+    overflow:hidden;max-height:1200px;transition:max-height .28s ease, opacity .2s ease;
+    opacity:1;
+  }
+  .card.collapsed .card-body{max-height:0;opacity:0;}
 
   /* SPLIT-FLAP FLIGHT BOARD */
   .board{
@@ -114,7 +127,19 @@
   }
   .pack-head{
     background:linear-gradient(120deg,#1B2A4A,#274268);padding:20px 22px 18px;
+    cursor:pointer;user-select:none;position:relative;
   }
+  .pack-head .chev{
+    position:absolute;top:22px;right:22px;font-size:12px;color:#AEBBD0;
+    transition:transform .2s ease;
+  }
+  .pack-card.collapsed .pack-head .chev{transform:rotate(-90deg);}
+  .pack-card.collapsed .pack-head{padding-bottom:20px;}
+  .pack-body{
+    overflow:hidden;max-height:2000px;transition:max-height .28s ease, opacity .2s ease;
+    opacity:1;
+  }
+  .pack-card.collapsed .pack-body{max-height:0 !important;opacity:0;padding-top:0;padding-bottom:0;}
   .pack-tag{
     font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;
     text-transform:uppercase;background:rgba(255,255,255,.12);color:#F0B896;
@@ -164,6 +189,84 @@
   }
   .reset-btn:hover{border-color:var(--heat);color:var(--heat);}
 
+  /* WEATHER WIDGET */
+  .wx-now{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+  .wx-big{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;line-height:1;color:var(--navy);}
+  .wx-cond{font-size:12.5px;color:var(--ink-dim);margin-top:6px;}
+  .wx-stats{display:flex;gap:18px;}
+  .wx-stat-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);}
+  .wx-stat-val{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;margin-top:3px;}
+  .wx-stat-val span{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;margin-left:3px;padding:2px 6px;border-radius:100px;}
+  .heat-val span{background:var(--heat-soft);color:#8A3210;}
+  .go-val span{background:var(--go-soft);color:#1F5C3F;}
+
+  .fc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;}
+  .fc-day{
+    background:var(--paper-2);border-radius:10px;padding:12px 8px;text-align:center;
+  }
+  .fc-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);}
+  .fc-ic{font-size:22px;margin:6px 0 4px;}
+  .fc-hi{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;}
+  .fc-lo{font-size:12px;color:var(--ink-dim);}
+  .fc-pop{font-size:10.5px;color:#2C6FA0;margin-top:3px;}
+
+  .wx-refresh{
+    margin-left:auto;background:none;border:1px solid var(--line);color:var(--ink-dim);
+    font-size:10.5px;padding:4px 10px;border-radius:100px;cursor:pointer;
+    font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.05em;
+  }
+  .wx-refresh:hover{border-color:var(--navy);color:var(--navy);}
+  .wx-updated{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-dim);
+    margin-bottom:12px;
+  }
+  .wx-loading{font-size:12.5px;color:var(--ink-dim);text-align:center;padding:14px 0;font-style:italic;}
+  .wx-error{
+    border:1px dashed var(--heat);color:#8A3210;background:var(--heat-soft);
+    border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:12px;
+  }
+
+  /* FLIGHT STATUS */
+  .fs-keybar{
+    margin-top:16px;background:var(--paper-2);border-radius:10px;padding:12px 14px;
+  }
+  .fs-key-label{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;
+  }
+  .fs-key-row{display:flex;gap:8px;}
+  .fs-input{
+    flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px;
+    font-size:12.5px;font-family:'Inter',sans-serif;background:#fff;color:var(--ink);
+  }
+  .fs-save-btn{
+    background:var(--navy);color:#fff;border:none;border-radius:8px;
+    padding:8px 14px;font-size:12.5px;font-weight:500;cursor:pointer;flex:none;
+  }
+  .fs-key-note{font-size:11px;color:var(--ink-dim);margin-top:8px;}
+  .fs-key-note a{color:var(--navy);}
+  .fs-updated{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-dim);
+    margin:16px 0 10px;
+  }
+  .fs-flight{
+    border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:10px;
+  }
+  .fs-flight:last-child{margin-bottom:0;}
+  .fs-flight-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .fs-flight-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;}
+  .fs-flight-route{font-size:11.5px;color:var(--ink-dim);margin-top:2px;}
+  .fs-chip{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;
+    padding:4px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em;
+    flex:none;
+  }
+  .fs-chip.ontime{background:var(--go-soft);color:#1F5C3F;}
+  .fs-chip.delayed{background:var(--heat-soft);color:#8A3210;}
+  .fs-chip.unknown{background:var(--paper-2);color:var(--ink-dim);}
+  .fs-detail{font-size:12px;color:var(--ink-dim);margin-top:8px;line-height:1.5;}
+  .fs-detail b{color:var(--ink);}
+
   .footer-note{
     margin-top:6px;font-size:11.5px;color:var(--ink-dim);text-align:center;
     font-family:'IBM Plex Mono',monospace;
@@ -187,54 +290,97 @@
 
   <div class="grid">
     <div>
-      <div class="card">
-        <h2><span class="ic">✈️</span> Flights</h2>
-        <div class="board">
-          <div class="board-row head">
-            <div>Dir</div><div>Route</div><div>Depart</div><div>Arrive</div>
-          </div>
-          <div class="board-row">
-            <div><span class="tag out">Out</span></div>
-            <div><span class="flap">DTW → MCO</span></div>
-            <div><span class="flap">12:15p</span></div>
-            <div><span class="flap">2:59p</span></div>
-          </div>
-          <div class="board-row">
-            <div><span class="tag ret">Ret</span></div>
-            <div><span class="flap">MCO → DTW</span></div>
-            <div><span class="flap">2:13p</span></div>
-            <div><span class="flap">5:08p</span></div>
+      <div class="card" data-card>
+        <h2 onclick="toggleCard(this)"><span class="ic">☀️</span> Weather &amp; Air Quality
+          <span class="h2-controls">
+            <button class="wx-refresh" id="wxRefreshBtn" onclick="event.stopPropagation(); loadEnvironmentalMetrics();">Refresh</button>
+            <span class="chev">▾</span>
+          </span>
+        </h2>
+        <div class="card-body">
+          <div class="wx-updated" id="wxUpdated">Loading live conditions…</div>
+          <div id="wxRoot">
+            <div class="wx-loading">Querying weather and air quality systems…</div>
           </div>
         </div>
       </div>
 
-      <div class="card">
-        <h2><span class="ic">🏃</span> Running &amp; Fitness</h2>
-        <div class="advisory">
-          <div class="dot"></div>
-          <div>
-            <b>Avoid midday.</b>
-            <p>High heat and dew point through the afternoon — get out at dawn, or fall back to the hotel gym if a session slips.</p>
+      <div class="card" data-card>
+        <h2 onclick="toggleCard(this)"><span class="ic">✈️</span> Flights
+          <span class="h2-controls">
+            <button class="wx-refresh" id="fsRefreshBtn" onclick="event.stopPropagation(); loadFlightStatuses();">Refresh</button>
+            <span class="chev">▾</span>
+          </span>
+        </h2>
+        <div class="card-body">
+          <div class="board">
+            <div class="board-row head">
+              <div>Dir</div><div>Route</div><div>Depart</div><div>Arrive</div>
+            </div>
+            <div class="board-row">
+              <div><span class="tag out">Out</span></div>
+              <div><span class="flap">DTW → MCO</span></div>
+              <div><span class="flap">12:15p</span></div>
+              <div><span class="flap">2:59p</span></div>
+            </div>
+            <div class="board-row">
+              <div><span class="tag ret">Ret</span></div>
+              <div><span class="flap">MCO → DTW</span></div>
+              <div><span class="flap">2:13p</span></div>
+              <div><span class="flap">5:08p</span></div>
+            </div>
           </div>
-        </div>
-        <div class="routes">
-          <div class="route-btn">Lake Nona Trail Loop · ~3mi</div>
-          <div class="route-btn">Laureate Park Loop · ~5mi</div>
-          <div class="route-btn alt">Fitness Center + Pool (on-site)</div>
+
+          <div id="fsKeyBar" class="fs-keybar">
+            <div class="fs-key-label">AviationStack API key</div>
+            <div class="fs-key-row">
+              <input type="text" id="fsKeyInput" class="fs-input" placeholder="Paste your free AviationStack access key" autocomplete="off" />
+              <button class="fs-save-btn" onclick="saveAviationStackKey()">Save</button>
+            </div>
+            <div class="fs-key-note">Saved on this device only. Get a free key at <a href="https://aviationstack.com/" target="_blank">aviationstack.com</a>.</div>
+          </div>
+
+          <div id="fsStatusWrap" style="display:none;">
+            <div class="fs-updated" id="fsUpdated"></div>
+            <div id="fsRoot"></div>
+            <div class="fs-key-note" style="margin-top:10px;">
+              <a href="#" onclick="event.preventDefault(); document.getElementById('fsKeyBar').style.display='block'; document.getElementById('fsStatusWrap').style.display='none';">Change API key</a>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <h2><span class="ic">📋</span> Meeting Notes</h2>
-        <div class="weather-note" style="margin-top:0;">
-          AcG All In-Person Meeting — DPP Accounting Group session. Leave campus by ~12:15p on 7/24 to make the return flight. Confirm room/times on arrival.
+      <div class="card" data-card>
+        <h2 onclick="toggleCard(this)"><span class="ic">🏃</span> Running &amp; Fitness<span class="chev">▾</span></h2>
+        <div class="card-body">
+          <div class="advisory">
+            <div class="dot"></div>
+            <div>
+              <b>Avoid midday.</b>
+              <p>High heat and dew point through the afternoon — get out at dawn, or fall back to the hotel gym if a session slips.</p>
+            </div>
+          </div>
+          <div class="routes">
+            <div class="route-btn">Lake Nona Trail Loop · ~3mi</div>
+            <div class="route-btn">Laureate Park Loop · ~5mi</div>
+            <div class="route-btn alt">Fitness Center + Pool (on-site)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-card>
+        <h2 onclick="toggleCard(this)"><span class="ic">📋</span> Meeting Notes<span class="chev">▾</span></h2>
+        <div class="card-body">
+          <div class="weather-note" style="margin-top:0;">
+            AcG All In-Person Meeting — DPP Accounting Group session. Leave campus by ~12:15p on 7/24 to make the return flight. Confirm room/times on arrival.
+          </div>
         </div>
       </div>
     </div>
 
     <div>
-      <div class="pack-card">
-        <div class="pack-head">
+      <div class="pack-card" data-card>
+        <div class="pack-head" onclick="togglePack(this.parentElement)">
           <div class="pack-tag">🔒 Packing</div>
           <h2>Orlando Packing Checklist</h2>
           <div class="dates">Trip dates: July 22–24, 2026</div>
@@ -242,6 +388,7 @@
             <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
             <div class="prog-text" id="progText">0 of 0 items packed</div>
           </div>
+          <span class="chev">▾</span>
         </div>
         <div class="pack-body" id="packBody"></div>
       </div>
@@ -252,6 +399,13 @@
 </div>
 
 <script>
+function toggleCard(headerEl){
+  headerEl.parentElement.classList.toggle("collapsed");
+}
+function togglePack(cardEl){
+  cardEl.classList.toggle("collapsed");
+}
+
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5L9 17.5L20 6.5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 const groups = [
@@ -317,6 +471,358 @@ async function init(){
 }
 
 init();
+
+/* ===================== LIVE WEATHER / AQI / UV ===================== */
+// Lake Nona, Orlando, FL — near the KPMG campus and suggested run routes
+const WX_LAT = 28.3772;
+const WX_LON = -81.2662;
+const OWM_KEY = '95d28256d918534c0c26a5fb47fd0ab1';
+const AIRNOW_KEY = '80781D70-714E-4225-977B-8E032C27AD62';
+
+const WX_EMOJI = {
+  Clear: "☀️", Clouds: "☁️", Rain: "🌧️", Drizzle: "🌦️",
+  Thunderstorm: "⛈️", Snow: "🌨️", Mist: "🌫️", Fog: "🌫️",
+  Haze: "🌫️", Smoke: "🌫️", Dust: "🌫️", Sand: "🌫️", Squall: "💨", Tornado: "🌪️"
+};
+function wxEmoji(main){ return WX_EMOJI[main] || "🌡️"; }
+
+function uvLabel(uvi){
+  if (uvi === null || uvi === undefined) return "--";
+  if (uvi < 3) return "Low";
+  if (uvi < 6) return "Moderate";
+  if (uvi < 8) return "High";
+  if (uvi < 11) return "Very High";
+  return "Extreme";
+}
+function aqiCategory(aqi){
+  if (aqi <= 50) return { label: "Good", cls: "go-val" };
+  if (aqi <= 100) return { label: "Moderate", cls: "heat-val" };
+  if (aqi <= 150) return { label: "Unhealthy (Sensitive)", cls: "heat-val" };
+  return { label: "Unhealthy", cls: "heat-val" };
+}
+function fmtDayLabel(dateKey){
+  const now = new Date();
+  const todayKey = now.toISOString().slice(0,10);
+  const tmrw = new Date(now.getTime() + 86400000).toISOString().slice(0,10);
+  if (dateKey === todayKey) return "Today";
+  if (dateKey === tmrw) return "Tomorrow";
+  const d = new Date(dateKey + "T12:00:00");
+  return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+}
+
+async function fetchJson(url, timeoutMs = 12000){
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+async function loadWeatherBundle(){
+  // Primary: OpenWeatherMap One Call 3.0 (current + daily)
+  try {
+    const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${WX_LAT}&lon=${WX_LON}&units=imperial&exclude=minutely,hourly,alerts&appid=${OWM_KEY}`;
+    const data = await fetchJson(url);
+    const c = data.current;
+    const current = {
+      temp: c.temp, feelsLike: c.feels_like, humidity: c.humidity,
+      uvi: c.uvi, main: (c.weather && c.weather[0]) ? c.weather[0].main : "",
+      description: (c.weather && c.weather[0]) ? c.weather[0].description : ""
+    };
+    const daily = (data.daily || []).slice(0,3).map(d => ({
+      label: fmtDayLabel(new Date(d.dt*1000).toISOString().slice(0,10)),
+      hi: Math.round(d.temp.max), lo: Math.round(d.temp.min),
+      precip: d.pop !== undefined ? Math.round(d.pop*100) : null,
+      main: (d.weather && d.weather[0]) ? d.weather[0].main : ""
+    }));
+    return { current, daily, source: "OpenWeatherMap One Call" };
+  } catch(e) {
+    // Fallback: OWM 2.5 current + 5-day/3-hour forecast
+    const curUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${WX_LAT}&lon=${WX_LON}&units=imperial&appid=${OWM_KEY}`;
+    const fcUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${WX_LAT}&lon=${WX_LON}&units=imperial&appid=${OWM_KEY}`;
+    const [curData, fcData] = await Promise.all([fetchJson(curUrl), fetchJson(fcUrl)]);
+    const current = {
+      temp: curData.main.temp, feelsLike: curData.main.feels_like, humidity: curData.main.humidity,
+      uvi: null, main: (curData.weather && curData.weather[0]) ? curData.weather[0].main : "",
+      description: (curData.weather && curData.weather[0]) ? curData.weather[0].description : ""
+    };
+    const byDate = {};
+    const order = [];
+    (fcData.list || []).forEach(item => {
+      const dateKey = new Date(item.dt*1000).toISOString().slice(0,10);
+      const hour = new Date(item.dt*1000).getHours();
+      if (!byDate[dateKey]) {
+        byDate[dateKey] = { hi: item.main.temp_max, lo: item.main.temp_min, pop: item.pop||0, main: (item.weather&&item.weather[0])?item.weather[0].main:"", dist: Math.abs(hour-14) };
+        order.push(dateKey);
+      } else {
+        const b = byDate[dateKey];
+        b.hi = Math.max(b.hi, item.main.temp_max);
+        b.lo = Math.min(b.lo, item.main.temp_min);
+        b.pop = Math.max(b.pop, item.pop||0);
+        if (Math.abs(hour-14) < b.dist) { b.main = (item.weather&&item.weather[0])?item.weather[0].main:""; b.dist = Math.abs(hour-14); }
+      }
+    });
+    const daily = order.slice(0,3).map(k => ({
+      label: fmtDayLabel(k), hi: Math.round(byDate[k].hi), lo: Math.round(byDate[k].lo),
+      precip: Math.round(byDate[k].pop*100), main: byDate[k].main
+    }));
+    return { current, daily, source: "OpenWeatherMap (fallback)" };
+  }
+}
+
+async function loadUvFallback(){
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${WX_LAT}&longitude=${WX_LON}&hourly=uv_index&timezone=America%2FNew_York&forecast_days=1`;
+  const data = await fetchJson(url);
+  const hour = new Date().getHours();
+  return data.hourly && data.hourly.uv_index ? data.hourly.uv_index[hour] : null;
+}
+
+async function loadAirNowCurrent(){
+  const url = `https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${WX_LAT}&longitude=${WX_LON}&distance=50&API_KEY=${AIRNOW_KEY}`;
+  const data = await fetchJson(url);
+  if (!data || !data.length) return null;
+  let best = data[0];
+  data.forEach(d => { if (d.AQI > best.AQI) best = d; });
+  return { aqi: best.AQI, category: best.Category ? best.Category.Name : aqiCategory(best.AQI).label };
+}
+
+async function loadAqiForecast3Day(){
+  const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${WX_LAT}&longitude=${WX_LON}&hourly=us_aqi&forecast_days=3&timezone=America%2FNew_York`;
+  const data = await fetchJson(url);
+  const times = data.hourly.time, vals = data.hourly.us_aqi;
+  const byDate = {};
+  times.forEach((t, i) => {
+    const dateKey = t.split("T")[0];
+    if (vals[i] === null || vals[i] === undefined) return;
+    (byDate[dateKey] = byDate[dateKey] || []).push(vals[i]);
+  });
+  return Object.keys(byDate).sort().slice(0,3).map(k => {
+    const arr = byDate[k];
+    const avg = Math.round(arr.reduce((a,b)=>a+b,0)/arr.length);
+    return { date: k, label: fmtDayLabel(k), avgAqi: avg };
+  });
+}
+
+function renderWeather(bundle, airNow, aqiForecast){
+  const root = document.getElementById("wxRoot");
+  const c = bundle.current;
+  const uviVal = (c.uvi !== null && c.uvi !== undefined) ? Math.round(c.uvi) : null;
+  const aqiVal = airNow ? airNow.aqi : (aqiForecast[0] ? aqiForecast[0].avgAqi : null);
+  const aqiCat = aqiVal !== null ? aqiCategory(aqiVal) : null;
+
+  let html = "";
+  if (!bundle.ok) {
+    html += `<div class="wx-error">Couldn't load live conditions — showing what's available.</div>`;
+  }
+  html += `<div class="wx-now">
+    <div class="wx-temp">
+      <div class="wx-big">${wxEmoji(c.main)} ${Math.round(c.temp)}°</div>
+      <div class="wx-cond">${c.description || ""} · feels like <b>${Math.round(c.feelsLike)}°</b> · humidity ${c.humidity}%</div>
+    </div>
+    <div class="wx-stats">
+      <div class="wx-stat">
+        <div class="wx-stat-label">UV Index</div>
+        <div class="wx-stat-val heat-val">${uviVal !== null ? uviVal : "--"} <span>${uvLabel(uviVal)}</span></div>
+      </div>
+      <div class="wx-stat">
+        <div class="wx-stat-label">Air Quality</div>
+        <div class="wx-stat-val ${aqiCat ? aqiCat.cls : ''}">${aqiVal !== null ? aqiVal : "--"} ${aqiCat ? `<span>${aqiCat.label}</span>` : ''}</div>
+      </div>
+    </div>
+  </div>`;
+
+  const days = (aqiForecast.length ? bundle.daily.map((d,i) => ({...d, aqi: aqiForecast[i] ? aqiForecast[i].avgAqi : null})) : bundle.daily);
+  html += `<div class="fc-row">`;
+  days.forEach(d => {
+    html += `<div class="fc-day">
+      <div class="fc-label">${d.label}</div>
+      <div class="fc-ic">${wxEmoji(d.main)}</div>
+      <div class="fc-hi">${d.hi}°</div>
+      <div class="fc-lo">${d.lo}° low</div>
+      <div class="fc-pop">${d.precip !== null ? d.precip + '% rain' : ''}${d.aqi !== null && d.aqi !== undefined ? ' · AQI ' + d.aqi : ''}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="weather-note">
+    <b>Peak UV and heat hit 10am–4pm.</b> Get runs in at dawn — both sun exposure and afternoon storm chances climb through the day.
+  </div>`;
+
+  root.innerHTML = html;
+}
+
+async function loadEnvironmentalMetrics(){
+  const updatedEl = document.getElementById("wxUpdated");
+  const root = document.getElementById("wxRoot");
+  updatedEl.textContent = "Refreshing…";
+  root.innerHTML = `<div class="wx-loading">Querying weather and air quality systems…</div>`;
+
+  const results = await Promise.allSettled([
+    loadWeatherBundle(),
+    loadAirNowCurrent(),
+    loadAqiForecast3Day(),
+    loadUvFallback()
+  ]);
+
+  const bundleRes = results[0];
+  const airNowRes = results[1];
+  const aqiFcRes = results[2];
+  const uvFallbackRes = results[3];
+
+  let bundle = bundleRes.status === "fulfilled" ? bundleRes.value : null;
+  const airNow = airNowRes.status === "fulfilled" ? airNowRes.value : null;
+  const aqiForecast = aqiFcRes.status === "fulfilled" ? aqiFcRes.value : [];
+
+  if (!bundle) {
+    root.innerHTML = `<div class="wx-error">Live weather is unavailable right now. Try refresh in a moment.</div>`;
+    updatedEl.textContent = "Last attempt failed at " + new Date().toLocaleTimeString();
+    return;
+  }
+  bundle.ok = true;
+  if ((bundle.current.uvi === null || bundle.current.uvi === undefined) && uvFallbackRes.status === "fulfilled") {
+    bundle.current.uvi = uvFallbackRes.value;
+  }
+
+  renderWeather(bundle, airNow, aqiForecast);
+  updatedEl.textContent = "Last updated " + new Date().toLocaleTimeString() + " · " + bundle.source + (airNow ? " + AirNow" : "") + (aqiForecast.length ? " + Open-Meteo AQI" : "");
+}
+
+loadEnvironmentalMetrics();
+setInterval(loadEnvironmentalMetrics, 15 * 60 * 1000);
+
+/* ===================== FLIGHT STATUS (AviationStack) ===================== */
+const FS_KEY_STORAGE = "aviationstack-api-key";
+const FS_KEY_DEFAULT = "83bed1f1d8a5151bf85a6ab8a5c9f375";
+const FLIGHTS_WATCHED = [
+  { iata: "DL2027", label: "DL 2027", route: "DTW → MCO", date: "2026-07-22", schedDep: "12:15p", schedArr: "2:59p" },
+  { iata: "DL1747", label: "DL 1747", route: "MCO → DTW", date: "2026-07-24", schedDep: "2:13p", schedArr: "5:08p" }
+];
+let fsApiKey = null;
+
+async function saveAviationStackKey(){
+  const input = document.getElementById("fsKeyInput");
+  const key = input.value.trim();
+  if (!key) return;
+  fsApiKey = key;
+  try {
+    await window.storage.set(FS_KEY_STORAGE, key);
+  } catch(e) { console.error("Storage error:", e); }
+  document.getElementById("fsKeyBar").style.display = "none";
+  document.getElementById("fsStatusWrap").style.display = "block";
+  loadFlightStatuses();
+}
+
+function fsChip(status, delayMin){
+  const s = (status || "").toLowerCase();
+  if (s === "cancelled") return { cls: "delayed", text: "Cancelled" };
+  if (s === "diverted") return { cls: "delayed", text: "Diverted" };
+  if (s === "landed") return { cls: "ontime", text: "Landed" };
+  if (delayMin && delayMin >= 15) return { cls: "delayed", text: `Delayed ${delayMin}m` };
+  if (s === "active") return { cls: "ontime", text: "In the air" };
+  if (s === "scheduled") return { cls: "ontime", text: "On time" };
+  return { cls: "unknown", text: status ? status : "Unknown" };
+}
+
+async function fetchOneFlightStatus(flight){
+  const httpsUrl = `https://api.aviationstack.com/v1/flights?access_key=${fsApiKey}&flight_iata=${flight.iata}`;
+  const httpUrl = `http://api.aviationstack.com/v1/flights?access_key=${fsApiKey}&flight_iata=${flight.iata}`;
+  let data;
+  try {
+    data = await fetchJson(httpsUrl);
+  } catch(e) {
+    // AviationStack's free plan only supports HTTP; browsers block this as
+    // mixed content when this page itself is loaded over HTTPS (e.g. in a
+    // hosted preview). Opening the saved .html file directly (file://) avoids
+    // that restriction, which is when this fallback will actually succeed.
+    data = await fetchJson(httpUrl);
+  }
+  if (!data.data || !data.data.length) return { flight, found: false };
+  // Prefer the entry matching our travel date, otherwise take the most recent
+  let match = data.data.find(f => f.flight_date === flight.date) || data.data[0];
+  return { flight, found: true, data: match };
+}
+
+function renderFlightStatuses(results){
+  const root = document.getElementById("fsRoot");
+  let html = "";
+  results.forEach(r => {
+    const f = r.flight;
+    html += `<div class="fs-flight">`;
+    html += `<div class="fs-flight-top">
+      <div>
+        <div class="fs-flight-name">${f.label} · ${f.route}</div>
+        <div class="fs-flight-route">Scheduled ${f.schedDep} → ${f.schedArr} · ${f.date}</div>
+      </div>`;
+
+    if (!r.ok) {
+      html += `<span class="fs-chip unknown">Unavailable</span></div>`;
+      html += `<div class="fs-detail">Couldn't reach AviationStack for this flight.</div></div>`;
+      return;
+    }
+    if (!r.found) {
+      html += `<span class="fs-chip unknown">Not yet tracked</span></div>`;
+      html += `<div class="fs-detail">AviationStack's free tier only surfaces a flight once it's active — check back closer to departure day.</div></div>`;
+      return;
+    }
+
+    const d = r.data;
+    const depDelay = d.departure ? d.departure.delay : null;
+    const arrDelay = d.arrival ? d.arrival.delay : null;
+    const chip = fsChip(d.flight_status, depDelay || arrDelay);
+    html += `<span class="fs-chip ${chip.cls}">${chip.text}</span></div>`;
+
+    let details = [];
+    if (d.departure) {
+      details.push(`Departure gate <b>${d.departure.gate || '—'}</b>, terminal <b>${d.departure.terminal || '—'}</b>${depDelay ? `, delayed <b>${depDelay}m</b>` : ''}`);
+    }
+    if (d.arrival) {
+      details.push(`Arrival gate <b>${d.arrival.gate || '—'}</b>, terminal <b>${d.arrival.terminal || '—'}</b>, baggage <b>${d.arrival.baggage || '—'}</b>${arrDelay ? `, delayed <b>${arrDelay}m</b>` : ''}`);
+    }
+    html += `<div class="fs-detail">${details.join(' · ')}</div></div>`;
+  });
+  root.innerHTML = html;
+}
+
+async function loadFlightStatuses(){
+  if (!fsApiKey) return;
+  const updatedEl = document.getElementById("fsUpdated");
+  const root = document.getElementById("fsRoot");
+  updatedEl.textContent = "Checking flight status…";
+  root.innerHTML = `<div class="wx-loading">Checking with AviationStack…</div>`;
+
+  const settled = await Promise.allSettled(FLIGHTS_WATCHED.map(fetchOneFlightStatus));
+  const results = settled.map((s, i) => {
+    if (s.status === "fulfilled") return { ok: true, ...s.value };
+    return { ok: false, flight: FLIGHTS_WATCHED[i] };
+  });
+
+  renderFlightStatuses(results);
+  updatedEl.textContent = "Last checked " + new Date().toLocaleTimeString();
+}
+
+async function initFlightStatus(){
+  try {
+    const result = await window.storage.get(FS_KEY_STORAGE);
+    if (result && result.value) {
+      fsApiKey = result.value;
+    }
+  } catch(e) {
+    // no key saved yet
+  }
+  if (!fsApiKey) {
+    fsApiKey = FS_KEY_DEFAULT;
+    try { await window.storage.set(FS_KEY_STORAGE, fsApiKey); } catch(e) {}
+  }
+  document.getElementById("fsKeyBar").style.display = "none";
+  document.getElementById("fsStatusWrap").style.display = "block";
+  loadFlightStatuses();
+}
+
+initFlightStatus();
 </script>
 </body>
 </html>
