@@ -4,29 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Orlando Trip Hub — Jul 22–24</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#152238;
-    --navy-soft:#1f3350;
-    --paper:#EEF1EC;
-    --paper-2:#E4E9E3;
-    --panel:#FBFCFA;
-    --line:#D7DED4;
-    --heat:#D9541C;
-    --heat-soft:#F3D9C9;
-    --go:#2F7A56;
-    --go-soft:#D9EBDF;
-    --ink:#1A2418;
-    --ink-dim:#5B665A;
+    /* KPMG brand palette */
+    --kpmg-blue:#00338D;      /* Primary */
+    --medium-blue:#005EB8;
+    --light-blue:#0091DA;
+    --violet:#483698;         /* Secondary */
+    --purple:#470A68;
+    --light-purple:#6D2077;
+    --green:#00A3A1;
+
+    --navy:var(--kpmg-blue);
+    --navy-soft:var(--medium-blue);
+    --paper:#EEF1F6;
+    --paper-2:#E2E8F1;
+    --panel:#FCFDFE;
+    --line:#D3DCE7;
+    --heat:#B8401E;
+    --heat-soft:#F1DACF;
+    --go:var(--green);
+    --go-soft:#D7EFED;
+    --ink:#141B2E;
+    --ink-dim:#5C6478;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     background:var(--paper);
     color:var(--ink);
-    font-family:'Inter',sans-serif;
+    font-family:Arial, Helvetica, sans-serif;
     -webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
@@ -39,33 +46,43 @@
   }
   .hero::after{
     content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;
-    background:radial-gradient(circle, rgba(217,84,28,.35), transparent 70%);
+    background:radial-gradient(circle, rgba(0,145,218,.4), transparent 70%);
+  }
+  .hero::before{
+    content:"";position:absolute;left:-40px;bottom:-70px;width:220px;height:220px;
+    background:radial-gradient(circle, rgba(0,163,161,.28), transparent 70%);
   }
   .eyebrow{
-    font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;
-    text-transform:uppercase;color:#F0B896;margin-bottom:10px;
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:12px;letter-spacing:.14em;
+    text-transform:uppercase;color:#9FD6F2;margin-bottom:10px;
   }
+  .eyebrow .brandmark{color:#fff;font-weight:700;letter-spacing:.02em;}
   .hero h1{
-    font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,42px);
+    font-family:Arial, Helvetica, sans-serif;font-size:clamp(28px,4vw,42px);
     margin:0 0 6px;font-weight:700;letter-spacing:-.01em;
   }
   .hero .sub{color:#C7D0DE;font-size:15px;max-width:520px;}
   .hero-meta{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
-  .hero-meta .m-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:#8FA3BE;text-transform:uppercase;}
-  .hero-meta .m-val{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;margin-top:3px;}
+  .hero-meta .m-label{font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:10.5px;letter-spacing:.1em;color:#A9C7E6;text-transform:uppercase;}
+  .hero-meta .m-val{font-family:Arial, Helvetica, sans-serif;font-size:20px;font-weight:600;margin-top:3px;}
 
   /* GRID */
   .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;}
   @media (max-width:860px){.grid{grid-template-columns:1fr;}}
 
   .card{
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--light-blue);
+    border-radius:10px;
     padding:22px 22px 24px;margin-bottom:20px;
   }
+  .card[data-accent="blue"]{border-left-color:var(--medium-blue);}
+  .card[data-accent="green"]{border-left-color:var(--green);}
+  .card[data-accent="purple"]{border-left-color:var(--light-purple);}
+  .card[data-accent="navy"]{border-left-color:var(--kpmg-blue);}
   .card h2{
-    font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;
+    font-family:Arial, Helvetica, sans-serif;font-size:15px;font-weight:700;
     margin:0;display:flex;align-items:center;gap:8px;letter-spacing:-.01em;
-    cursor:pointer;user-select:none;padding-bottom:16px;
+    cursor:pointer;user-select:none;padding-bottom:16px;color:var(--kpmg-blue);
   }
   .card.collapsed h2{padding-bottom:0;}
   .card h2 .ic{font-size:16px;}
@@ -84,7 +101,7 @@
   /* SPLIT-FLAP FLIGHT BOARD */
   .board{
     background:var(--navy);border-radius:10px;overflow:hidden;
-    font-family:'IBM Plex Mono',monospace;color:#EAEFE8;
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;color:#E8EEF7;
   }
   .board-row{
     display:grid;grid-template-columns:70px 1fr 90px 90px;gap:0;
@@ -92,14 +109,14 @@
     font-size:13px;align-items:center;
   }
   .board-row:last-child{border-bottom:none;}
-  .board-row.head{color:#8FA3BE;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:8px;}
+  .board-row.head{color:#A9C7E6;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:8px;}
   .flap{background:#0E1626;padding:3px 8px;border-radius:4px;display:inline-block;letter-spacing:.03em;}
   .tag{
     font-size:10px;padding:2px 7px;border-radius:100px;letter-spacing:.06em;
     text-transform:uppercase;font-weight:600;
   }
-  .tag.out{background:#2C4A38;color:#8FE0B0;}
-  .tag.ret{background:#3B2C1E;color:#F0B896;}
+  .tag.out{background:rgba(0,163,161,.28);color:#7EE7E1;}
+  .tag.ret{background:rgba(72,54,152,.32);color:#C9BCE8;}
 
   /* HEAT ADVISORY */
   .advisory{
@@ -110,13 +127,13 @@
     width:10px;height:10px;border-radius:50%;background:var(--heat);margin-top:5px;flex:none;
     box-shadow:0 0 0 4px rgba(217,84,28,.18);
   }
-  .advisory b{color:#8A3210;font-family:'Space Grotesk',sans-serif;}
+  .advisory b{color:#8A3210;font-family:Arial, Helvetica, sans-serif;}
   .advisory p{margin:4px 0 0;font-size:13.5px;color:#5B3520;line-height:1.5;}
 
   .routes{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
   .route-btn{
     background:var(--navy);color:#fff;border:none;border-radius:8px;
-    padding:9px 14px;font-size:12.5px;font-family:'Inter',sans-serif;font-weight:500;
+    padding:9px 14px;font-size:12.5px;font-family:Arial, Helvetica, sans-serif;font-weight:500;
     cursor:default;
   }
   .route-btn.alt{background:#fff;color:var(--navy);border:1px solid var(--line);}
@@ -126,7 +143,7 @@
     background:var(--navy);color:#fff;border-radius:14px;padding:0;overflow:hidden;
   }
   .pack-head{
-    background:linear-gradient(120deg,#1B2A4A,#274268);padding:20px 22px 18px;
+    background:linear-gradient(120deg,var(--kpmg-blue),var(--medium-blue));padding:20px 22px 18px;
     cursor:pointer;user-select:none;position:relative;
   }
   .pack-head .chev{
@@ -141,21 +158,21 @@
   }
   .pack-card.collapsed .pack-body{max-height:0 !important;opacity:0;padding-top:0;padding-bottom:0;}
   .pack-tag{
-    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;
-    text-transform:uppercase;background:rgba(255,255,255,.12);color:#F0B896;
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;background:rgba(255,255,255,.12);color:#9FD6F2;
     display:inline-block;padding:4px 9px;border-radius:100px;margin-bottom:10px;
   }
-  .pack-head h2{font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0 0 4px;font-weight:700;}
+  .pack-head h2{font-family:Arial, Helvetica, sans-serif;font-size:20px;margin:0 0 4px;font-weight:700;}
   .pack-head .dates{font-size:12.5px;color:#AEBBD0;}
   .prog-wrap{margin-top:14px;}
   .prog-bar{height:7px;background:rgba(255,255,255,.15);border-radius:100px;overflow:hidden;}
   .prog-fill{height:100%;background:var(--go);width:0%;transition:width .35s ease;}
-  .prog-text{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#C7D0DE;margin-top:6px;}
+  .prog-text{font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:11.5px;color:#C7D0DE;margin-top:6px;}
 
   .pack-body{padding:6px 22px 20px;background:#fff;color:var(--ink);}
   .pgroup{margin-top:16px;}
   .pgroup-title{
-    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:11px;letter-spacing:.1em;
     text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;
     display:flex;align-items:center;gap:8px;
   }
@@ -185,18 +202,18 @@
   .reset-btn{
     background:none;border:1px solid var(--line);color:var(--ink-dim);
     font-size:11.5px;padding:6px 12px;border-radius:100px;cursor:pointer;
-    font-family:'Inter',sans-serif;
+    font-family:Arial, Helvetica, sans-serif;
   }
   .reset-btn:hover{border-color:var(--heat);color:var(--heat);}
 
   /* WEATHER WIDGET */
   .wx-now{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
-  .wx-big{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;line-height:1;color:var(--navy);}
+  .wx-big{font-family:Arial, Helvetica, sans-serif;font-size:44px;font-weight:700;line-height:1;color:var(--navy);}
   .wx-cond{font-size:12.5px;color:var(--ink-dim);margin-top:6px;}
   .wx-stats{display:flex;gap:18px;}
-  .wx-stat-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);}
-  .wx-stat-val{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;margin-top:3px;}
-  .wx-stat-val span{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;margin-left:3px;padding:2px 6px;border-radius:100px;}
+  .wx-stat-label{font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);}
+  .wx-stat-val{font-family:Arial, Helvetica, sans-serif;font-size:18px;font-weight:600;margin-top:3px;}
+  .wx-stat-val span{font-family:Arial, Helvetica, sans-serif;font-size:10.5px;font-weight:600;margin-left:3px;padding:2px 6px;border-radius:100px;}
   .heat-val span{background:var(--heat-soft);color:#8A3210;}
   .go-val span{background:var(--go-soft);color:#1F5C3F;}
 
@@ -204,20 +221,20 @@
   .fc-day{
     background:var(--paper-2);border-radius:10px;padding:12px 8px;text-align:center;
   }
-  .fc-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);}
+  .fc-label{font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);}
   .fc-ic{font-size:22px;margin:6px 0 4px;}
-  .fc-hi{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;}
+  .fc-hi{font-family:Arial, Helvetica, sans-serif;font-size:16px;font-weight:700;}
   .fc-lo{font-size:12px;color:var(--ink-dim);}
   .fc-pop{font-size:10.5px;color:#2C6FA0;margin-top:3px;}
 
   .wx-refresh{
     margin-left:auto;background:none;border:1px solid var(--line);color:var(--ink-dim);
     font-size:10.5px;padding:4px 10px;border-radius:100px;cursor:pointer;
-    font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.05em;
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;text-transform:uppercase;letter-spacing:.05em;
   }
   .wx-refresh:hover{border-color:var(--navy);color:var(--navy);}
   .wx-updated{
-    font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-dim);
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:10.5px;color:var(--ink-dim);
     margin-bottom:12px;
   }
   .wx-loading{font-size:12.5px;color:var(--ink-dim);text-align:center;padding:14px 0;font-style:italic;}
@@ -231,13 +248,13 @@
     margin-top:16px;background:var(--paper-2);border-radius:10px;padding:12px 14px;
   }
   .fs-key-label{
-    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:10.5px;letter-spacing:.08em;
     text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;
   }
   .fs-key-row{display:flex;gap:8px;}
   .fs-input{
     flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px;
-    font-size:12.5px;font-family:'Inter',sans-serif;background:#fff;color:var(--ink);
+    font-size:12.5px;font-family:Arial, Helvetica, sans-serif;background:#fff;color:var(--ink);
   }
   .fs-save-btn{
     background:var(--navy);color:#fff;border:none;border-radius:8px;
@@ -246,7 +263,7 @@
   .fs-key-note{font-size:11px;color:var(--ink-dim);margin-top:8px;}
   .fs-key-note a{color:var(--navy);}
   .fs-updated{
-    font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-dim);
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:10.5px;color:var(--ink-dim);
     margin:16px 0 10px;
   }
   .fs-flight{
@@ -254,10 +271,10 @@
   }
   .fs-flight:last-child{margin-bottom:0;}
   .fs-flight-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-  .fs-flight-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;}
+  .fs-flight-name{font-family:Arial, Helvetica, sans-serif;font-weight:700;font-size:14px;}
   .fs-flight-route{font-size:11.5px;color:var(--ink-dim);margin-top:2px;}
   .fs-chip{
-    font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;font-size:10.5px;font-weight:600;
     padding:4px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:.04em;
     flex:none;
   }
@@ -269,7 +286,7 @@
 
   .footer-note{
     margin-top:6px;font-size:11.5px;color:var(--ink-dim);text-align:center;
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   }
 </style>
 </head>
@@ -277,7 +294,7 @@
 <div class="wrap">
 
   <div class="hero">
-    <div class="eyebrow">Trip Dossier · KPMG AcG In-Person</div>
+    <div class="eyebrow"><span class="brandmark">KPMG</span> · Trip Dossier · AcG In-Person</div>
     <h1>Orlando, FL</h1>
     <div class="sub">Three days on campus for the AcG all in-person meeting — with early runs squeezed in before the heat wins.</div>
     <div class="hero-meta">
@@ -305,7 +322,7 @@
         </div>
       </div>
 
-      <div class="card" data-card>
+      <div class="card" data-card data-accent="blue">
         <h2 onclick="toggleCard(this)"><span class="ic">✈️</span> Flights
           <span class="h2-controls">
             <button class="wx-refresh" id="fsRefreshBtn" onclick="event.stopPropagation(); loadFlightStatuses();">Refresh</button>
@@ -350,7 +367,7 @@
         </div>
       </div>
 
-      <div class="card" data-card>
+      <div class="card" data-card data-accent="green">
         <h2 onclick="toggleCard(this)"><span class="ic">🏃</span> Running &amp; Fitness<span class="chev">▾</span></h2>
         <div class="card-body">
           <div class="advisory">
@@ -368,7 +385,7 @@
         </div>
       </div>
 
-      <div class="card" data-card>
+      <div class="card" data-card data-accent="purple">
         <h2 onclick="toggleCard(this)"><span class="ic">📋</span> Meeting Notes<span class="chev">▾</span></h2>
         <div class="card-body">
           <div class="weather-note" style="margin-top:0;">
@@ -740,9 +757,15 @@ async function fetchOneFlightStatus(flight){
     // that restriction, which is when this fallback will actually succeed.
     data = await fetchJson(httpUrl);
   }
-  if (!data.data || !data.data.length) return { flight, found: false };
-  // Prefer the entry matching our travel date, otherwise take the most recent
-  let match = data.data.find(f => f.flight_date === flight.date) || data.data[0];
+  if (!data.data || !data.data.length) return { flight, found: false, reason: "none" };
+  // AviationStack's free tier does not support querying by flight_date — a
+  // flight_iata-only query returns whatever occurrence of that flight number
+  // is in its current window (often a past or unrelated date), not
+  // necessarily our travel date. Silently taking the first result would show
+  // real-looking but wrong delay/gate data for a different day's flight, so
+  // we only accept a result whose own flight_date actually matches the trip.
+  const match = data.data.find(f => f.flight_date === flight.date);
+  if (!match) return { flight, found: false, reason: "date-mismatch", available: data.data.map(f => f.flight_date) };
   return { flight, found: true, data: match };
 }
 
@@ -764,8 +787,12 @@ function renderFlightStatuses(results){
       return;
     }
     if (!r.found) {
+      let msg = "AviationStack's free tier only surfaces a flight once it's active — check back closer to departure day.";
+      if (r.reason === "date-mismatch" && r.available && r.available.length) {
+        msg = `AviationStack only has this flight number for ${r.available.join(", ")} right now, not ${f.date} — that's not your flight, so we're not showing it. Check the Delta app for the authoritative status.`;
+      }
       html += `<span class="fs-chip unknown">Not yet tracked</span></div>`;
-      html += `<div class="fs-detail">AviationStack's free tier only surfaces a flight once it's active — check back closer to departure day.</div></div>`;
+      html += `<div class="fs-detail">${msg}</div></div>`;
       return;
     }
 
