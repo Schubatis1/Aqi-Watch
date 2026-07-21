@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orlando Trip Hub — Jul 22–24</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#152238;
+    --navy-soft:#1f3350;
+    --paper:#EEF1EC;
+    --paper-2:#E4E9E3;
+    --panel:#FBFCFA;
+    --line:#D7DED4;
+    --heat:#D9541C;
+    --heat-soft:#F3D9C9;
+    --go:#2F7A56;
+    --go-soft:#D9EBDF;
+    --ink:#1A2418;
+    --ink-dim:#5B665A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
+
+  /* HERO */
+  .hero{
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-soft) 100%);
+    color:#fff;border-radius:18px;padding:32px 34px;position:relative;overflow:hidden;
+    margin-bottom:22px;
+  }
+  .hero::after{
+    content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;
+    background:radial-gradient(circle, rgba(217,84,28,.35), transparent 70%);
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;
+    text-transform:uppercase;color:#F0B896;margin-bottom:10px;
+  }
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,42px);
+    margin:0 0 6px;font-weight:700;letter-spacing:-.01em;
+  }
+  .hero .sub{color:#C7D0DE;font-size:15px;max-width:520px;}
+  .hero-meta{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
+  .hero-meta .m-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:#8FA3BE;text-transform:uppercase;}
+  .hero-meta .m-val{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;margin-top:3px;}
+
+  /* GRID */
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;}
+  @media (max-width:860px){.grid{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:22px 22px 24px;margin-bottom:20px;
+  }
+  .card h2{
+    font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;
+    margin:0 0 16px;display:flex;align-items:center;gap:8px;letter-spacing:-.01em;
+  }
+  .card h2 .ic{font-size:16px;}
+
+  /* SPLIT-FLAP FLIGHT BOARD */
+  .board{
+    background:var(--navy);border-radius:10px;overflow:hidden;
+    font-family:'IBM Plex Mono',monospace;color:#EAEFE8;
+  }
+  .board-row{
+    display:grid;grid-template-columns:70px 1fr 90px 90px;gap:0;
+    padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);
+    font-size:13px;align-items:center;
+  }
+  .board-row:last-child{border-bottom:none;}
+  .board-row.head{color:#8FA3BE;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding-bottom:8px;}
+  .flap{background:#0E1626;padding:3px 8px;border-radius:4px;display:inline-block;letter-spacing:.03em;}
+  .tag{
+    font-size:10px;padding:2px 7px;border-radius:100px;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:600;
+  }
+  .tag.out{background:#2C4A38;color:#8FE0B0;}
+  .tag.ret{background:#3B2C1E;color:#F0B896;}
+
+  /* HEAT ADVISORY */
+  .advisory{
+    background:var(--heat-soft);border:1px solid #E8B393;border-radius:10px;
+    padding:16px 18px;display:flex;gap:14px;align-items:flex-start;
+  }
+  .advisory .dot{
+    width:10px;height:10px;border-radius:50%;background:var(--heat);margin-top:5px;flex:none;
+    box-shadow:0 0 0 4px rgba(217,84,28,.18);
+  }
+  .advisory b{color:#8A3210;font-family:'Space Grotesk',sans-serif;}
+  .advisory p{margin:4px 0 0;font-size:13.5px;color:#5B3520;line-height:1.5;}
+
+  .routes{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  .route-btn{
+    background:var(--navy);color:#fff;border:none;border-radius:8px;
+    padding:9px 14px;font-size:12.5px;font-family:'Inter',sans-serif;font-weight:500;
+    cursor:default;
+  }
+  .route-btn.alt{background:#fff;color:var(--navy);border:1px solid var(--line);}
+
+  /* PACKING PANEL */
+  .pack-card{
+    background:var(--navy);color:#fff;border-radius:14px;padding:0;overflow:hidden;
+  }
+  .pack-head{
+    background:linear-gradient(120deg,#1B2A4A,#274268);padding:20px 22px 18px;
+  }
+  .pack-tag{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;background:rgba(255,255,255,.12);color:#F0B896;
+    display:inline-block;padding:4px 9px;border-radius:100px;margin-bottom:10px;
+  }
+  .pack-head h2{font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0 0 4px;font-weight:700;}
+  .pack-head .dates{font-size:12.5px;color:#AEBBD0;}
+  .prog-wrap{margin-top:14px;}
+  .prog-bar{height:7px;background:rgba(255,255,255,.15);border-radius:100px;overflow:hidden;}
+  .prog-fill{height:100%;background:var(--go);width:0%;transition:width .35s ease;}
+  .prog-text{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#C7D0DE;margin-top:6px;}
+
+  .pack-body{padding:6px 22px 20px;background:#fff;color:var(--ink);}
+  .pgroup{margin-top:16px;}
+  .pgroup-title{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .pgroup-title::after{content:"";flex:1;height:1px;background:var(--line);}
+  .pitem{
+    display:flex;align-items:center;gap:10px;padding:7px 4px;border-radius:8px;
+    cursor:pointer;user-select:none;transition:background .15s;
+  }
+  .pitem:hover{background:var(--paper-2);}
+  .check{
+    width:18px;height:18px;border-radius:5px;border:1.5px solid #B7C0B4;flex:none;
+    display:flex;align-items:center;justify-content:center;transition:all .15s;
+  }
+  .pitem.done .check{background:var(--go);border-color:var(--go);}
+  .check svg{opacity:0;width:11px;height:11px;transition:opacity .1s;}
+  .pitem.done .check svg{opacity:1;}
+  .plabel{font-size:13.5px;}
+  .pitem.done .plabel{color:var(--ink-dim);text-decoration:line-through;text-decoration-color:#B7C0B4;}
+
+  .weather-note{
+    margin-top:18px;background:var(--paper-2);border-radius:10px;padding:14px 16px;
+    font-size:12.5px;line-height:1.55;color:var(--ink-dim);
+  }
+  .weather-note b{color:var(--ink);}
+
+  .reset-row{margin-top:16px;text-align:right;}
+  .reset-btn{
+    background:none;border:1px solid var(--line);color:var(--ink-dim);
+    font-size:11.5px;padding:6px 12px;border-radius:100px;cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .reset-btn:hover{border-color:var(--heat);color:var(--heat);}
+
+  .footer-note{
+    margin-top:6px;font-size:11.5px;color:var(--ink-dim);text-align:center;
+    font-family:'IBM Plex Mono',monospace;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Trip Dossier · KPMG AcG In-Person</div>
+    <h1>Orlando, FL</h1>
+    <div class="sub">Three days on campus for the AcG all in-person meeting — with early runs squeezed in before the heat wins.</div>
+    <div class="hero-meta">
+      <div><div class="m-label">Dates</div><div class="m-val">Jul 22–24, 2026</div></div>
+      <div><div class="m-label">Outbound</div><div class="m-val">DL 2027 · 12:15p</div></div>
+      <div><div class="m-label">Return</div><div class="m-val">DL 1747 · 2:13p</div></div>
+      <div><div class="m-label">Feels like</div><div class="m-val" id="feelsLike">104°F</div></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2><span class="ic">✈️</span> Flights</h2>
+        <div class="board">
+          <div class="board-row head">
+            <div>Dir</div><div>Route</div><div>Depart</div><div>Arrive</div>
+          </div>
+          <div class="board-row">
+            <div><span class="tag out">Out</span></div>
+            <div><span class="flap">DTW → MCO</span></div>
+            <div><span class="flap">12:15p</span></div>
+            <div><span class="flap">2:59p</span></div>
+          </div>
+          <div class="board-row">
+            <div><span class="tag ret">Ret</span></div>
+            <div><span class="flap">MCO → DTW</span></div>
+            <div><span class="flap">2:13p</span></div>
+            <div><span class="flap">5:08p</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="ic">🏃</span> Running &amp; Fitness</h2>
+        <div class="advisory">
+          <div class="dot"></div>
+          <div>
+            <b>Avoid midday.</b>
+            <p>High heat and dew point through the afternoon — get out at dawn, or fall back to the hotel gym if a session slips.</p>
+          </div>
+        </div>
+        <div class="routes">
+          <div class="route-btn">Lake Nona Trail Loop · ~3mi</div>
+          <div class="route-btn">Laureate Park Loop · ~5mi</div>
+          <div class="route-btn alt">Fitness Center + Pool (on-site)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="ic">📋</span> Meeting Notes</h2>
+        <div class="weather-note" style="margin-top:0;">
+          AcG All In-Person Meeting — DPP Accounting Group session. Leave campus by ~12:15p on 7/24 to make the return flight. Confirm room/times on arrival.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="pack-card">
+        <div class="pack-head">
+          <div class="pack-tag">🔒 Packing</div>
+          <h2>Orlando Packing Checklist</h2>
+          <div class="dates">Trip dates: July 22–24, 2026</div>
+          <div class="prog-wrap">
+            <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+            <div class="prog-text" id="progText">0 of 0 items packed</div>
+          </div>
+        </div>
+        <div class="pack-body" id="packBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Tap any item to check it off — saved automatically on this device.</div>
+</div>
+
+<script>
+const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5L9 17.5L20 6.5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const groups = [
+  { title: "Running", items: ["2 running shirts","2 pairs shorts","Running shoes","Socks (3 pairs)","Sunglasses + hat","Garmin + HR monitor","Shokz headphones","Hydration / Nuun tabs"] },
+  { title: "Casual Clothing", items: ["Pajamas","T-shirts","Casual collared shirt","Shorts","Sweatshirt (cool A/C)","Jeans"] },
+  { title: "Work Clothes (business casual)", items: ["2 button-down shirts","Slacks / chinos","Sports coat (optional)","Belt","Dress shoes","Dress socks"] },
+  { title: "Misc / Basics", items: ["Underwear (4)","Undershirts","Toiletries + medicines","Wallet + KPMG badge"] },
+  { title: "Backpack / Tech", items: ["Laptop + charger","Chargers (USB-C, Shokz, Garmin)","iPad + headphones","Water bottle + Nuun","Personal + work phone","Keys"] }
+];
+
+const STORAGE_KEY = "orlando-trip-2026-packing";
+let state = {};
+
+function allItemIds(){
+  const ids = [];
+  groups.forEach((g,gi) => g.items.forEach((_,ii) => ids.push(gi+"-"+ii)));
+  return ids;
+}
+
+function render(){
+  const body = document.getElementById("packBody");
+  body.innerHTML = "";
+  groups.forEach((g, gi) => {
+    const wrap = document.createElement("div");
+    wrap.className = "pgroup";
+    const t = document.createElement("div");
+    t.className = "pgroup-title";
+    t.textContent = g.title;
+    wrap.appendChild(t);
+    g.items.forEach((label, ii) => {
+      const id = gi+"-"+ii;
+      const row = document.createElement("div");
+      row.className = "pitem" + (state[id] ? " done" : "");
+      row.innerHTML = `<div class="check">${CHECK_SVG}</div><div class="plabel">${label}</div>`;
+      row.onclick = () => toggle(id);
+      wrap.appendChild(row);
+    });
+    body.appendChild(wrap);
+  });
+
+  const total = allItemIds().length;
+  const done = allItemIds().filter(id => state[id]).length;
+  document.getElementById("progFill").style.width = (total ? (done/total*100) : 0) + "%";
+  document.getElementById("progText").textContent = `${done} of ${total} items packed`;
+}
+
+async function toggle(id){
+  state[id] = !state[id];
+  render();
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) { console.error("Storage error:", e); }
+}
+
+async function init(){
+  try {
+    const result = await window.storage.get(STORAGE_KEY);
+    if (result && result.value) state = JSON.parse(result.value);
+  } catch(e) {
+    state = {};
+  }
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
