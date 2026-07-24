@@ -814,7 +814,7 @@
     <header class="header">
       <div class="header-titles">
         <h1>Curated Properties</h1>
-        <p id="subheadingText">11 curated listings in Royal Oak, Michigan</p>
+        <p id="subheadingText">19 curated listings in Royal Oak, Michigan</p>
       </div>
       <button class="btn-primary" onclick="exportRoute()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
@@ -868,7 +868,7 @@
         </div>
 
         <div class="filter-meta">
-          <span class="result-count" id="resultCount">11 properties</span>
+          <span class="result-count" id="resultCount">19 properties</span>
         </div>
       </div>
     </div>
@@ -973,7 +973,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
   <script>
-    // Original Property Dataset
+    // Complete Property Dataset (19 Listings)
     let properties = [
       {
         id: "1",
@@ -1150,139 +1150,135 @@
         notes: "Non-bungalow ✓. 4 full bedrooms above grade, south of 13 Mile Rd.",
         url: "https://www.zillow.com/homes/2211-N-Main-St-Royal-Oak,-MI-48073_rb/",
         userRating: 3, pros: "", cons: ""
+      },
+      {
+        id: "12",
+        address: "116 S Kenwood Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4868, lng: -83.1412,
+        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
+        day: "Sun", openHouse: "1:00–3:00 PM",
+        price: "$489,000", rawPrice: 489000,
+        beds: 3, baths: 2.0,
+        sqft: "2,050", rawSqft: 2050,
+        style: "Traditional", isBungalow: false,
+        notes: "Non-bungalow ✓. Near Downtown Royal Oak; Sunday open house.",
+        url: "https://www.zillow.com/homedetails/116-S-Kenwood-Ave-Royal-Oak-MI-48067/24650296_zpid/",
+        userRating: 4, pros: "", cons: ""
+      },
+      {
+        id: "13",
+        address: "827 Gardenia Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4842, lng: -83.1365,
+        priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "Sun", openHouse: "12:00–2:00 PM",
+        price: "$415,000", rawPrice: 415000,
+        beds: 3, baths: 2.0,
+        sqft: "1,820", rawSqft: 1820,
+        style: "Craftsman", isBungalow: false,
+        notes: "Non-bungalow ✓. Updated interior; Sunday open house.",
+        url: "https://www.zillow.com/homes/827-Gardenia-Ave-Royal-Oak,-MI-48067_rb/",
+        userRating: 4, pros: "", cons: ""
+      },
+      {
+        id: "14",
+        address: "2925 Bembridge Rd",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5165, lng: -83.1702,
+        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
+        day: "Sun", openHouse: "2:00–4:00 PM",
+        price: "$545,000", rawPrice: 545000,
+        beds: 4, baths: 2.5,
+        sqft: "2,450", rawSqft: 2450,
+        style: "Colonial", isBungalow: false,
+        notes: "Non-bungalow ✓. Spacious layout in North Royal Oak; Sunday open house.",
+        url: "https://www.zillow.com/homedetails/2925-Bembridge-Rd-Royal-Oak-MI-48073/24621416_zpid/",
+        userRating: 5, pros: "", cons: ""
+      },
+      {
+        id: "15",
+        address: "1207 Irving Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4818, lng: -83.1332,
+        priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "Sun", openHouse: "1:00–3:00 PM",
+        price: "$450,000", rawPrice: 450000,
+        beds: 3, baths: 2.0,
+        sqft: "1,950", rawSqft: 1950,
+        style: "2-Story", isBungalow: false,
+        notes: "Non-bungalow ✓. Added Sunday open house schedule.",
+        url: "https://www.zillow.com/homes/1207-Irving-Ave-Royal-Oak,-MI-48067_rb/",
+        userRating: 4, pros: "", cons: ""
+      },
+      {
+        id: "16",
+        address: "223 N Alexander Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4886, lng: -83.1552,
+        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+        day: "Sun", openHouse: "12:00–2:00 PM",
+        price: "$350,000", rawPrice: 350000,
+        beds: 3, baths: 1.5,
+        sqft: "1,600", rawSqft: 1600,
+        style: "BUNGALOW", isBungalow: true,
+        notes: "⚠️ Architectural style = Bungalow — excludes per criteria.",
+        url: "https://www.zillow.com/homes/223-N-Alexander-Ave-Royal-Oak,-MI-48067_rb/",
+        userRating: 2, pros: "", cons: ""
+      },
+      {
+        id: "17",
+        address: "3210 Harvard Rd",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5182, lng: -83.1724,
+        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
+        day: "Sun", openHouse: "1:00–4:00 PM",
+        price: "$520,000", rawPrice: 520000,
+        beds: 4, baths: 2.5,
+        sqft: "2,300", rawSqft: 2300,
+        style: "Colonial", isBungalow: false,
+        notes: "Non-bungalow ✓. Quiet neighborhood setting; Sunday open house.",
+        url: "https://www.zillow.com/homes/3210-Harvard-Rd-Royal-Oak,-MI-48073_rb/",
+        userRating: 5, pros: "", cons: ""
+      },
+      {
+        id: "18",
+        address: "2436 N Vermont Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5082, lng: -83.1368,
+        priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "Sun", openHouse: "2:00–4:00 PM",
+        price: "$439,000", rawPrice: 439000,
+        beds: 3, baths: 2.0,
+        sqft: "1,880", rawSqft: 1880,
+        style: "Split-Level", isBungalow: false,
+        notes: "Non-bungalow ✓. Sunday open house scheduled.",
+        url: "https://www.zillow.com/homes/2436-N-Vermont-Ave-Royal-Oak,-MI-48073_rb/",
+        userRating: 3, pros: "", cons: ""
+      },
+      {
+        id: "19",
+        address: "1102 N Lafayette Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4926, lng: -83.1462,
+        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
+        day: "Sun", openHouse: "1:00–3:00 PM",
+        price: "$498,000", rawPrice: 498000,
+        beds: 3, baths: 2.0,
+        sqft: "2,120", rawSqft: 2120,
+        style: "Craftsman", isBungalow: false,
+        notes: "Non-bungalow ✓. Prime Lafayette corridor location; Sunday open house.",
+        url: "https://www.zillow.com/homes/1102-N-Lafayette-Ave-Royal-Oak,-MI-48067_rb/",
+        userRating: 5, pros: "", cons: ""
       }
-      // Append these items to the properties array (IDs 12–19)
-properties.push(
-  {
-    id: "12",
-    address: "116 S Kenwood Ave",
-    city: "Royal Oak, MI",
-    zip: "48067",
-    lat: 42.4868, lng: -83.1412,
-    priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
-    day: "Sun", openHouse: "1:00–3:00 PM",
-    price: "$489,000", rawPrice: 489000,
-    beds: 3, baths: 2.0,
-    sqft: "2,050", rawSqft: 2050,
-    style: "Traditional", isBungalow: false,
-    notes: "Non-bungalow ✓. Near Downtown Royal Oak; Sunday open house.",
-    url: "https://www.zillow.com/homedetails/116-S-Kenwood-Ave-Royal-Oak-MI-48067/24650296_zpid/",
-    userRating: 4, pros: "", cons: ""
-  },
-  {
-    id: "13",
-    address: "827 Gardenia Ave",
-    city: "Royal Oak, MI",
-    zip: "48067",
-    lat: 42.4842, lng: -83.1365,
-    priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
-    day: "Sun", openHouse: "12:00–2:00 PM",
-    price: "$415,000", rawPrice: 415000,
-    beds: 3, baths: 2.0,
-    sqft: "1,820", rawSqft: 1820,
-    style: "Craftsman", isBungalow: false,
-    notes: "Non-bungalow ✓. Updated interior; Sunday open house.",
-    url: "https://www.zillow.com/homes/827-Gardenia-Ave-Royal-Oak,-MI-48067_rb/",
-    userRating: 4, pros: "", cons: ""
-  },
-  {
-    id: "14",
-    address: "2925 Bembridge Rd",
-    city: "Royal Oak, MI",
-    zip: "48073",
-    lat: 42.5165, lng: -83.1702,
-    priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
-    day: "Sun", openHouse: "2:00–4:00 PM",
-    price: "$545,000", rawPrice: 545000,
-    beds: 4, baths: 2.5,
-    sqft: "2,450", rawSqft: 2450,
-    style: "Colonial", isBungalow: false,
-    notes: "Non-bungalow ✓. Spacious layout in North Royal Oak; Sunday open house.",
-    url: "https://www.zillow.com/homedetails/2925-Bembridge-Rd-Royal-Oak-MI-48073/24621416_zpid/",
-    userRating: 5, pros: "", cons: ""
-  },
-  {
-    id: "15",
-    address: "1207 Irving Ave",
-    city: "Royal Oak, MI",
-    zip: "48067",
-    lat: 42.4818, lng: -83.1332,
-    priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
-    day: "Sun", openHouse: "1:00–3:00 PM",
-    price: "$450,000", rawPrice: 450000,
-    beds: 3, baths: 2.0,
-    sqft: "1,950", rawSqft: 1950,
-    style: "2-Story", isBungalow: false,
-    notes: "Non-bungalow ✓. Added Sunday open house schedule.",
-    url: "https://www.zillow.com/homes/1207-Irving-Ave-Royal-Oak,-MI-48067_rb/",
-    userRating: 4, pros: "", cons: ""
-  },
-  {
-    id: "16",
-    address: "223 N Alexander Ave",
-    city: "Royal Oak, MI",
-    zip: "48067",
-    lat: 42.4886, lng: -83.1552,
-    priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
-    day: "Sun", openHouse: "12:00–2:00 PM",
-    price: "$350,000", rawPrice: 350000,
-    beds: 3, baths: 1.5,
-    sqft: "1,600", rawSqft: 1600,
-    style: "BUNGALOW", isBungalow: true,
-    notes: "⚠️ Architectural style = Bungalow — excludes per criteria.",
-    url: "https://www.zillow.com/homes/223-N-Alexander-Ave-Royal-Oak,-MI-48067_rb/",
-    userRating: 2, pros: "", cons: ""
-  },
-  {
-    id: "17",
-    address: "3210 Harvard Rd",
-    city: "Royal Oak, MI",
-    zip: "48073",
-    lat: 42.5182, lng: -83.1724,
-    priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
-    day: "Sun", openHouse: "1:00–4:00 PM",
-    price: "$520,000", rawPrice: 520000,
-    beds: 4, baths: 2.5,
-    sqft: "2,300", rawSqft: 2300,
-    style: "Colonial", isBungalow: false,
-    notes: "Non-bungalow ✓. Quiet neighborhood setting; Sunday open house.",
-    url: "https://www.zillow.com/homes/3210-Harvard-Rd-Royal-Oak,-MI-48073_rb/",
-    userRating: 5, pros: "", cons: ""
-  },
-  {
-    id: "18",
-    address: "2436 N Vermont Ave",
-    city: "Royal Oak, MI",
-    zip: "48073",
-    lat: 42.5082, lng: -83.1368,
-    priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
-    day: "Sun", openHouse: "2:00–4:00 PM",
-    price: "$439,000", rawPrice: 439000,
-    beds: 3, baths: 2.0,
-    sqft: "1,880", rawSqft: 1880,
-    style: "Split-Level", isBungalow: false,
-    notes: "Non-bungalow ✓. Sunday open house scheduled.",
-    url: "https://www.zillow.com/homes/2436-N-Vermont-Ave-Royal-Oak,-MI-48073_rb/",
-    userRating: 3, pros: "", cons: ""
-  },
-  {
-    id: "19",
-    address: "1102 N Lafayette Ave",
-    city: "Royal Oak, MI",
-    zip: "48067",
-    lat: 42.4926, lng: -83.1462,
-    priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
-    day: "Sun", openHouse: "1:00–3:00 PM",
-    price: "$498,000", rawPrice: 498000,
-    beds: 3, baths: 2.0,
-    sqft: "2,120", rawSqft: 2120,
-    style: "Craftsman", isBungalow: false,
-    notes: "Non-bungalow ✓. Prime Lafayette corridor location; Sunday open house.",
-    url: "https://www.zillow.com/homes/1102-N-Lafayette-Ave-Royal-Oak,-MI-48067_rb/",
-    userRating: 5, pros: "", cons: ""
-  }
-);
-
     ];
 
     // Compute Price Per Sq Ft & Load LocalStorage
@@ -1400,7 +1396,7 @@ properties.push(
             </div>
 
             <div class="card-open-house">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/></svg>
               ${item.day === '—' ? 'No Open House Announced' : `Open ${item.day}: ${item.openHouse}`}
             </div>
 
