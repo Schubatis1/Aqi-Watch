@@ -3,650 +3,223 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>House Hunting Command Center</title>
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <title>Curated Properties</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  
   <style>
+    :root {
+      --bg: #faf8f5;
+      --card-bg: #ffffff;
+      --text-main: #1f2421;
+      --text-muted: #707571;
+      --accent-top: #2a5240;
+      --badge-top-bg: #e8f0ec;
+      --accent-good: #8c6d46;
+      --badge-good-bg: #f7f3ed;
+      --accent-other: #5c626b;
+      --badge-other-bg: #f0f2f5;
+      --border: #e8e6e1;
+    }
+
     * {
       box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
     }
+
     body {
-      margin: 0;
-      padding: 20px;
-      background-color: #f8fafc;
-      color: #1e293b;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 40px 20px;
     }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      color: #0f172a;
-    }
-    .dashboard-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-width: 1400px;
+
+    .container {
+      max-width: 1080px;
       margin: 0 auto;
     }
-    
-    /* Control Panel Controls */
-    .controls-panel {
-      background: white;
-      padding: 16px;
+
+    header {
+      margin-bottom: 36px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 20px;
+      transition: all 0.2s ease-in-out;
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
+      flex-direction: column;
       justify-content: space-between;
     }
-    .filter-group {
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
+      border-color: #d1cecf;
+    }
+
+    .card-top-bar {
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-    }
-    input[type="text"], select {
-      padding: 8px 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 14px;
-      outline: none;
-    }
-    input[type="text"]:focus, select:focus {
-      border-color: #2563eb;
-    }
-    .btn {
-      padding: 8px 16px;
-      border-radius: 6px;
-      border: none;
-      background-color: #2563eb;
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn:hover {
-      background-color: #1d4ed8;
-    }
-    .btn-secondary {
-      background-color: #059669;
-    }
-    .btn-secondary:hover {
-      background-color: #047857;
+      margin-bottom: 14px;
     }
 
-    #map {
-      height: 380px;
-      width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-      z-index: 1;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 13px;
-    }
-    th {
-      background-color: #f1f5f9;
-      color: #475569;
-      font-weight: 600;
-      padding: 12px;
-      border-bottom: 2px solid #e2e8f0;
-      white-space: nowrap;
-      cursor: pointer;
-      user-select: none;
-    }
-    th:hover {
-      background-color: #e2e8f0;
-    }
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #e2e8f0;
-      vertical-align: middle;
-    }
-    tr.property-row {
-      cursor: pointer;
-      transition: background-color 0.15s ease;
-    }
-    tr.property-row:hover {
-      background-color: #f8fafc;
-    }
-    tr.property-row.active {
-      background-color: #e0f2fe !important;
-    }
     .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 11px;
+      font-size: 0.72rem;
       font-weight: 600;
-    }
-    .badge-top { background-color: #fef3c7; color: #92400e; }
-    .badge-good { background-color: #dcfce7; color: #166534; }
-    .badge-verify { background-color: #f1f5f9; color: #475569; }
-    
-    .rating-stars {
-      color: #f59e0b;
-      cursor: pointer;
-      font-size: 16px;
-      white-space: nowrap;
-    }
-    a.zillow-link {
-      color: #2563eb;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    a.zillow-link:hover { text-decoration: underline; }
-    .notes {
-      max-width: 220px;
-      font-size: 12px;
-      color: #64748b;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
-    /* Modal Styling */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.5);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
+    .badge-top { background: var(--badge-top-bg); color: var(--accent-top); }
+    .badge-good { background: var(--badge-good-bg); color: var(--accent-good); }
+    .badge-other { background: var(--badge-other-bg); color: var(--accent-other); }
+
+    .address {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-main);
+      text-decoration: none;
+      line-height: 1.3;
+      display: block;
+      margin-bottom: 4px;
     }
-    .modal-content {
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+
+    .address:hover {
+      color: var(--accent-good);
     }
-    .modal-header {
+
+    .location {
+      font-size: 0.85rem;
+      color: var(--text-muted);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
-    }
-    .modal-header h3 { margin: 0; }
-    .close-modal { cursor: pointer; font-size: 20px; font-weight: bold; color: #64748b; }
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
-    .form-group textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
+      gap: 4px;
     }
   </style>
 </head>
 <body>
 
-  <div class="dashboard-container">
-    <div class="header">
-      <h1>🏡 House Hunting Command Center</h1>
-      <button class="btn btn-secondary" onclick="exportRoute()">🚗 Generate Driving Route</button>
-    </div>
+  <div class="container">
+    <header>
+      <h1>Selected Properties</h1>
+      <div class="subtitle">8 listings curated in Royal Oak, MI</div>
+    </header>
 
-    <!-- Filter & Controls -->
-    <div class="controls-panel">
-      <div class="filter-group">
-        <input type="text" id="searchInput" placeholder="Search address, notes..." oninput="applyFilters()">
-        
-        <select id="dayFilter" onchange="applyFilters()">
-          <option value="ALL">All Days</option>
-          <option value="Sat">Saturday Only</option>
-          <option value="Sun">Sunday Only</option>
-          <option value="TBD">TBD / Verify</option>
-        </select>
-
-        <select id="priorityFilter" onchange="applyFilters()">
-          <option value="ALL">All Priorities</option>
-          <option value="Top">Top Match Only</option>
-          <option value="Good">Good Match Only</option>
-          <option value="Verify">Verify Only</option>
-        </select>
-
-        <label style="font-size: 13px; cursor: pointer;">
-          <input type="checkbox" id="hideBungalows" onchange="applyFilters()"> Hide Bungalows
-        </label>
+    <div class="grid">
+      <!-- Top Match -->
+      <div class="card">
+        <div>
+          <div class="card-top-bar">
+            <span class="badge badge-top">Top Match</span>
+          </div>
+          <a class="address" href="https://maps.google.com/?q=915+E+6th+St" target="_blank">915 E 6th St</a>
+          <div class="location">Royal Oak, MI</div>
+        </div>
       </div>
-      
-      <div style="font-size: 13px; color: #64748b;" id="resultCount">Showing 11 properties</div>
-    </div>
 
-    <div id="map"></div>
+      <div class="card">
+        <div>
+          <div class="card-top-bar">
+            <span class="badge badge-top">Top Match</span>
+          </div>
+          <a class="address" href="https://maps.google.com/?q=1029+Longfellow+Ave" target="_blank">1029 Longfellow Ave</a>
+          <div class="location">Royal Oak, MI</div>
+        </div>
+      </div>
 
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th onclick="sortTable('priority')">Priority ↕</th>
-            <th onclick="sortTable('day')">Day ↕</th>
-            <th>Open House Time</th>
-            <th onclick="sortTable('address')">Address ↕</th>
-            <th onclick="sortTable('rawPrice')">Price ↕</th>
-            <th onclick="sortTable('pricePerSqFt')">$/Sq Ft ↕</th>
-            <th onclick="sortTable('beds')">B/B</th>
-            <th onclick="sortTable('rawSqft')">Sq Ft ↕</th>
-            <th>Style</th>
-            <th onclick="sortTable('userRating')">My Rating ↕</th>
-            <th>Notes & Verification</th>
-            <th>Evaluation</th>
-            <th>Link</th>
-          </tr>
-        </thead>
-        <tbody id="property-table-body">
-          <!-- Injected via JS -->
-        </tbody>
-      </table>
+      <!-- Good Match -->
+      <div class="card">
+        <div>
+          <div class="card-top-bar">
+            <span class="badge badge-good">Good Match</span>
+          </div>
+          <a class="address" href="https://maps.google.com/?q=3803+Linwood+Ave" target="_blank">3803 Linwood Ave</a>
+          <div class="location">Royal Oak, MI</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-top-bar">
+            <span class="badge badge-good">Good Match</span>
+          </div>
+          <a class="address" href="https://maps.google.com/?q=4518+Woodland+Ave" target="_blank">4518 Woodland Ave</a>
+          <div class="location">Royal Oak, MI</div>
+        </div>
+      </div>
+
+      <!-- Bungalows / Other -->
+      <div class="card">
+        <div>
+          <div class="card-top-bar">
+            <span class="badge badge-other">Bungalow</span>
+          </div>
+          <a class="address" href="https://maps.google.com/?q=305+Devillen+Ave" target="_blank">305 Devillen Ave</a>
+          <div class="location">Royal Oak, MI</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-top-bar">
+            <span class="badge badge-other">Bungalow</span>
+          </div>
+          <a class="address" href="https://maps.google.com/?q=1616+N+Vermont+Ave" target="_blank">1616 N Vermont Ave</a>
+          <div class="location">Royal Oak, MI</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-top-bar">
+            <span class="badge badge-other">Other</span>
+          </div>
+          <a class="address" href="https://maps.google.com/?q=309+Amelia+St" target="_blank">309 Amelia St</a>
+          <div class="location">Royal Oak, MI</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <div class="card-top-bar">
+            <span class="badge badge-other">Other</span>
+          </div>
+          <a class="address" href="https://maps.google.com/?q=1815+Massoit+Rd" target="_blank">1815 Massoit Rd</a>
+          <div class="location">Royal Oak, MI</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Evaluation Modal -->
-  <div class="modal" id="evalModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="modalTitle">Property Evaluation</h3>
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-      </div>
-      <div class="form-group">
-        <label>Pros</label>
-        <textarea id="modalPros" rows="2" placeholder="e.g. Updated kitchen, large backyard..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>Cons</label>
-        <textarea id="modalCons" rows="2" placeholder="e.g. Busy street, small garage..."></textarea>
-      </div>
-      <button class="btn" style="width: 100%; justify-content: center;" onclick="saveEvaluation()">Save Evaluation</button>
-    </div>
-  </div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    let properties = [
-      {
-        id: "1",
-        address: "915 E 6th St",
-        city: "Royal Oak, MI",
-        zip: "48067",
-        lat: 42.4862, lng: -83.1362,
-        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
-        day: "Sun", openHouse: "1:00–3:00 PM",
-        price: "$475,000", rawPrice: 475000,
-        beds: 5, baths: 2.0,
-        sqft: "2,845", rawSqft: 2845,
-        style: "Craftsman", isBungalow: false,
-        notes: "Non-bungalow ✓. Just listed 7/22; confirm open time holds",
-        url: "https://www.zillow.com/homedetails/915-E-6th-St-Royal-Oak-MI-48067/24648628_zpid/",
-        userRating: 5, pros: "", cons: ""
-      },
-      {
-        id: "2",
-        address: "1029 Longfellow Ave",
-        city: "Royal Oak, MI",
-        zip: "48067",
-        lat: 42.4932, lng: -83.1345,
-        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
-        day: "Sun", openHouse: "2:00–4:00 PM",
-        price: "$529,900", rawPrice: 529900,
-        beds: 3, baths: 2.0,
-        sqft: "2,230", rawSqft: 2230,
-        style: "2-Story", isBungalow: false,
-        notes: "Non-bungalow ✓. Strong match; 3D tour. Confirm Sun open house is active",
-        url: "https://www.zillow.com/homedetails/1029-Longfellow-Ave-Royal-Oak-MI-48067/24649120_zpid/",
-        userRating: 4, pros: "", cons: ""
-      },
-      {
-        id: "3",
-        address: "3803 Linwood Ave",
-        city: "Royal Oak, MI",
-        zip: "48073",
-        lat: 42.5186, lng: -83.1818,
-        priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
-        day: "Sat", openHouse: "12:00–2:00 PM",
-        price: "$598,900", rawPrice: 598900,
-        beds: 3, baths: 3.0,
-        sqft: "2,741", rawSqft: 2741,
-        style: "Colonial", isBungalow: false,
-        notes: "Non-bungalow ✓ (Realtor.com mistags 'bungalow'). Top of budget.",
-        url: "https://www.zillow.com/homedetails/3803-Linwood-Ave-Royal-Oak-MI-48073/24616754_zpid/",
-        userRating: 4, pros: "", cons: ""
-      },
-      {
-        id: "4",
-        address: "4518 Woodland Ave",
-        city: "Royal Oak, MI",
-        zip: "48073",
-        lat: 42.5252, lng: -83.1764,
-        priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
-        day: "Sat", openHouse: "1:00–4:00 PM",
-        price: "$400,000", rawPrice: 400000,
-        beds: 4, baths: 2.0,
-        sqft: "1,530", rawSqft: 1530,
-        style: "Colonial / 1.5-story", isBungalow: false,
-        notes: "STYLE CONFLICT: Zillow=Colonial, Trulia=Bungalow. Verify style + south of 14 Mile",
-        url: "https://www.zillow.com/homedetails/4518-Woodland-Ave-Royal-Oak-MI-48073/24615972_zpid/",
-        userRating: 3, pros: "", cons: ""
-      },
-      {
-        id: "5",
-        address: "305 Devillen Ave",
-        city: "Royal Oak, MI",
-        zip: "48073",
-        lat: 42.5098, lng: -83.1533,
-        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
-        day: "Sat/Sun", openHouse: "Sat 12–2 / Sun 1–3",
-        price: "$319,900", rawPrice: 319900,
-        beds: 3, baths: 2.0,
-        sqft: "1,733", rawSqft: 1733,
-        style: "BUNGALOW", isBungalow: true,
-        notes: "⚠️ Listed as a bungalow — excludes per your criteria. Under budget",
-        url: "https://www.zillow.com/homedetails/305-Devillen-Ave-Royal-Oak-MI-48073/24624924_zpid/",
-        userRating: 2, pros: "", cons: ""
-      },
-      {
-        id: "6",
-        address: "1616 N Vermont Ave",
-        city: "Royal Oak, MI",
-        zip: "48067",
-        lat: 42.4998, lng: -83.1368,
-        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
-        day: "Sun", openHouse: "2:00–4:00 PM",
-        price: "$360,000", rawPrice: 360000,
-        beds: 3, baths: 2.0,
-        sqft: "1,720", rawSqft: 1720,
-        style: "BUNGALOW", isBungalow: true,
-        notes: "⚠️ Architectural style = Bungalow — excludes per criteria.",
-        url: "https://www.zillow.com/homedetails/1616-N-Vermont-Ave-Royal-Oak-MI-48067/24634323_zpid/",
-        userRating: 1, pros: "", cons: ""
-      },
-      {
-        id: "7",
-        address: "1815 Massoit Rd",
-        city: "Royal Oak, MI",
-        zip: "48073",
-        lat: 42.5225, lng: -83.1702,
-        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
-        day: "Sat", openHouse: "12:00–2:00 PM",
-        price: "$345,000", rawPrice: 345000,
-        beds: 3, baths: 1.5,
-        sqft: "2,100", rawSqft: 2100,
-        style: "Ranch", isBungalow: false,
-        notes: "Non-bungalow ✓ but only 1,426 sq ft ABOVE grade.",
-        url: "https://www.zillow.com/homedetails/1815-Massoit-Rd-Royal-Oak-MI-48073/24616115_zpid/",
-        userRating: 2, pros: "", cons: ""
-      },
-      {
-        id: "8",
-        address: "309 Amelia Ave",
-        city: "Royal Oak, MI",
-        zip: "48073",
-        lat: 42.5188, lng: -83.1531,
-        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
-        day: "—", openHouse: "None this wknd?",
-        price: "$469,900", rawPrice: 469900,
-        beds: 4, baths: 1.5,
-        sqft: "2,180", rawSqft: 2180,
-        style: "Colonial", isBungalow: false,
-        notes: "⚠️ Open houses were last wknd. Confirm if re-listed.",
-        url: "https://www.zillow.com/homedetails/309-Amelia-Ave-Royal-Oak-MI-48073/24612671_zpid/",
-        userRating: 3, pros: "", cons: ""
-      },
-      {
-        id: "9",
-        address: "403 N Edison Ave",
-        city: "Royal Oak, MI",
-        zip: "48067",
-        lat: 42.4891, lng: -83.1504,
-        priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
-        day: "TBD", openHouse: "Confirm with Agent",
-        price: "$485,000", rawPrice: 485000,
-        beds: 3, baths: 2.0,
-        sqft: "2,100", rawSqft: 2100,
-        style: "Colonial", isBungalow: false,
-        notes: "Non-bungalow ✓. Near Downtown Royal Oak; traditional floorplan.",
-        url: "https://www.zillow.com/homes/403-N-Edison-Ave-Royal-Oak,-MI-48067_rb/",
-        userRating: 4, pros: "", cons: ""
-      },
-      {
-        id: "10",
-        address: "1221 Vinsetta Blvd",
-        city: "Royal Oak, MI",
-        zip: "48067",
-        lat: 42.5036, lng: -83.1360,
-        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
-        day: "TBD", openHouse: "Confirm with Agent",
-        price: "$575,000", rawPrice: 575000,
-        beds: 3, baths: 2.5,
-        sqft: "2,400", rawSqft: 2400,
-        style: "Traditional", isBungalow: false,
-        notes: "Non-bungalow ✓. Prime Vinsetta Park area location.",
-        url: "https://www.zillow.com/homes/1221-Vinsetta-Blvd-Royal-Oak,-MI-48067_rb/",
-        userRating: 5, pros: "", cons: ""
-      },
-      {
-        id: "11",
-        address: "2211 N Main St",
-        city: "Royal Oak, MI",
-        zip: "48073",
-        lat: 42.5057, lng: -83.1462,
-        priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
-        day: "TBD", openHouse: "Confirm with Agent",
-        price: "$425,000", rawPrice: 425000,
-        beds: 4, baths: 2.0,
-        sqft: "1,850", rawSqft: 1850,
-        style: "Split-Level", isBungalow: false,
-        notes: "Non-bungalow ✓. 4 full bedrooms above grade, south of 13 Mile Rd.",
-        url: "https://www.zillow.com/homes/2211-N-Main-St-Royal-Oak,-MI-48073_rb/",
-        userRating: 3, pros: "", cons: ""
-      }
-    ];
-
-    // Compute Price Per Sq Ft
-    properties.forEach(p => {
-      p.pricePerSqFt = Math.round(p.rawPrice / p.rawSqft);
-    });
-
-    // Map Setup
-    const map = L.map('map').setView([42.505, -83.15], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19, attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    let markers = {};
-    let currentSortColumn = '';
-    let sortAscending = true;
-    let activeEvalId = null;
-
-    // Render Table and Map Markers
-    function renderDashboard(data) {
-      const tableBody = document.getElementById('property-table-body');
-      tableBody.innerHTML = '';
-
-      // Clear map markers
-      Object.values(markers).forEach(m => map.removeLayer(m));
-      markers = {};
-
-      data.forEach(item => {
-        // Table Row
-        const tr = document.createElement('tr');
-        tr.className = 'property-row';
-        tr.id = `row-${item.id}`;
-        tr.innerHTML = `
-          <td><span class="badge ${item.priorityClass}">${item.priority}</span></td>
-          <td><strong>${item.day}</strong></td>
-          <td>${item.openHouse}</td>
-          <td><strong>${item.address}</strong></td>
-          <td>${item.price}</td>
-          <td><strong>$${item.pricePerSqFt}</strong>/ft²</td>
-          <td>${item.beds}/${item.baths}</td>
-          <td>${item.sqft}</td>
-          <td>${item.style}</td>
-          <td>
-            <div class="rating-stars" onclick="event.stopPropagation(); setRating('${item.id}')">
-              ${'★'.repeat(item.userRating)}${'☆'.repeat(5 - item.userRating)}
-            </div>
-          </td>
-          <td class="notes">${item.notes}</td>
-          <td><button class="btn" style="padding:4px 8px; font-size:11px;" onclick="event.stopPropagation(); openModal('${item.id}')">Evaluate</button></td>
-          <td><a href="${item.url}" target="_blank" class="zillow-link" onclick="event.stopPropagation()">Zillow</a></td>
-        `;
-
-        tr.addEventListener('click', () => highlightProperty(item.id, true));
-        tableBody.appendChild(tr);
-
-        // Marker Color-Coding
-        const markerColor = item.priorityGroup === 'Top' ? '#f59e0b' : item.priorityGroup === 'Good' ? '#10b981' : '#64748b';
-        const customIcon = L.divIcon({
-          className: 'custom-pin',
-          html: `<div style="background-color:${markerColor}; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 0 4px rgba(0,0,0,0.3);"></div>`
-        });
-
-        const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(map);
-        marker.bindPopup(`<strong>${item.address}</strong><br>${item.price} ($${item.pricePerSqFt}/sqft)<br>Open: ${item.day} ${item.openHouse}`);
-        marker.on('click', () => highlightProperty(item.id, false));
-
-        markers[item.id] = marker;
-      });
-
-      document.getElementById('resultCount').innerText = `Showing ${data.length} properties`;
-    }
-
-    // Filtering
-    function applyFilters() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const day = document.getElementById('dayFilter').value;
-      const priority = document.getElementById('priorityFilter').value;
-      const hideBungalows = document.getElementById('hideBungalows').checked;
-
-      const filtered = properties.filter(item => {
-        const matchesSearch = item.address.toLowerCase().includes(search) || item.notes.toLowerCase().includes(search);
-        const matchesDay = day === 'ALL' || item.day.includes(day);
-        const matchesPriority = priority === 'ALL' || item.priorityGroup === priority;
-        const matchesBungalow = !hideBungalows || !item.isBungalow;
-
-        return matchesSearch && matchesDay && matchesPriority && matchesBungalow;
-      });
-
-      renderDashboard(filtered);
-    }
-
-    // Sorting
-    function sortTable(column) {
-      if (currentSortColumn === column) {
-        sortAscending = !sortAscending;
-      } else {
-        currentSortColumn = column;
-        sortAscending = true;
-      }
-
-      properties.sort((a, b) => {
-        let valA = a[column];
-        let valB = b[column];
-        
-        if (typeof valA === 'string') valA = valA.toLowerCase();
-        if (typeof valB === 'string') valB = valB.toLowerCase();
-
-        if (valA < valB) return sortAscending ? -1 : 1;
-        if (valA > valB) return sortAscending ? 1 : -1;
-        return 0;
-      });
-
-      applyFilters();
-    }
-
-    // Export Driving Route
-    function exportRoute() {
-      const visibleRows = Array.from(document.querySelectorAll('.property-row'));
-      if (visibleRows.length === 0) {
-        alert("No properties visible to route!");
-        return;
-      }
-
-      const visibleIds = visibleRows.map(row => row.id.replace('row-', ''));
-      const routeProperties = properties.filter(p => visibleIds.includes(p.id));
-
-      const waypoints = routeProperties.map(p => encodeURIComponent(`${p.address}, ${p.city}`)).join('/');
-      const googleMapsUrl = `https://www.google.com/maps/dir/${waypoints}`;
-      window.open(googleMapsUrl, '_blank');
-    }
-
-    // Interactive Rating
-    function setRating(id) {
-      const property = properties.find(p => p.id === id);
-      if (property) {
-        property.userRating = (property.userRating % 5) + 1;
-        applyFilters();
-      }
-    }
-
-    // Modal Logic
-    function openModal(id) {
-      activeEvalId = id;
-      const property = properties.find(p => p.id === id);
-      document.getElementById('modalTitle').innerText = `Evaluation: ${property.address}`;
-      document.getElementById('modalPros').value = property.pros;
-      document.getElementById('modalCons').value = property.cons;
-      document.getElementById('evalModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-      document.getElementById('evalModal').style.display = 'none';
-    }
-
-    function saveEvaluation() {
-      const property = properties.find(p => p.id === activeEvalId);
-      if (property) {
-        property.pros = document.getElementById('modalPros').value;
-        property.cons = document.getElementById('modalCons').value;
-      }
-      closeModal();
-    }
-
-    function highlightProperty(id, moveMap = false) {
-      document.querySelectorAll('.property-row').forEach(row => row.classList.remove('active'));
-      const selectedRow = document.getElementById(`row-${id}`);
-      if (selectedRow) {
-        selectedRow.classList.add('active');
-        selectedRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      const targetMarker = markers[id];
-      if (targetMarker) {
-        targetMarker.openPopup();
-        if (moveMap) {
-          map.setView(targetMarker.getLatLng(), 15, { animate: true });
-        }
-      }
-    }
-
-    // Initial Load
-    renderDashboard(properties);
-  </script>
 </body>
 </html>
