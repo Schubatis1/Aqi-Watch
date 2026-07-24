@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>House Hunting Dashboard</title>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #0f172a;
+    }
+    .dashboard-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      z-index: 1;
+    }
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background-color: #f1f5f9;
+      color: #475569;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 2px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+    tr.property-row {
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    tr.property-row:hover {
+      background-color: #f8fafc;
+    }
+    tr.property-row.active {
+      background-color: #e0f2fe !important;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-top {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    .badge-good {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    .badge-verify {
+      background-color: #f1f5f9;
+      color: #475569;
+    }
+    a.zillow-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    a.zillow-link:hover {
+      text-decoration: underline;
+    }
+    .notes {
+      max-width: 280px;
+      font-size: 13px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🏡 Royal Oak House Hunting Dashboard</h1>
+
+  <div class="dashboard-container">
+    <div id="map"></div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Priority</th>
+            <th>Day</th>
+            <th>Open House Time</th>
+            <th>Address</th>
+            <th>Zip</th>
+            <th>Price</th>
+            <th>Beds</th>
+            <th>Baths</th>
+            <th>Sq Ft</th>
+            <th>Style</th>
+            <th>Notes to Verify</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody id="property-table-body">
+          <!-- Rows injected dynamically via JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const properties = [
+      {
+        id: "1",
+        address: "915 E 6th St",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4862,
+        lng: -83.1362,
+        priority: "⭐ Top",
+        priorityClass: "badge-top",
+        day: "Sun",
+        openHouse: "1:00–3:00 PM",
+        price: "$475,000",
+        beds: 5,
+        baths: 2.0,
+        sqft: "2,845",
+        style: "Craftsman",
+        notes: "Non-bungalow ✓. Just listed 7/22; confirm open time holds",
+        url: "https://www.zillow.com/homedetails/915-E-6th-St-Royal-Oak-MI-48067/24648628_zpid/"
+      },
+      {
+        id: "2",
+        address: "1029 Longfellow Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4932,
+        lng: -83.1345,
+        priority: "⭐ Top",
+        priorityClass: "badge-top",
+        day: "Sun",
+        openHouse: "2:00–4:00 PM",
+        price: "$529,900",
+        beds: 3,
+        baths: 2.0,
+        sqft: "2,230",
+        style: "2-Story",
+        notes: "Non-bungalow ✓. Strong match; 3D tour. Confirm Sun open house is active",
+        url: "https://www.zillow.com/homedetails/1029-Longfellow-Ave-Royal-Oak-MI-48067/24649120_zpid/"
+      },
+      {
+        id: "3",
+        address: "3803 Linwood Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5186,
+        lng: -83.1818,
+        priority: "⭐ Good",
+        priorityClass: "badge-good",
+        day: "Sat",
+        openHouse: "12:00–2:00 PM",
+        price: "$598,900",
+        beds: 3,
+        baths: 3.0,
+        sqft: "2,741",
+        style: "Colonial",
+        notes: "Non-bungalow ✓ (Realtor.com mistags 'bungalow'). Top of budget. Verify vs 12 Mile line",
+        url: "https://www.zillow.com/homedetails/3803-Linwood-Ave-Royal-Oak-MI-48073/24616754_zpid/"
+      },
+      {
+        id: "4",
+        address: "4518 Woodland Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5252,
+        lng: -83.1764,
+        priority: "Good",
+        priorityClass: "badge-good",
+        day: "Sat",
+        openHouse: "1:00–4:00 PM",
+        price: "$400,000",
+        beds: 4,
+        baths: 2.0,
+        sqft: "1,530",
+        style: "Colonial / 1.5-story",
+        notes: "STYLE CONFLICT: Zillow/Redfin=Colonial, Trulia=Bungalow. Coming soon; verify style + south of 14 Mile",
+        url: "https://www.zillow.com/homedetails/4518-Woodland-Ave-Royal-Oak-MI-48073/24615972_zpid/"
+      },
+      {
+        id: "5",
+        address: "305 Devillen Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5098,
+        lng: -83.1533,
+        priority: "Verify",
+        priorityClass: "badge-verify",
+        day: "Sat/Sun",
+        openHouse: "Sat 12–2 / Sun 1–3",
+        price: "$319,900",
+        beds: 3,
+        baths: 2.0,
+        sqft: "1,733",
+        style: "BUNGALOW",
+        notes: "⚠️ Listed as a bungalow — excludes per your criteria. Under budget",
+        url: "https://www.zillow.com/homedetails/305-Devillen-Ave-Royal-Oak-MI-48073/24624924_zpid/"
+      },
+      {
+        id: "6",
+        address: "1616 N Vermont Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4998,
+        lng: -83.1368,
+        priority: "Verify",
+        priorityClass: "badge-verify",
+        day: "Sun",
+        openHouse: "2:00–4:00 PM",
+        price: "$360,000",
+        beds: 3,
+        baths: 2.0,
+        sqft: "1,720",
+        style: "BUNGALOW",
+        notes: "⚠️ Architectural style = Bungalow — excludes per criteria. Also only 1,050 sq ft above grade",
+        url: "https://www.zillow.com/homedetails/1616-N-Vermont-Ave-Royal-Oak-MI-48067/24634323_zpid/"
+      },
+      {
+        id: "7",
+        address: "1815 Massoit Rd",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5225,
+        lng: -83.1702,
+        priority: "Verify",
+        priorityClass: "badge-verify",
+        day: "Sat",
+        openHouse: "12:00–2:00 PM",
+        price: "$345,000",
+        beds: 3,
+        baths: 1.5,
+        sqft: "2,100",
+        style: "Ranch",
+        notes: "Non-bungalow ✓ but only 1,426 sq ft ABOVE grade (2,100 incl. basement) — likely under 1,500 rule",
+        url: "https://www.zillow.com/homedetails/1815-Massoit-Rd-Royal-Oak-MI-48073/24616115_zpid/"
+      },
+      {
+        id: "8",
+        address: "309 Amelia Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5188,
+        lng: -83.1531,
+        priority: "Verify",
+        priorityClass: "badge-verify",
+        day: "—",
+        openHouse: "None this wknd?",
+        price: "$469,900",
+        beds: 4,
+        baths: 1.5,
+        sqft: "2,180",
+        style: "Colonial",
+        notes: "⚠️ Open houses were 7/18–19 (last wknd). Confirm if re-listed for 7/25–26; may be pending",
+        url: "https://www.zillow.com/homedetails/309-Amelia-Ave-Royal-Oak-MI-48073/24612671_zpid/"
+      }
+    ];
+
+    // Initialize Map
+    const map = L.map('map').setView([42.505, -83.15], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = {};
+    const tableBody = document.getElementById('property-table-body');
+
+    // Populate Table and Add Markers
+    properties.forEach(item => {
+      // 1. Create Table Row
+      const tr = document.createElement('tr');
+      tr.className = 'property-row';
+      tr.id = `row-${item.id}`;
+      tr.innerHTML = `
+        <td><span class="badge ${item.priorityClass}">${item.priority}</span></td>
+        <td><strong>${item.day}</strong></td>
+        <td>${item.openHouse}</td>
+        <td><strong>${item.address}</strong></td>
+        <td>${item.zip}</td>
+        <td><strong>${item.price}</strong></td>
+        <td>${item.beds}</td>
+        <td>${item.baths}</td>
+        <td>${item.sqft}</td>
+        <td>${item.style}</td>
+        <td class="notes">${item.notes}</td>
+        <td><a href="${item.url}" target="_blank" class="zillow-link" onclick="event.stopPropagation()">Zillow</a></td>
+      `;
+
+      // Row Click Listener -> Highlight Marker & Zoom
+      tr.addEventListener('click', () => {
+        highlightProperty(item.id, true);
+      });
+
+      tableBody.appendChild(tr);
+
+      // 2. Create Map Marker
+      const marker = L.marker([item.lat, item.lng]).addTo(map);
+      marker.bindPopup(`
+        <strong>${item.address}</strong><br>
+        Price: ${item.price}<br>
+        Beds/Baths: ${item.beds}b / ${item.baths}ba<br>
+        Open House: ${item.day} ${item.openHouse}
+      `);
+
+      // Marker Click Listener -> Highlight Table Row
+      marker.on('click', () => {
+        highlightProperty(item.id, false);
+      });
+
+      markers[item.id] = marker;
+    });
+
+    // Function to handle selection sync
+    function highlightProperty(id, moveMap = false) {
+      // Clear previous active states
+      document.querySelectorAll('.property-row').forEach(row => row.classList.remove('active'));
+
+      // Highlight Table Row
+      const selectedRow = document.getElementById(`row-${id}`);
+      if (selectedRow) {
+        selectedRow.classList.add('active');
+        selectedRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // Open Map Popup & Set View
+      const targetMarker = markers[id];
+      if (targetMarker) {
+        targetMarker.openPopup();
+        if (moveMap) {
+          map.setView(targetMarker.getLatLng(), 15, { animate: true });
+        }
+      }
+    }
+  </script>
+</body>
+</html>
