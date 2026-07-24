@@ -195,7 +195,7 @@
     .close-modal { cursor: pointer; font-size: 20px; font-weight: bold; color: #64748b; }
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
-    .form-group textarea, .form-group input {
+    .form-group textarea {
       width: 100%;
       padding: 8px;
       border: 1px solid #cbd5e1;
@@ -211,7 +211,7 @@
       <button class="btn btn-secondary" onclick="exportRoute()">🚗 Generate Driving Route</button>
     </div>
 
-    <!-- Feature 4: Filter & Controls -->
+    <!-- Filter & Controls -->
     <div class="controls-panel">
       <div class="filter-group">
         <input type="text" id="searchInput" placeholder="Search address, notes..." oninput="applyFilters()">
@@ -220,6 +220,7 @@
           <option value="ALL">All Days</option>
           <option value="Sat">Saturday Only</option>
           <option value="Sun">Sunday Only</option>
+          <option value="TBD">TBD / Verify</option>
         </select>
 
         <select id="priorityFilter" onchange="applyFilters()">
@@ -234,7 +235,7 @@
         </label>
       </div>
       
-      <div style="font-size: 13px; color: #64748b;" id="resultCount">Showing 8 properties</div>
+      <div style="font-size: 13px; color: #64748b;" id="resultCount">Showing 11 properties</div>
     </div>
 
     <div id="map"></div>
@@ -415,6 +416,54 @@
         notes: "⚠️ Open houses were last wknd. Confirm if re-listed.",
         url: "https://www.zillow.com/homedetails/309-Amelia-Ave-Royal-Oak-MI-48073/24612671_zpid/",
         userRating: 3, pros: "", cons: ""
+      },
+      {
+        id: "9",
+        address: "403 N Edison Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4891, lng: -83.1504,
+        priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "TBD", openHouse: "Confirm with Agent",
+        price: "$485,000", rawPrice: 485000,
+        beds: 3, baths: 2.0,
+        sqft: "2,100", rawSqft: 2100,
+        style: "Colonial", isBungalow: false,
+        notes: "Non-bungalow ✓. Near Downtown Royal Oak; traditional floorplan.",
+        url: "https://www.zillow.com/homes/403-N-Edison-Ave-Royal-Oak,-MI-48067_rb/",
+        userRating: 4, pros: "", cons: ""
+      },
+      {
+        id: "10",
+        address: "1221 Vinsetta Blvd",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.5036, lng: -83.1360,
+        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
+        day: "TBD", openHouse: "Confirm with Agent",
+        price: "$575,000", rawPrice: 575000,
+        beds: 3, baths: 2.5,
+        sqft: "2,400", rawSqft: 2400,
+        style: "Traditional", isBungalow: false,
+        notes: "Non-bungalow ✓. Prime Vinsetta Park area location.",
+        url: "https://www.zillow.com/homes/1221-Vinsetta-Blvd-Royal-Oak,-MI-48067_rb/",
+        userRating: 5, pros: "", cons: ""
+      },
+      {
+        id: "11",
+        address: "2211 N Main St",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5057, lng: -83.1462,
+        priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "TBD", openHouse: "Confirm with Agent",
+        price: "$425,000", rawPrice: 425000,
+        beds: 4, baths: 2.0,
+        sqft: "1,850", rawSqft: 1850,
+        style: "Split-Level", isBungalow: false,
+        notes: "Non-bungalow ✓. 4 full bedrooms above grade, south of 13 Mile Rd.",
+        url: "https://www.zillow.com/homes/2211-N-Main-St-Royal-Oak,-MI-48073_rb/",
+        userRating: 3, pros: "", cons: ""
       }
     ];
 
@@ -488,7 +537,7 @@
       document.getElementById('resultCount').innerText = `Showing ${data.length} properties`;
     }
 
-    // Feature 4: Filtering
+    // Filtering
     function applyFilters() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const day = document.getElementById('dayFilter').value;
@@ -507,7 +556,7 @@
       renderDashboard(filtered);
     }
 
-    // Feature 4: Sorting
+    // Sorting
     function sortTable(column) {
       if (currentSortColumn === column) {
         sortAscending = !sortAscending;
@@ -531,7 +580,7 @@
       applyFilters();
     }
 
-    // Feature 1: Export Driving Route
+    // Export Driving Route
     function exportRoute() {
       const visibleRows = Array.from(document.querySelectorAll('.property-row'));
       if (visibleRows.length === 0) {
@@ -547,7 +596,7 @@
       window.open(googleMapsUrl, '_blank');
     }
 
-    // Feature 5: Interactive Rating
+    // Interactive Rating
     function setRating(id) {
       const property = properties.find(p => p.id === id);
       if (property) {
@@ -556,7 +605,7 @@
       }
     }
 
-    // Feature 5: Evaluation Modal Logic
+    // Modal Logic
     function openModal(id) {
       activeEvalId = id;
       const property = properties.find(p => p.id === id);
