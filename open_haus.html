@@ -429,7 +429,71 @@
       background-color: #fffdfc;
     }
 
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 10px; }
+
+    /* Tour Checkbox */
+    .tour-checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .tour-checkbox-wrap input {
+      display: none;
+    }
+
+    .tour-checkbox-box {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 2px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+
+    .tour-checkbox-wrap:hover .tour-checkbox-box {
+      border-color: var(--coral);
+    }
+
+    .tour-checkbox-wrap input:checked + .tour-checkbox-box {
+      background: var(--coral);
+      border-color: var(--coral);
+    }
+
+    .tour-checkbox-box svg {
+      width: 13px;
+      height: 13px;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: var(--transition);
+      color: #ffffff;
+    }
+
+    .tour-checkbox-wrap input:checked + .tour-checkbox-box svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .tour-count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--coral);
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
 
     /* Priority Badges */
     .badge {
@@ -754,6 +818,7 @@
       <button class="btn-primary" onclick="exportRoute()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
         Plan Tour
+        <span class="tour-count-badge" id="tourCountBadge" style="display:none;">0</span>
       </button>
     </header>
 
@@ -1174,6 +1239,7 @@
 
     let markers = {};
     let activeEvalId = null;
+    let selectedForTour = new Set();
 
     function getCleanPriorityLabel(group) {
       if (group === 'Top') return 'Top Match';
@@ -1229,7 +1295,15 @@
           <div>
             <div class="card-top">
               <span class="badge ${item.priorityClass}">${getCleanPriorityLabel(item.priorityGroup)}</span>
-              ${renderStarsHtml(item.id, item.userRating)}
+              <div style="display:flex; align-items:center; gap:10px;">
+                ${renderStarsHtml(item.id, item.userRating)}
+                <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
+                  <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
+                  <span class="tour-checkbox-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                </label>
+              </div>
             </div>
 
             <h3 class="card-address">${item.address}</h3>
@@ -1363,15 +1437,47 @@
       applyFilters();
     }
 
+    function toggleTourSelection(id, isChecked) {
+      if (isChecked) {
+        selectedForTour.add(id);
+      } else {
+        selectedForTour.delete(id);
+      }
+      updateTourButtonBadge();
+    }
+
+    function updateTourButtonBadge() {
+      const badge = document.getElementById('tourCountBadge');
+      const count = selectedForTour.size;
+      if (count > 0) {
+        badge.style.display = 'inline-flex';
+        badge.innerText = count;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
     function exportRoute() {
-      const visibleCards = Array.from(document.querySelectorAll('.property-card'));
-      if (visibleCards.length === 0) {
-        alert("No visible properties available to create a route.");
-        return;
+      let routeProperties;
+
+      if (selectedForTour.size > 0) {
+        // Use only the checked properties, in their dataset order
+        routeProperties = properties.filter(p => selectedForTour.has(p.id));
+      } else {
+        // Fallback: no checkboxes selected, use everything currently visible/filtered
+        const visibleCards = Array.from(document.querySelectorAll('.property-card'));
+        if (visibleCards.length === 0) {
+          alert("No properties available to create a route. Check a few listings first.");
+          return;
+        }
+        const visibleIds = visibleCards.map(card => card.id.replace('card-', ''));
+        routeProperties = properties.filter(p => visibleIds.includes(p.id));
       }
 
-      const visibleIds = visibleCards.map(card => card.id.replace('card-', ''));
-      const routeProperties = properties.filter(p => visibleIds.includes(p.id));
+      if (routeProperties.length === 0) {
+        alert("No properties selected for the route.");
+        return;
+      }
 
       const waypoints = routeProperties.map(p => encodeURIComponent(`${p.address}, ${p.city}`)).join('/');
       const googleMapsUrl = `https://www.google.com/maps/dir/${waypoints}`;
@@ -1465,6 +1571,7 @@
 
     // Initial Dashboard Load
     renderDashboard(properties);
+    updateTourButtonBadge();
   </script>
 </body>
 </html>
