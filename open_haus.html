@@ -204,7 +204,7 @@
       cursor: pointer;
       transition: var(--transition);
       appearance: none;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%20707571' viewBox='0 0 16 16'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23707571' viewBox='0 0 16 16'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
       background-repeat: no-repeat;
       background-position: calc(100% - 16px) center;
       padding-right: 38px;
@@ -346,7 +346,7 @@
 
     .custom-leaflet-pin:hover .pin-inner,
     .custom-leaflet-pin.active .pin-inner {
-      transform: scale(1.3);
+      transform: scale(1.35);
       border-color: var(--text);
     }
 
@@ -730,6 +730,30 @@
       padding-top: 20px;
     }
 
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 2000;
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
     /* Responsive Queries */
     @media (max-width: 1024px) {
       .content-layout {
@@ -786,7 +810,7 @@
 
   <div class="app-container">
     
-    <!-- Elegant Header -->
+    <!-- Header -->
     <header class="header">
       <div class="header-titles">
         <h1>Curated Properties</h1>
@@ -942,11 +966,14 @@
     </aside>
   </div>
 
+  <!-- Toast Element -->
+  <div class="toast" id="toast">Evaluation notes saved</div>
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
   <script>
-    // Original Property Dataset preserved exactly
+    // Original Property Dataset
     let properties = [
       {
         id: "1",
@@ -1130,7 +1157,6 @@
     properties.forEach(p => {
       p.pricePerSqFt = Math.round(p.rawPrice / p.rawSqft);
       
-      // LocalStorage persistence extensions
       const savedRating = localStorage.getItem(`rating_${p.id}`);
       if (savedRating !== null) p.userRating = parseInt(savedRating, 10);
 
@@ -1154,11 +1180,9 @@
     }).addTo(map);
 
     let markers = {};
-    let currentSortColumn = '';
-    let sortAscending = true;
     let activeEvalId = null;
 
-    // Helper: Priority Text Formatter
+    // Helper: Priority Label Formatter
     function getCleanPriorityLabel(group) {
       if (group === 'Top') return 'Top Match';
       if (group === 'Good') return 'Good Match';
@@ -1175,7 +1199,15 @@
       return `<div class="rating-stars">${stars}</div>`;
     }
 
-    // Render Luxury Cards & Markers
+    // Helper: Toast Notifications
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // Render Cards & Map Markers
     function renderDashboard(data) {
       const grid = document.getElementById('cardsGrid');
       grid.innerHTML = '';
@@ -1188,12 +1220,15 @@
         grid.innerHTML = `
           <div class="empty-state" style="grid-column: 1 / -1;">
             <h3>No curated homes match your filters</h3>
-            <p>Try adjusting your search criteria or unchecking "Hide Bungalows".</p>
+            <p style="margin-bottom:16px;">Try adjusting your search criteria or unchecking "Hide Bungalows".</p>
+            <button class="btn-secondary" onclick="resetFilters()">Reset All Filters</button>
           </div>
         `;
         document.getElementById('resultCount').innerText = `0 properties`;
         return;
       }
+
+      const bounds = L.latLngBounds();
 
       data.forEach(item => {
         // Build Luxury Card
@@ -1270,7 +1305,13 @@
         marker.on('click', () => highlightProperty(item.id, false));
 
         markers[item.id] = marker;
+        bounds.extend([item.lat, item.lng]);
       });
+
+      // Adjust map bounds dynamically to show filtered markers
+      if (data.length > 0) {
+        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+      }
 
       document.getElementById('resultCount').innerText = `${data.length} ${data.length === 1 ? 'property' : 'properties'}`;
       document.getElementById('subheadingText').innerText = `${data.length} curated listings in Royal Oak, Michigan`;
@@ -1297,6 +1338,15 @@
       renderDashboard(filtered);
     }
 
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('dayFilter').value = 'ALL';
+      document.getElementById('priorityFilter').value = 'ALL';
+      document.getElementById('sortSelect').value = 'default';
+      document.getElementById('hideBungalows').checked = false;
+      applyFilters();
+    }
+
     // Handle Sort Dropdown
     function handleSortChange(value) {
       if (value === 'price-asc') {
@@ -1308,29 +1358,6 @@
       } else if (value === 'rating-desc') {
         properties.sort((a, b) => b.userRating - a.userRating);
       }
-      applyFilters();
-    }
-
-    // Legacy Sort Support for column headers if needed
-    function sortTable(column) {
-      if (currentSortColumn === column) {
-        sortAscending = !sortAscending;
-      } else {
-        currentSortColumn = column;
-        sortAscending = true;
-      }
-
-      properties.sort((a, b) => {
-        let valA = a[column];
-        let valB = b[column];
-        if (typeof valA === 'string') valA = valA.toLowerCase();
-        if (typeof valB === 'string') valB = valB.toLowerCase();
-
-        if (valA < valB) return sortAscending ? -1 : 1;
-        if (valA > valB) return sortAscending ? 1 : -1;
-        return 0;
-      });
-
       applyFilters();
     }
 
@@ -1350,12 +1377,13 @@
       window.open(googleMapsUrl, '_blank');
     }
 
-    // Interactive Gold Star Rating with LocalStorage
+    // Interactive Gold Star Rating
     function setRating(id, ratingValue) {
       const property = properties.find(p => p.id === id);
       if (property) {
         property.userRating = ratingValue;
         localStorage.setItem(`rating_${id}`, ratingValue);
+        showToast(`Rating updated to ${ratingValue} stars`);
         applyFilters();
       }
     }
@@ -1401,11 +1429,13 @@
         
         localStorage.setItem(`pros_${activeEvalId}`, property.pros);
         localStorage.setItem(`cons_${activeEvalId}`, property.cons);
+
+        showToast('Evaluation notes saved successfully');
       }
       closeModal();
     }
 
-    // Card & Map Marker Interaction Sync
+    // Card & Map Marker Syncing
     function highlightProperty(id, moveMap = false) {
       document.querySelectorAll('.property-card').forEach(card => card.classList.remove('active'));
       document.querySelectorAll('.pin-inner').forEach(pin => pin.parentElement.classList.remove('active'));
@@ -1428,6 +1458,13 @@
         }
       }
     }
+
+    // Keyboard Shortcuts (Esc key closes modal)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
 
     // Initial Dashboard Load
     renderDashboard(properties);
