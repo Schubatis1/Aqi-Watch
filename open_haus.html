@@ -3,24 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Curated Properties</title>
+  <title>Curated Properties | Royal Oak Luxury Real Estate</title>
+  
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
   
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
     :root {
       --bg: #faf8f5;
-      --card-bg: #ffffff;
-      --text-main: #1f2421;
-      --text-muted: #707571;
-      --accent-top: #2a5240;
-      --badge-top-bg: #e8f0ec;
-      --accent-good: #8c6d46;
-      --badge-good-bg: #f7f3ed;
-      --accent-other: #5c626b;
-      --badge-other-bg: #f0f2f5;
+      --card: #ffffff;
+      --text: #1f2421;
+      --muted: #707571;
       --border: #e8e6e1;
+      --green: #2a5240;
+      --green-light: #e8f0ec;
+      --gold: #8c6d46;
+      --gold-light: #f7f3ed;
+      --gray: #5c626b;
+      --gray-light: #f0f2f5;
+      
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --shadow-soft: 0 10px 30px rgba(0,0,0,0.05);
+      --shadow-hover: 0 20px 40px rgba(0,0,0,0.08);
+      --shadow-sm: 0 4px 12px rgba(0,0,0,0.03);
+      --radius: 16px;
+      --radius-sm: 8px;
+      --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
@@ -30,196 +44,1393 @@
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: var(--bg);
-      color: var(--text-main);
-      padding: 40px 20px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+      padding: 32px 24px;
+      min-height: 100vh;
     }
 
-    .container {
-      max-width: 1080px;
+    .app-container {
+      max-width: 1600px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
     }
 
-    header {
-      margin-bottom: 36px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 20px;
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 8px 4px;
     }
 
-    h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.2rem;
-      font-weight: 600;
+    .header-titles h1 {
+      font-family: var(--font-serif);
+      font-size: 2.5rem;
+      font-weight: 500;
       letter-spacing: -0.02em;
+      color: var(--text);
       margin-bottom: 6px;
     }
 
-    .subtitle {
-      color: var(--text-muted);
+    .header-titles p {
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-primary {
+      background-color: var(--green);
+      color: #ffffff;
+      border: none;
+      border-radius: 30px;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 600;
       font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(42, 82, 64, 0.2);
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 20px;
+    .btn-primary:hover {
+      background-color: #1f3d30;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(42, 82, 64, 0.3);
     }
 
-    .card {
-      background: var(--card-bg);
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      transition: all 0.2s ease-in-out;
+      border-radius: 30px;
+      padding: 10px 20px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--gray-light);
+      border-color: var(--muted);
+    }
+
+    /* Sticky Filter Bar */
+    .filter-wrapper {
+      position: sticky;
+      top: 20px;
+      z-index: 500;
+    }
+
+    .filter-bar {
+      background: var(--card);
+      padding: 16px 24px;
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+    }
+
+    .filter-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .search-pill {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+      max-width: 380px;
+    }
+
+    .search-pill svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search-pill input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--text);
+      background-color: var(--bg);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-pill input:focus {
+      background-color: #ffffff;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(140, 109, 70, 0.1);
+    }
+
+    .select-pill {
+      padding: 12px 20px;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      color: var(--text);
+      background-color: var(--bg);
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition);
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%20707571' viewBox='0 0 16 16'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+      background-repeat: no-repeat;
+      background-position: calc(100% - 16px) center;
+      padding-right: 38px;
+    }
+
+    .select-pill:focus, .select-pill:hover {
+      border-color: var(--gold);
+      background-color: #ffffff;
+    }
+
+    /* Toggle Pill */
+    .toggle-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      transition: var(--transition);
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .toggle-pill:hover {
+      border-color: var(--gold);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      background-color: #d1d5db;
+      border-radius: 20px;
+      transition: var(--transition);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background-color: white;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+
+    .toggle-pill input {
+      display: none;
+    }
+
+    .toggle-pill input:checked + .toggle-switch {
+      background-color: var(--green);
+    }
+
+    .toggle-pill input:checked + .toggle-switch::after {
+      transform: translateX(16px);
+    }
+
+    .filter-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .result-count {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Layout Split */
+    .content-layout {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+    }
+
+    /* Sticky Map Panel (40%) */
+    .map-panel {
+      flex: 0 0 40%;
+      position: sticky;
+      top: 110px;
+      height: calc(100vh - 140px);
+      min-height: 500px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
     }
 
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
-      border-color: #d1cecf;
-    }
-
-    .card-top-bar {
+    .map-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #ffffff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
     }
 
-    .badge {
-      font-size: 0.72rem;
+    .map-header h2 {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
       font-weight: 600;
-      padding: 4px 10px;
+      color: var(--text);
+    }
+
+    #map {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background: var(--bg);
+    }
+
+    /* Custom Leaflet Map Pins */
+    .custom-leaflet-pin {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .pin-inner {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 3px solid #ffffff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      transition: var(--transition);
+    }
+
+    .custom-leaflet-pin:hover .pin-inner,
+    .custom-leaflet-pin.active .pin-inner {
+      transform: scale(1.3);
+      border-color: var(--text);
+    }
+
+    /* Property Cards Container (60%) */
+    .cards-panel {
+      flex: 0 0 calc(60% - 32px);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    /* Property Card */
+    .property-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      padding: 24px;
+      transition: var(--transition);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .property-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(140, 109, 70, 0.3);
+    }
+
+    .property-card.active {
+      border-color: var(--green);
+      box-shadow: 0 0 0 2px var(--green), var(--shadow-hover);
+      background-color: #fcfdfc;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    /* Priority Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
       border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
-    .badge-top { background: var(--badge-top-bg); color: var(--accent-top); }
-    .badge-good { background: var(--badge-good-bg); color: var(--accent-good); }
-    .badge-other { background: var(--badge-other-bg); color: var(--accent-other); }
+    .badge-top {
+      background-color: var(--green);
+      color: #ffffff;
+    }
 
-    .address {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.25rem;
+    .badge-good {
+      background-color: var(--gold-light);
+      color: var(--gold);
+      border: 1px solid rgba(140, 109, 70, 0.2);
+    }
+
+    .badge-verify {
+      background-color: var(--gray-light);
+      color: var(--gray);
+    }
+
+    /* Interactive Gold Stars */
+    .rating-stars {
+      display: inline-flex;
+      gap: 2px;
+      color: #e2e8f0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .rating-stars span {
+      font-size: 1.1rem;
+      transition: transform 0.15s ease, color 0.15s ease;
+      color: #cbd5e1;
+    }
+
+    .rating-stars span.filled {
+      color: #d97706; /* Rich Amber Gold */
+    }
+
+    .rating-stars span:hover {
+      transform: scale(1.25);
+    }
+
+    .card-address {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
       font-weight: 600;
-      color: var(--text-main);
-      text-decoration: none;
-      line-height: 1.3;
-      display: block;
+      color: var(--text);
+      line-height: 1.25;
       margin-bottom: 4px;
     }
 
-    .address:hover {
-      color: var(--accent-good);
+    .card-city {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      font-weight: 500;
     }
 
-    .location {
+    .card-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .card-sqft-price {
       font-size: 0.85rem;
-      color: var(--text-muted);
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Stats Grid */
+    .card-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--bg);
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-item .val {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .stat-item .lbl {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    .card-open-house {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--green);
+      background-color: var(--green-light);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .card-notes {
+      font-size: 0.85rem;
+      color: var(--gray);
+      line-height: 1.4;
+      margin-bottom: 20px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 12px;
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--green);
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+      padding: 0;
+    }
+
+    .btn-link:hover {
+      color: var(--gold);
+      transform: translateX(3px);
+    }
+
+    /* Empty State */
+    .empty-state {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px dashed var(--border);
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-state h3 {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    /* Slide-over Panel (Property Details & Evaluation) */
+    .panel-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(31, 36, 33, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .panel-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .slide-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      max-width: 540px;
+      height: 100%;
+      background: #ffffff;
+      z-index: 1001;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-backdrop.open .slide-panel {
+      transform: translateX(0);
+    }
+
+    .panel-header {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .panel-close {
+      background: var(--bg);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--muted);
+      transition: var(--transition);
+    }
+
+    .panel-close:hover {
+      background: var(--gray-light);
+      color: var(--text);
+    }
+
+    .panel-body {
+      padding: 32px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .panel-address-title {
+      font-family: var(--font-serif);
+      font-size: 1.8rem;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text);
+    }
+
+    .panel-price {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-top: 6px;
+    }
+
+    .panel-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      background: var(--bg);
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+
+    .panel-section-title {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .form-group textarea {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      resize: vertical;
+      transition: var(--transition);
+    }
+
+    .form-group textarea:focus {
+      background: #ffffff;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(140, 109, 70, 0.1);
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 20px;
+    }
+
+    /* Responsive Queries */
+    @media (max-width: 1024px) {
+      .content-layout {
+        flex-direction: column;
+      }
+
+      .map-panel {
+        flex: none;
+        width: 100%;
+        height: 380px;
+        position: relative;
+        top: 0;
+      }
+
+      .cards-panel {
+        flex: none;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px 12px;
+      }
+
+      .header-titles h1 {
+        font-size: 1.8rem;
+      }
+
+      .filter-bar {
+        padding: 12px 16px;
+        border-radius: 16px;
+      }
+
+      .search-pill {
+        max-width: 100%;
+      }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .slide-panel {
+        max-width: 100%;
+      }
+
+      .panel-body {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <h1>Selected Properties</h1>
-      <div class="subtitle">8 listings curated in Royal Oak, MI</div>
+  <div class="app-container">
+    
+    <!-- Elegant Header -->
+    <header class="header">
+      <div class="header-titles">
+        <h1>Curated Properties</h1>
+        <p id="subheadingText">11 curated listings in Royal Oak, Michigan</p>
+      </div>
+      <button class="btn-primary" onclick="exportRoute()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        Plan Tour
+      </button>
     </header>
 
-    <div class="grid">
-      <!-- Top Match -->
-      <div class="card">
-        <div>
-          <div class="card-top-bar">
-            <span class="badge badge-top">Top Match</span>
+    <!-- Floating Filter Bar -->
+    <div class="filter-wrapper">
+      <div class="filter-bar">
+        <div class="filter-controls">
+          
+          <!-- Search -->
+          <div class="search-pill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="Search address, notes, style..." oninput="applyFilters()">
           </div>
-          <a class="address" href="https://maps.google.com/?q=915+E+6th+St" target="_blank">915 E 6th St</a>
-          <div class="location">Royal Oak, MI</div>
-        </div>
-      </div>
 
-      <div class="card">
-        <div>
-          <div class="card-top-bar">
-            <span class="badge badge-top">Top Match</span>
-          </div>
-          <a class="address" href="https://maps.google.com/?q=1029+Longfellow+Ave" target="_blank">1029 Longfellow Ave</a>
-          <div class="location">Royal Oak, MI</div>
-        </div>
-      </div>
+          <!-- Day Filter -->
+          <select id="dayFilter" class="select-pill" onchange="applyFilters()">
+            <option value="ALL">All Schedule Days</option>
+            <option value="Sat">Saturday Only</option>
+            <option value="Sun">Sunday Only</option>
+            <option value="TBD">TBD / Verify</option>
+          </select>
 
-      <!-- Good Match -->
-      <div class="card">
-        <div>
-          <div class="card-top-bar">
-            <span class="badge badge-good">Good Match</span>
-          </div>
-          <a class="address" href="https://maps.google.com/?q=3803+Linwood+Ave" target="_blank">3803 Linwood Ave</a>
-          <div class="location">Royal Oak, MI</div>
-        </div>
-      </div>
+          <!-- Priority Filter -->
+          <select id="priorityFilter" class="select-pill" onchange="applyFilters()">
+            <option value="ALL">All Match Tiers</option>
+            <option value="Top">Top Match Only</option>
+            <option value="Good">Good Match Only</option>
+            <option value="Verify">Verify Only</option>
+          </select>
 
-      <div class="card">
-        <div>
-          <div class="card-top-bar">
-            <span class="badge badge-good">Good Match</span>
-          </div>
-          <a class="address" href="https://maps.google.com/?q=4518+Woodland+Ave" target="_blank">4518 Woodland Ave</a>
-          <div class="location">Royal Oak, MI</div>
-        </div>
-      </div>
+          <!-- Sort Select -->
+          <select id="sortSelect" class="select-pill" onchange="handleSortChange(this.value)">
+            <option value="default">Sort by: Default</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="sqft-desc">Size: Largest First</option>
+            <option value="rating-desc">Highest Rated</option>
+          </select>
 
-      <!-- Bungalows / Other -->
-      <div class="card">
-        <div>
-          <div class="card-top-bar">
-            <span class="badge badge-other">Bungalow</span>
-          </div>
-          <a class="address" href="https://maps.google.com/?q=305+Devillen+Ave" target="_blank">305 Devillen Ave</a>
-          <div class="location">Royal Oak, MI</div>
-        </div>
-      </div>
+          <!-- Modern Switch Toggle -->
+          <label class="toggle-pill">
+            <input type="checkbox" id="hideBungalows" onchange="applyFilters()">
+            <span class="toggle-switch"></span>
+            Hide Bungalows
+          </label>
 
-      <div class="card">
-        <div>
-          <div class="card-top-bar">
-            <span class="badge badge-other">Bungalow</span>
-          </div>
-          <a class="address" href="https://maps.google.com/?q=1616+N+Vermont+Ave" target="_blank">1616 N Vermont Ave</a>
-          <div class="location">Royal Oak, MI</div>
         </div>
-      </div>
 
-      <div class="card">
-        <div>
-          <div class="card-top-bar">
-            <span class="badge badge-other">Other</span>
-          </div>
-          <a class="address" href="https://maps.google.com/?q=309+Amelia+St" target="_blank">309 Amelia St</a>
-          <div class="location">Royal Oak, MI</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div>
-          <div class="card-top-bar">
-            <span class="badge badge-other">Other</span>
-          </div>
-          <a class="address" href="https://maps.google.com/?q=1815+Massoit+Rd" target="_blank">1815 Massoit Rd</a>
-          <div class="location">Royal Oak, MI</div>
+        <div class="filter-meta">
+          <span class="result-count" id="resultCount">11 properties</span>
         </div>
       </div>
     </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-layout">
+      
+      <!-- Interactive Map Panel (40%) -->
+      <section class="map-panel">
+        <div class="map-header">
+          <h2>Neighborhood Map</h2>
+          <span style="font-size:0.75rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Royal Oak, MI</span>
+        </div>
+        <div id="map"></div>
+      </section>
+
+      <!-- Cards List Panel (60%) -->
+      <section class="cards-panel">
+        <div class="cards-grid" id="cardsGrid">
+          <!-- Property Cards Injected via JS -->
+        </div>
+      </section>
+
+    </div>
   </div>
 
+  <!-- Slide-over Property Details Panel -->
+  <div class="panel-backdrop" id="panelBackdrop" onclick="closeModal()">
+    <aside class="slide-panel" onclick="event.stopPropagation()">
+      <div class="panel-header">
+        <div>
+          <span class="badge" id="panelBadge">Top Match</span>
+        </div>
+        <button class="panel-close" onclick="closeModal()">&times;</button>
+      </div>
+
+      <div class="panel-body">
+        <div>
+          <h2 class="panel-address-title" id="panelAddress">915 E 6th St</h2>
+          <p style="color:var(--muted); font-size:0.9rem;" id="panelCity">Royal Oak, MI 48067</p>
+          <div class="panel-price" id="panelPrice">$475,000</div>
+        </div>
+
+        <div class="panel-stats-grid">
+          <div>
+            <div class="val" id="panelBeds">5</div>
+            <div class="lbl">Beds</div>
+          </div>
+          <div>
+            <div class="val" id="panelBaths">2.0</div>
+            <div class="lbl">Baths</div>
+          </div>
+          <div>
+            <div class="val" id="panelSqft">2,845</div>
+            <div class="lbl">Sq Ft</div>
+          </div>
+          <div>
+            <div class="val" id="panelPpsq">$167</div>
+            <div class="lbl">$/Sq Ft</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel-section-title">Schedule & Style</div>
+          <p style="font-size:0.9rem; color:var(--text); margin-bottom: 4px;" id="panelOpenHouse"><strong>Open House:</strong> Sun 1:00–3:00 PM</p>
+          <p style="font-size:0.9rem; color:var(--muted);" id="panelStyle"><strong>Architectural Style:</strong> Craftsman</p>
+        </div>
+
+        <div>
+          <div class="panel-section-title">Curator Notes</div>
+          <p style="font-size:0.9rem; color:var(--gray); line-height:1.5; background:var(--bg); padding:12px 16px; border-radius:8px;" id="panelNotes">
+            Non-bungalow ✓. Just listed 7/22; confirm open time holds.
+          </p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="panel-section-title">Personal Evaluation</div>
+          
+          <div class="form-group">
+            <label>Pros</label>
+            <textarea id="modalPros" rows="3" placeholder="e.g. Updated kitchen, spacious layout, prime location..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Cons</label>
+            <textarea id="modalCons" rows="3" placeholder="e.g. Busy street, requires landscaping..."></textarea>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <a id="panelZillowBtn" href="#" target="_blank" class="btn-secondary" style="text-decoration:none; text-align:center; flex:1;">View on Zillow</a>
+          <button class="btn-primary" style="flex:1; justify-content:center;" onclick="saveEvaluation()">Save Notes</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script>
+    // Original Property Dataset preserved exactly
+    let properties = [
+      {
+        id: "1",
+        address: "915 E 6th St",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4862, lng: -83.1362,
+        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
+        day: "Sun", openHouse: "1:00–3:00 PM",
+        price: "$475,000", rawPrice: 475000,
+        beds: 5, baths: 2.0,
+        sqft: "2,845", rawSqft: 2845,
+        style: "Craftsman", isBungalow: false,
+        notes: "Non-bungalow ✓. Just listed 7/22; confirm open time holds",
+        url: "https://www.zillow.com/homedetails/915-E-6th-St-Royal-Oak-MI-48067/24648628_zpid/",
+        userRating: 5, pros: "", cons: ""
+      },
+      {
+        id: "2",
+        address: "1029 Longfellow Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4932, lng: -83.1345,
+        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
+        day: "Sun", openHouse: "2:00–4:00 PM",
+        price: "$529,900", rawPrice: 529900,
+        beds: 3, baths: 2.0,
+        sqft: "2,230", rawSqft: 2230,
+        style: "2-Story", isBungalow: false,
+        notes: "Non-bungalow ✓. Strong match; 3D tour. Confirm Sun open house is active",
+        url: "https://www.zillow.com/homedetails/1029-Longfellow-Ave-Royal-Oak-MI-48067/24649120_zpid/",
+        userRating: 4, pros: "", cons: ""
+      },
+      {
+        id: "3",
+        address: "3803 Linwood Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5186, lng: -83.1818,
+        priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "Sat", openHouse: "12:00–2:00 PM",
+        price: "$598,900", rawPrice: 598900,
+        beds: 3, baths: 3.0,
+        sqft: "2,741", rawSqft: 2741,
+        style: "Colonial", isBungalow: false,
+        notes: "Non-bungalow ✓ (Realtor.com mistags 'bungalow'). Top of budget.",
+        url: "https://www.zillow.com/homedetails/3803-Linwood-Ave-Royal-Oak-MI-48073/24616754_zpid/",
+        userRating: 4, pros: "", cons: ""
+      },
+      {
+        id: "4",
+        address: "4518 Woodland Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5252, lng: -83.1764,
+        priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "Sat", openHouse: "1:00–4:00 PM",
+        price: "$400,000", rawPrice: 400000,
+        beds: 4, baths: 2.0,
+        sqft: "1,530", rawSqft: 1530,
+        style: "Colonial / 1.5-story", isBungalow: false,
+        notes: "STYLE CONFLICT: Zillow=Colonial, Trulia=Bungalow. Verify style + south of 14 Mile",
+        url: "https://www.zillow.com/homedetails/4518-Woodland-Ave-Royal-Oak-MI-48073/24615972_zpid/",
+        userRating: 3, pros: "", cons: ""
+      },
+      {
+        id: "5",
+        address: "305 Devillen Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5098, lng: -83.1533,
+        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+        day: "Sat/Sun", openHouse: "Sat 12–2 / Sun 1–3",
+        price: "$319,900", rawPrice: 319900,
+        beds: 3, baths: 2.0,
+        sqft: "1,733", rawSqft: 1733,
+        style: "BUNGALOW", isBungalow: true,
+        notes: "⚠️ Listed as a bungalow — excludes per your criteria. Under budget",
+        url: "https://www.zillow.com/homedetails/305-Devillen-Ave-Royal-Oak-MI-48073/24624924_zpid/",
+        userRating: 2, pros: "", cons: ""
+      },
+      {
+        id: "6",
+        address: "1616 N Vermont Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4998, lng: -83.1368,
+        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+        day: "Sun", openHouse: "2:00–4:00 PM",
+        price: "$360,000", rawPrice: 360000,
+        beds: 3, baths: 2.0,
+        sqft: "1,720", rawSqft: 1720,
+        style: "BUNGALOW", isBungalow: true,
+        notes: "⚠️ Architectural style = Bungalow — excludes per criteria.",
+        url: "https://www.zillow.com/homedetails/1616-N-Vermont-Ave-Royal-Oak-MI-48067/24634323_zpid/",
+        userRating: 1, pros: "", cons: ""
+      },
+      {
+        id: "7",
+        address: "1815 Massoit Rd",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5225, lng: -83.1702,
+        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+        day: "Sat", openHouse: "12:00–2:00 PM",
+        price: "$345,000", rawPrice: 345000,
+        beds: 3, baths: 1.5,
+        sqft: "2,100", rawSqft: 2100,
+        style: "Ranch", isBungalow: false,
+        notes: "Non-bungalow ✓ but only 1,426 sq ft ABOVE grade.",
+        url: "https://www.zillow.com/homedetails/1815-Massoit-Rd-Royal-Oak-MI-48073/24616115_zpid/",
+        userRating: 2, pros: "", cons: ""
+      },
+      {
+        id: "8",
+        address: "309 Amelia Ave",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5188, lng: -83.1531,
+        priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+        day: "—", openHouse: "None this wknd?",
+        price: "$469,900", rawPrice: 469900,
+        beds: 4, baths: 1.5,
+        sqft: "2,180", rawSqft: 2180,
+        style: "Colonial", isBungalow: false,
+        notes: "⚠️ Open houses were last wknd. Confirm if re-listed.",
+        url: "https://www.zillow.com/homedetails/309-Amelia-Ave-Royal-Oak-MI-48073/24612671_zpid/",
+        userRating: 3, pros: "", cons: ""
+      },
+      {
+        id: "9",
+        address: "403 N Edison Ave",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.4891, lng: -83.1504,
+        priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "TBD", openHouse: "Confirm with Agent",
+        price: "$485,000", rawPrice: 485000,
+        beds: 3, baths: 2.0,
+        sqft: "2,100", rawSqft: 2100,
+        style: "Colonial", isBungalow: false,
+        notes: "Non-bungalow ✓. Near Downtown Royal Oak; traditional floorplan.",
+        url: "https://www.zillow.com/homes/403-N-Edison-Ave-Royal-Oak,-MI-48067_rb/",
+        userRating: 4, pros: "", cons: ""
+      },
+      {
+        id: "10",
+        address: "1221 Vinsetta Blvd",
+        city: "Royal Oak, MI",
+        zip: "48067",
+        lat: 42.5036, lng: -83.1360,
+        priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
+        day: "TBD", openHouse: "Confirm with Agent",
+        price: "$575,000", rawPrice: 575000,
+        beds: 3, baths: 2.5,
+        sqft: "2,400", rawSqft: 2400,
+        style: "Traditional", isBungalow: false,
+        notes: "Non-bungalow ✓. Prime Vinsetta Park area location.",
+        url: "https://www.zillow.com/homes/1221-Vinsetta-Blvd-Royal-Oak,-MI-48067_rb/",
+        userRating: 5, pros: "", cons: ""
+      },
+      {
+        id: "11",
+        address: "2211 N Main St",
+        city: "Royal Oak, MI",
+        zip: "48073",
+        lat: 42.5057, lng: -83.1462,
+        priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
+        day: "TBD", openHouse: "Confirm with Agent",
+        price: "$425,000", rawPrice: 425000,
+        beds: 4, baths: 2.0,
+        sqft: "1,850", rawSqft: 1850,
+        style: "Split-Level", isBungalow: false,
+        notes: "Non-bungalow ✓. 4 full bedrooms above grade, south of 13 Mile Rd.",
+        url: "https://www.zillow.com/homes/2211-N-Main-St-Royal-Oak,-MI-48073_rb/",
+        userRating: 3, pros: "", cons: ""
+      }
+    ];
+
+    // Compute Price Per Sq Ft & Load LocalStorage
+    properties.forEach(p => {
+      p.pricePerSqFt = Math.round(p.rawPrice / p.rawSqft);
+      
+      // LocalStorage persistence extensions
+      const savedRating = localStorage.getItem(`rating_${p.id}`);
+      if (savedRating !== null) p.userRating = parseInt(savedRating, 10);
+
+      const savedPros = localStorage.getItem(`pros_${p.id}`);
+      if (savedPros !== null) p.pros = savedPros;
+
+      const savedCons = localStorage.getItem(`cons_${p.id}`);
+      if (savedCons !== null) p.cons = savedCons;
+    });
+
+    // Initialize Leaflet Map
+    const map = L.map('map', {
+      zoomControl: false
+    }).setView([42.505, -83.15], 13);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap © CARTO'
+    }).addTo(map);
+
+    let markers = {};
+    let currentSortColumn = '';
+    let sortAscending = true;
+    let activeEvalId = null;
+
+    // Helper: Priority Text Formatter
+    function getCleanPriorityLabel(group) {
+      if (group === 'Top') return 'Top Match';
+      if (group === 'Good') return 'Good Match';
+      return 'Verify';
+    }
+
+    // Helper: Star Rating Generator
+    function renderStarsHtml(id, rating) {
+      let stars = '';
+      for (let i = 1; i <= 5; i++) {
+        const isFilled = i <= rating ? 'filled' : '';
+        stars += `<span class="${isFilled}" onclick="event.stopPropagation(); setRating('${id}', ${i})">★</span>`;
+      }
+      return `<div class="rating-stars">${stars}</div>`;
+    }
+
+    // Render Luxury Cards & Markers
+    function renderDashboard(data) {
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = '';
+
+      // Clear map markers
+      Object.values(markers).forEach(m => map.removeLayer(m));
+      markers = {};
+
+      if (data.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <h3>No curated homes match your filters</h3>
+            <p>Try adjusting your search criteria or unchecking "Hide Bungalows".</p>
+          </div>
+        `;
+        document.getElementById('resultCount').innerText = `0 properties`;
+        return;
+      }
+
+      data.forEach(item => {
+        // Build Luxury Card
+        const card = document.createElement('article');
+        card.className = 'property-card';
+        card.id = `card-${item.id}`;
+        card.onclick = () => highlightProperty(item.id, true);
+
+        card.innerHTML = `
+          <div>
+            <div class="card-top">
+              <span class="badge ${item.priorityClass}">${getCleanPriorityLabel(item.priorityGroup)}</span>
+              ${renderStarsHtml(item.id, item.userRating)}
+            </div>
+
+            <h3 class="card-address">${item.address}</h3>
+            <div class="card-city">${item.city}</div>
+
+            <div class="card-price-row">
+              <span class="card-price">${item.price}</span>
+              <span class="card-sqft-price">• $${item.pricePerSqFt}/sq ft</span>
+            </div>
+
+            <div class="card-stats">
+              <div class="stat-item">
+                <div class="val">${item.beds}</div>
+                <div class="lbl">Beds</div>
+              </div>
+              <div class="stat-item">
+                <div class="val">${item.baths}</div>
+                <div class="lbl">Baths</div>
+              </div>
+              <div class="stat-item">
+                <div class="val">${item.sqft}</div>
+                <div class="lbl">Sq Ft</div>
+              </div>
+            </div>
+
+            <div class="card-open-house">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              ${item.day === '—' ? 'No Open House Announced' : `Open ${item.day}: ${item.openHouse}`}
+            </div>
+
+            <p class="card-notes">${item.notes}</p>
+          </div>
+
+          <div class="card-footer">
+            <button class="btn-link" onclick="event.stopPropagation(); openModal('${item.id}')">
+              View Details & Notes →
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(card);
+
+        // Marker Color Mapping
+        const markerColor = item.priorityGroup === 'Top' ? '#2a5240' : item.priorityGroup === 'Good' ? '#8c6d46' : '#707571';
+        
+        const customIcon = L.divIcon({
+          className: 'custom-leaflet-pin',
+          html: `<div class="pin-inner" id="pin-${item.id}" style="background-color:${markerColor};"></div>`,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+
+        const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(map);
+        marker.bindPopup(`
+          <div style="font-family:var(--font-sans); padding:4px;">
+            <strong style="font-family:var(--font-serif); font-size:1rem; color:var(--text);">${item.address}</strong><br/>
+            <span style="color:var(--green); font-weight:700;">${item.price}</span> (${item.beds}b/${item.baths}b)<br/>
+            <small style="color:var(--muted);">${item.openHouse}</small>
+          </div>
+        `);
+        marker.on('click', () => highlightProperty(item.id, false));
+
+        markers[item.id] = marker;
+      });
+
+      document.getElementById('resultCount').innerText = `${data.length} ${data.length === 1 ? 'property' : 'properties'}`;
+      document.getElementById('subheadingText').innerText = `${data.length} curated listings in Royal Oak, Michigan`;
+    }
+
+    // Filtering System
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const day = document.getElementById('dayFilter').value;
+      const priority = document.getElementById('priorityFilter').value;
+      const hideBungalows = document.getElementById('hideBungalows').checked;
+
+      const filtered = properties.filter(item => {
+        const matchesSearch = item.address.toLowerCase().includes(search) || 
+                              item.notes.toLowerCase().includes(search) ||
+                              item.style.toLowerCase().includes(search);
+        const matchesDay = day === 'ALL' || item.day.includes(day);
+        const matchesPriority = priority === 'ALL' || item.priorityGroup === priority;
+        const matchesBungalow = !hideBungalows || !item.isBungalow;
+
+        return matchesSearch && matchesDay && matchesPriority && matchesBungalow;
+      });
+
+      renderDashboard(filtered);
+    }
+
+    // Handle Sort Dropdown
+    function handleSortChange(value) {
+      if (value === 'price-asc') {
+        properties.sort((a, b) => a.rawPrice - b.rawPrice);
+      } else if (value === 'price-desc') {
+        properties.sort((a, b) => b.rawPrice - a.rawPrice);
+      } else if (value === 'sqft-desc') {
+        properties.sort((a, b) => b.rawSqft - a.rawSqft);
+      } else if (value === 'rating-desc') {
+        properties.sort((a, b) => b.userRating - a.userRating);
+      }
+      applyFilters();
+    }
+
+    // Legacy Sort Support for column headers if needed
+    function sortTable(column) {
+      if (currentSortColumn === column) {
+        sortAscending = !sortAscending;
+      } else {
+        currentSortColumn = column;
+        sortAscending = true;
+      }
+
+      properties.sort((a, b) => {
+        let valA = a[column];
+        let valB = b[column];
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+        if (valA < valB) return sortAscending ? -1 : 1;
+        if (valA > valB) return sortAscending ? 1 : -1;
+        return 0;
+      });
+
+      applyFilters();
+    }
+
+    // Export Driving Route (Google Maps)
+    function exportRoute() {
+      const visibleCards = Array.from(document.querySelectorAll('.property-card'));
+      if (visibleCards.length === 0) {
+        alert("No visible properties available to create a route.");
+        return;
+      }
+
+      const visibleIds = visibleCards.map(card => card.id.replace('card-', ''));
+      const routeProperties = properties.filter(p => visibleIds.includes(p.id));
+
+      const waypoints = routeProperties.map(p => encodeURIComponent(`${p.address}, ${p.city}`)).join('/');
+      const googleMapsUrl = `https://www.google.com/maps/dir/${waypoints}`;
+      window.open(googleMapsUrl, '_blank');
+    }
+
+    // Interactive Gold Star Rating with LocalStorage
+    function setRating(id, ratingValue) {
+      const property = properties.find(p => p.id === id);
+      if (property) {
+        property.userRating = ratingValue;
+        localStorage.setItem(`rating_${id}`, ratingValue);
+        applyFilters();
+      }
+    }
+
+    // Slide-over Modal Logic
+    function openModal(id) {
+      activeEvalId = id;
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+
+      document.getElementById('panelAddress').innerText = property.address;
+      document.getElementById('panelCity').innerText = `${property.city} ${property.zip}`;
+      document.getElementById('panelPrice').innerText = property.price;
+      document.getElementById('panelBeds').innerText = property.beds;
+      document.getElementById('panelBaths').innerText = property.baths;
+      document.getElementById('panelSqft').innerText = property.sqft;
+      document.getElementById('panelPpsq').innerText = `$${property.pricePerSqFt}`;
+      
+      document.getElementById('panelOpenHouse').innerHTML = `<strong>Open House:</strong> ${property.day === '—' ? 'None scheduled' : `${property.day} ${property.openHouse}`}`;
+      document.getElementById('panelStyle').innerHTML = `<strong>Style:</strong> ${property.style}`;
+      document.getElementById('panelNotes').innerText = property.notes;
+
+      document.getElementById('panelBadge').innerText = getCleanPriorityLabel(property.priorityGroup);
+      document.getElementById('panelBadge').className = `badge ${property.priorityClass}`;
+
+      document.getElementById('modalPros').value = property.pros || '';
+      document.getElementById('modalCons').value = property.cons || '';
+
+      document.getElementById('panelZillowBtn').href = property.url;
+
+      document.getElementById('panelBackdrop').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('panelBackdrop').classList.remove('open');
+    }
+
+    function saveEvaluation() {
+      const property = properties.find(p => p.id === activeEvalId);
+      if (property) {
+        property.pros = document.getElementById('modalPros').value;
+        property.cons = document.getElementById('modalCons').value;
+        
+        localStorage.setItem(`pros_${activeEvalId}`, property.pros);
+        localStorage.setItem(`cons_${activeEvalId}`, property.cons);
+      }
+      closeModal();
+    }
+
+    // Card & Map Marker Interaction Sync
+    function highlightProperty(id, moveMap = false) {
+      document.querySelectorAll('.property-card').forEach(card => card.classList.remove('active'));
+      document.querySelectorAll('.pin-inner').forEach(pin => pin.parentElement.classList.remove('active'));
+
+      const selectedCard = document.getElementById(`card-${id}`);
+      if (selectedCard) {
+        selectedCard.classList.add('active');
+        selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      const targetMarker = markers[id];
+      if (targetMarker) {
+        const pinEl = document.getElementById(`pin-${id}`);
+        if (pinEl && pinEl.parentElement) {
+          pinEl.parentElement.classList.add('active');
+        }
+        targetMarker.openPopup();
+        if (moveMap) {
+          map.setView(targetMarker.getLatLng(), 15, { animate: true });
+        }
+      }
+    }
+
+    // Initial Dashboard Load
+    renderDashboard(properties);
+  </script>
 </body>
 </html>
