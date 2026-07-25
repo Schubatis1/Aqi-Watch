@@ -919,6 +919,37 @@
     .rating-stars span.filled { color: var(--gold); }
     .rating-stars span:hover { transform: scale(1.25); }
 
+    .rating-stars.small span { font-size: 0.85rem; }
+
+    /* Card-level dual rating (Adam / Lauren), compact */
+    .dual-rating { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+    .dual-rating .rating-person { display: flex; align-items: center; gap: 5px; }
+    .dual-rating .rating-person-label { font-size: 0.68rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+
+    /* Personal Evaluation: side-by-side Adam / Lauren columns */
+    .eval-columns { display: flex; gap: 20px; }
+    .eval-column { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .eval-column-name { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+
+    /* Feature ratings grid */
+    .feature-ratings-grid { display: flex; flex-direction: column; gap: 4px; }
+    .feature-ratings-header, .feature-rating-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 0;
+    }
+    .feature-ratings-header { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 4px; }
+    .feature-ratings-header span { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--muted); text-align: center; }
+    .feature-ratings-header span:first-child { text-align: left; }
+    .feature-rating-row:not(:last-child) { border-bottom: 1px dashed var(--border); }
+    .feature-rating-label { font-size: 0.86rem; color: var(--text); }
+
+    @media (max-width: 640px) {
+      .eval-columns { flex-direction: column; gap: 18px; }
+    }
+
     .card-address {
       font-family: var(--font-display);
       font-size: 1.35rem;
@@ -1376,15 +1407,34 @@
         <div style="display:flex; flex-direction:column; gap:16px;">
           <div class="panel-section-title">Personal Evaluation</div>
 
-          <div class="form-group">
-            <label>Pros</label>
-            <textarea id="modalPros" rows="3" placeholder="e.g. Updated kitchen, spacious layout, prime location..."></textarea>
+          <div class="eval-columns">
+            <div class="eval-column">
+              <div class="eval-column-name">Adam</div>
+              <div id="ratingContainer-adam" class="rating-stars"></div>
+              <div class="form-group">
+                <label>Notes</label>
+                <textarea id="evalNotes-adam" rows="4" placeholder="Adam's thoughts on this house..."></textarea>
+              </div>
+            </div>
+            <div class="eval-column">
+              <div class="eval-column-name">Lauren</div>
+              <div id="ratingContainer-lauren" class="rating-stars"></div>
+              <div class="form-group">
+                <label>Notes</label>
+                <textarea id="evalNotes-lauren" rows="4" placeholder="Lauren's thoughts on this house..."></textarea>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label>Cons</label>
-            <textarea id="modalCons" rows="3" placeholder="e.g. Busy street, requires landscaping..."></textarea>
+        <div>
+          <div class="panel-section-title">Feature Ratings</div>
+          <div class="feature-ratings-header">
+            <span></span>
+            <span>Adam</span>
+            <span>Lauren</span>
           </div>
+          <div class="feature-ratings-grid" id="featureRatingsGrid"></div>
         </div>
 
         <div class="panel-actions">
@@ -1409,7 +1459,7 @@
         <span class="settings-status" id="settingsStatus"></span>
 
         <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Ratings &amp; Notes</label>
-        <p style="margin-top:4px;">Clears every star rating, pro, and con you've entered for all listings, and resets the easter egg so it can appear again. This can't be undone.</p>
+        <p style="margin-top:4px;">Clears every overall rating, feature rating, and note for both Adam and Lauren across all listings, and resets the easter egg so it can appear again. This can't be undone.</p>
         <button class="btn-secondary" style="width:100%;" onclick="resetAllRatingsAndNotes()">Reset All Ratings &amp; Notes</button>
       </div>
       <div class="settings-modal-footer">
@@ -1451,18 +1501,53 @@
     // Complete Property Dataset (19 Listings)
     // `properties` array now lives in properties.js, loaded above.
 
-    // Compute Price Per Sq Ft & Load LocalStorage
+    const PEOPLE = [
+      { key: 'adam', label: 'Adam' },
+      { key: 'lauren', label: 'Lauren' }
+    ];
+
+    const FEATURES = [
+      { key: 'curbAppeal', label: 'Curb Appeal' },
+      { key: 'familyRoom', label: 'Family Room' },
+      { key: 'kitchen', label: 'Kitchen' },
+      { key: 'basement', label: 'Basement' },
+      { key: 'mainBedroom', label: 'Main Bedroom' },
+      { key: 'bedroom2', label: 'Bedroom #2' },
+      { key: 'bedroom3', label: 'Bedroom #3' },
+      { key: 'mainBathroom', label: 'Main Bathroom' },
+      { key: 'otherBathroom', label: 'Other Bathroom' },
+      { key: 'closetSpace', label: 'Closet Space' },
+      { key: 'backYard', label: 'Back Yard' },
+      { key: 'naturalLight', label: 'Natural Light' },
+      { key: 'garageStorage', label: 'Garage/Storage' },
+      { key: 'layoutFlow', label: 'Layout & Flow' },
+      { key: 'overallCondition', label: 'Overall Condition' }
+    ];
+
+    function avgRating(p) {
+      return (p.ratings.adam + p.ratings.lauren) / 2;
+    }
+
+    // Compute Price Per Sq Ft & Load per-person ratings/notes/features from LocalStorage
     properties.forEach(p => {
       p.pricePerSqFt = Math.round(p.rawPrice / p.rawSqft);
 
-      const savedRating = localStorage.getItem(`rating_${p.id}`);
-      if (savedRating !== null) p.userRating = parseInt(savedRating, 10);
+      p.ratings = {};
+      p.evalNotes = {};
+      p.features = {};
 
-      const savedPros = localStorage.getItem(`pros_${p.id}`);
-      if (savedPros !== null) p.pros = savedPros;
+      PEOPLE.forEach(({ key: person }) => {
+        const savedRating = localStorage.getItem(`rating_${person}_${p.id}`);
+        p.ratings[person] = savedRating !== null ? parseInt(savedRating, 10) : 0;
 
-      const savedCons = localStorage.getItem(`cons_${p.id}`);
-      if (savedCons !== null) p.cons = savedCons;
+        p.evalNotes[person] = localStorage.getItem(`notes_${person}_${p.id}`) || '';
+
+        p.features[person] = {};
+        FEATURES.forEach(({ key: featureKey }) => {
+          const savedFeature = localStorage.getItem(`feat_${person}_${featureKey}_${p.id}`);
+          p.features[person][featureKey] = savedFeature !== null ? parseInt(savedFeature, 10) : 0;
+        });
+      });
     });
 
     // Initialize Leaflet Map
@@ -1672,15 +1757,20 @@
     }
 
     function resetAllRatingsAndNotes() {
-      if (!confirm('Reset star ratings, pros, and cons for every listing, and reset the easter egg? This cannot be undone.')) return;
+      if (!confirm("Reset Adam's and Lauren's overall ratings, feature ratings, and notes for every listing, and reset the easter egg? This cannot be undone.")) return;
 
       properties.forEach(p => {
-        localStorage.removeItem(`rating_${p.id}`);
-        localStorage.removeItem(`pros_${p.id}`);
-        localStorage.removeItem(`cons_${p.id}`);
-        p.userRating = 0;
-        p.pros = '';
-        p.cons = '';
+        PEOPLE.forEach(({ key: person }) => {
+          localStorage.removeItem(`rating_${person}_${p.id}`);
+          localStorage.removeItem(`notes_${person}_${p.id}`);
+          p.ratings[person] = 0;
+          p.evalNotes[person] = '';
+
+          FEATURES.forEach(({ key: featureKey }) => {
+            localStorage.removeItem(`feat_${person}_${featureKey}_${p.id}`);
+            p.features[person][featureKey] = 0;
+          });
+        });
       });
 
       setCookie('royaloak_easteregg_seen', '', -1);
@@ -1702,13 +1792,49 @@
       return 'Verify';
     }
 
-    function renderStarsHtml(id, rating) {
+    function renderStarSpans(id, person, rating) {
       let stars = '';
       for (let i = 1; i <= 5; i++) {
         const isFilled = i <= rating ? 'filled' : '';
-        stars += `<span class="${isFilled}" onclick="event.stopPropagation(); setRating('${id}', ${i})">★</span>`;
+        stars += `<span class="${isFilled}" onclick="event.stopPropagation(); setRating('${id}', '${person}', ${i})">★</span>`;
       }
-      return `<div class="rating-stars">${stars}</div>`;
+      return stars;
+    }
+
+    function renderStarsHtml(id, person, rating, extraClass = '') {
+      return `<div class="rating-stars ${extraClass}">${renderStarSpans(id, person, rating)}</div>`;
+    }
+
+    function renderCardDualRatingHtml(item) {
+      let html = '<div class="dual-rating">';
+      PEOPLE.forEach(({ key: person, label }) => {
+        html += `
+          <div class="rating-person">
+            <span class="rating-person-label">${label[0]}</span>
+            ${renderStarsHtml(item.id, person, item.ratings[person])}
+          </div>`;
+      });
+      html += '</div>';
+      return html;
+    }
+
+    function renderFeatureRatingsHtml(property) {
+      return FEATURES.map(({ key: featureKey, label }) => `
+        <div class="feature-rating-row">
+          <span class="feature-rating-label">${label}</span>
+          ${renderFeatureStarsHtml(property.id, 'adam', featureKey, property.features.adam[featureKey])}
+          ${renderFeatureStarsHtml(property.id, 'lauren', featureKey, property.features.lauren[featureKey])}
+        </div>
+      `).join('');
+    }
+
+    function renderFeatureStarsHtml(id, person, featureKey, rating) {
+      let stars = '';
+      for (let i = 1; i <= 5; i++) {
+        const isFilled = i <= rating ? 'filled' : '';
+        stars += `<span class="${isFilled}" onclick="event.stopPropagation(); setFeatureRating('${id}', '${person}', '${featureKey}', ${i})">★</span>`;
+      }
+      return `<div class="rating-stars small">${stars}</div>`;
     }
 
     function showToast(message) {
@@ -1759,14 +1885,14 @@
 
             <div class="card-top">
               <span class="badge ${item.priorityClass}">${getCleanPriorityLabel(item.priorityGroup)}</span>
-              <div style="display:flex; align-items:center; gap:10px;">
-                ${renderStarsHtml(item.id, item.userRating)}
+              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
                 <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
                   <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
                   <span class="tour-checkbox-box">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   </span>
                 </label>
+                ${renderCardDualRatingHtml(item)}
               </div>
             </div>
 
@@ -1897,7 +2023,7 @@
       } else if (value === 'sqft-desc') {
         properties.sort((a, b) => b.rawSqft - a.rawSqft);
       } else if (value === 'rating-desc') {
-        properties.sort((a, b) => b.userRating - a.userRating);
+        properties.sort((a, b) => avgRating(b) - avgRating(a));
       }
       applyFilters();
     }
@@ -1971,9 +2097,10 @@
         { label: 'Sq Ft', render: p => p.sqft },
         { label: 'Style', render: p => p.style },
         { label: 'Open House', render: p => p.day === '—' ? 'None scheduled' : `${p.day}: ${p.openHouse}` },
-        { label: 'Your Rating', render: p => renderStarsHtml(p.id, p.userRating) },
-        { label: 'Pros', render: p => p.pros ? p.pros : '<span style="color:var(--muted);">—</span>' },
-        { label: 'Cons', render: p => p.cons ? p.cons : '<span style="color:var(--muted);">—</span>' },
+        { label: "Adam's Rating", render: p => renderStarsHtml(p.id, 'adam', p.ratings.adam, 'small') },
+        { label: "Lauren's Rating", render: p => renderStarsHtml(p.id, 'lauren', p.ratings.lauren, 'small') },
+        { label: "Adam's Notes", render: p => p.evalNotes.adam ? p.evalNotes.adam : '<span style="color:var(--muted);">—</span>' },
+        { label: "Lauren's Notes", render: p => p.evalNotes.lauren ? p.evalNotes.lauren : '<span style="color:var(--muted);">—</span>' },
         { label: 'Notes', render: p => `<span style="font-size:0.85rem; color:var(--muted);">${p.notes}</span>` },
         { label: 'Zillow', render: p => `<a href="${p.url}" target="_blank" style="color:var(--coral-dark); font-weight:700; font-size:0.85rem;">View Listing →</a>` },
         { label: '', render: p => `<button class="compare-remove-btn" onclick="removeFromCompare('${p.id}')" title="Remove from compare">&times;</button>` }
@@ -2061,13 +2188,28 @@
       window.open(googleMapsUrl, '_blank');
     }
 
-    function setRating(id, ratingValue) {
+    function setRating(id, person, ratingValue) {
       const property = properties.find(p => p.id === id);
       if (property) {
-        property.userRating = ratingValue;
-        localStorage.setItem(`rating_${id}`, ratingValue);
-        showToast(`Rating updated to ${ratingValue} stars`);
+        property.ratings[person] = ratingValue;
+        localStorage.setItem(`rating_${person}_${id}`, ratingValue);
+        showToast(`${person === 'adam' ? 'Adam' : 'Lauren'}'s rating updated to ${ratingValue} stars`);
         applyFilters();
+        if (activeEvalId === id) {
+          document.getElementById(`ratingContainer-${person}`).innerHTML = renderStarSpans(id, person, ratingValue);
+        }
+      }
+    }
+
+    function setFeatureRating(id, person, featureKey, ratingValue) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+
+      property.features[person][featureKey] = ratingValue;
+      localStorage.setItem(`feat_${person}_${featureKey}_${id}`, ratingValue);
+
+      if (activeEvalId === id) {
+        document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
       }
     }
 
@@ -2091,8 +2233,12 @@
       document.getElementById('panelBadge').innerText = getCleanPriorityLabel(property.priorityGroup);
       document.getElementById('panelBadge').className = `badge ${property.priorityClass}`;
 
-      document.getElementById('modalPros').value = property.pros || '';
-      document.getElementById('modalCons').value = property.cons || '';
+      PEOPLE.forEach(({ key: person }) => {
+        document.getElementById(`ratingContainer-${person}`).innerHTML = renderStarSpans(id, person, property.ratings[person]);
+        document.getElementById(`evalNotes-${person}`).value = property.evalNotes[person] || '';
+      });
+
+      document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
 
       document.getElementById('panelZillowBtn').href = property.url;
 
@@ -2108,11 +2254,11 @@
     function saveEvaluation() {
       const property = properties.find(p => p.id === activeEvalId);
       if (property) {
-        property.pros = document.getElementById('modalPros').value;
-        property.cons = document.getElementById('modalCons').value;
-
-        localStorage.setItem(`pros_${activeEvalId}`, property.pros);
-        localStorage.setItem(`cons_${activeEvalId}`, property.cons);
+        PEOPLE.forEach(({ key: person }) => {
+          const value = document.getElementById(`evalNotes-${person}`).value;
+          property.evalNotes[person] = value;
+          localStorage.setItem(`notes_${person}_${activeEvalId}`, value);
+        });
 
         showToast('Evaluation notes saved successfully');
       }
