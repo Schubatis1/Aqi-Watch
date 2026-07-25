@@ -1911,8 +1911,14 @@
       });
 
       if (firebaseReady) {
+        const clearedFeatures = {};
+        FEATURES.forEach(({ key: featureKey }) => { clearedFeatures[featureKey] = 0; });
         properties.forEach(p => {
-          db.collection('openHaus').doc(p.id).delete().catch(err => console.warn('Firestore reset failed', err));
+          db.collection('openHaus').doc(p.id).set({
+            ratings: { adam: 0, lauren: 0 },
+            notes: { adam: '', lauren: '' },
+            features: { adam: clearedFeatures, lauren: clearedFeatures }
+          }).catch(err => console.warn('Firestore reset failed', err));
         });
       }
 
