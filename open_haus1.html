@@ -1383,6 +1383,10 @@
         <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted);">Google Maps API Key</label>
         <input type="password" id="settingsApiKeyInput" placeholder="Paste your Street View Static API key">
         <span class="settings-status" id="settingsStatus"></span>
+
+        <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Ratings &amp; Notes</label>
+        <p style="margin-top:4px;">Clears every star rating, pro, and con you've entered for all listings. This can't be undone.</p>
+        <button class="btn-secondary" style="width:100%;" onclick="resetAllRatingsAndNotes()">Reset All Ratings &amp; Notes</button>
       </div>
       <div class="settings-modal-footer">
         <button class="btn-secondary" style="flex:1;" onclick="clearApiKey()">Clear Key</button>
@@ -1484,8 +1488,11 @@
         }
       }
 
+      // Default key, used until the user saves their own in Settings.
+      const DEFAULT_GOOGLE_MAPS_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
+
       function getApiKey() {
-        return localStorage.getItem('googleMapsKey') || '';
+        return localStorage.getItem('googleMapsKey') || DEFAULT_GOOGLE_MAPS_KEY;
       }
 
       // ---- Providers ----
@@ -1607,7 +1614,7 @@
 
     function openSettings() {
       const input = document.getElementById('settingsApiKeyInput');
-      input.value = localStorage.getItem('googleMapsKey') || '';
+      input.value = localStorage.getItem('googleMapsKey') || DEFAULT_GOOGLE_MAPS_KEY;
       document.getElementById('settingsStatus').innerText = '';
       document.getElementById('settingsStatus').classList.remove('saved');
       document.getElementById('settingsBackdrop').classList.add('open');
@@ -1637,6 +1644,25 @@
       document.getElementById('settingsApiKeyInput').value = '';
       const status = document.getElementById('settingsStatus');
       status.innerText = 'Key cleared.';
+      status.classList.add('saved');
+    }
+
+    function resetAllRatingsAndNotes() {
+      if (!confirm('Reset star ratings, pros, and cons for every listing? This cannot be undone.')) return;
+
+      properties.forEach(p => {
+        localStorage.removeItem(`rating_${p.id}`);
+        localStorage.removeItem(`pros_${p.id}`);
+        localStorage.removeItem(`cons_${p.id}`);
+        p.userRating = 0;
+        p.pros = '';
+        p.cons = '';
+      });
+
+      applyFilters();
+
+      const status = document.getElementById('settingsStatus');
+      status.innerText = 'All ratings and notes reset.';
       status.classList.add('saved');
     }
 
