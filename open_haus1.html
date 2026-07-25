@@ -1780,7 +1780,7 @@
         localStorage.removeItem(cacheKey(fullAddress));
       }
 
-      return { get, clearCacheForAddress };
+      return { get, clearCacheForAddress, getApiKey };
     })();
 
     // ---- Lazy loading via IntersectionObserver ----
@@ -1860,7 +1860,7 @@
 
     function openSettings() {
       const input = document.getElementById('settingsApiKeyInput');
-      input.value = localStorage.getItem('googleMapsKey') || DEFAULT_GOOGLE_MAPS_KEY;
+      input.value = HousePhotoService.getApiKey();
       document.getElementById('settingsStatus').innerText = '';
       document.getElementById('settingsStatus').classList.remove('saved');
       document.getElementById('settingsBackdrop').classList.add('open');
