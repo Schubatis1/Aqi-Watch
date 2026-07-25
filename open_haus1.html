@@ -1496,6 +1496,9 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="properties.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
 
   <script>
     // Complete Property Dataset (19 Listings)
@@ -1549,6 +1552,75 @@
         });
       });
     });
+
+    // --- Firebase Firestore sync (cross-device ratings/notes) ---
+    let db = null;
+    let firebaseReady = false;
+    try {
+      if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        firebaseReady = true;
+      } else {
+        console.warn('Firebase not configured - fill in firebase-config.js to enable cross-device sync. Using localStorage only.');
+      }
+    } catch (err) {
+      console.warn('Firebase init failed - falling back to localStorage only.', err);
+    }
+
+    function applyRemotePropertyData(id, data) {
+      const property = properties.find(p => p.id === id);
+      if (!property || !data) return;
+
+      PEOPLE.forEach(({ key: person }) => {
+        if (data.ratings && data.ratings[person] !== undefined) {
+          property.ratings[person] = data.ratings[person];
+          localStorage.setItem(`rating_${person}_${id}`, data.ratings[person]);
+        }
+        if (data.notes && data.notes[person] !== undefined) {
+          property.evalNotes[person] = data.notes[person];
+          localStorage.setItem(`notes_${person}_${id}`, data.notes[person]);
+          const textarea = document.getElementById(`evalNotes-${person}`);
+          if (activeEvalId === id && textarea && document.activeElement !== textarea) {
+            textarea.value = data.notes[person];
+          }
+        }
+        if (data.features && data.features[person]) {
+          FEATURES.forEach(({ key: featureKey }) => {
+            const value = data.features[person][featureKey];
+            if (value !== undefined) {
+              property.features[person][featureKey] = value;
+              localStorage.setItem(`feat_${person}_${featureKey}_${id}`, value);
+            }
+          });
+        }
+      });
+
+      if (activeEvalId === id) {
+        PEOPLE.forEach(({ key: person }) => {
+          document.getElementById(`ratingContainer-${person}`).innerHTML = renderStarSpans(id, person, property.ratings[person]);
+        });
+        document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
+      }
+    }
+
+    function syncPropertyToFirestore(id, patch) {
+      if (!firebaseReady) return;
+      db.collection('openHaus').doc(id).set(patch, { merge: true })
+        .catch(err => console.warn('Firestore sync failed', err));
+    }
+
+    function initFirebaseSync() {
+      if (!firebaseReady) return;
+      db.collection('openHaus').onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type !== 'removed') {
+            applyRemotePropertyData(change.doc.id, change.doc.data());
+          }
+        });
+        applyFilters();
+      }, err => console.warn('Firestore listener error', err));
+    }
 
     // Initialize Leaflet Map
     const map = L.map('map', { zoomControl: false }).setView([42.505, -83.15], 13);
@@ -1772,6 +1844,12 @@
           });
         });
       });
+
+      if (firebaseReady) {
+        properties.forEach(p => {
+          db.collection('openHaus').doc(p.id).delete().catch(err => console.warn('Firestore reset failed', err));
+        });
+      }
 
       setCookie('royaloak_easteregg_seen', '', -1);
 
@@ -2193,6 +2271,7 @@
       if (property) {
         property.ratings[person] = ratingValue;
         localStorage.setItem(`rating_${person}_${id}`, ratingValue);
+        syncPropertyToFirestore(id, { ratings: { [person]: ratingValue } });
         showToast(`${person === 'adam' ? 'Adam' : 'Lauren'}'s rating updated to ${ratingValue} stars`);
         applyFilters();
         if (activeEvalId === id) {
@@ -2207,6 +2286,7 @@
 
       property.features[person][featureKey] = ratingValue;
       localStorage.setItem(`feat_${person}_${featureKey}_${id}`, ratingValue);
+      syncPropertyToFirestore(id, { features: { [person]: { [featureKey]: ratingValue } } });
 
       if (activeEvalId === id) {
         document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
@@ -2254,11 +2334,14 @@
     function saveEvaluation() {
       const property = properties.find(p => p.id === activeEvalId);
       if (property) {
+        const notesPatch = {};
         PEOPLE.forEach(({ key: person }) => {
           const value = document.getElementById(`evalNotes-${person}`).value;
           property.evalNotes[person] = value;
           localStorage.setItem(`notes_${person}_${activeEvalId}`, value);
+          notesPatch[person] = value;
         });
+        syncPropertyToFirestore(activeEvalId, { notes: notesPatch });
 
         showToast('Evaluation notes saved successfully');
       }
@@ -2297,6 +2380,7 @@
     // Initial Dashboard Load
     renderDashboard(properties);
     updateTourButtonBadge();
+    initFirebaseSync();
   </script>
 </body>
 </html>
