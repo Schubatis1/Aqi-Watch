@@ -11,7 +11,7 @@ const properties = [
     style: "Craftsman", isBungalow: false,
     notes: "Non-bungalow ✓. Just listed 7/22; confirm open time holds",
     url: "https://www.zillow.com/homedetails/915-E-6th-St-Royal-Oak-MI-48067/24648628_zpid/",
-    userRating: 5, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "2", address: "1029 Longfellow Ave", city: "Royal Oak, MI", zip: "48067",
@@ -23,7 +23,7 @@ const properties = [
     style: "2-Story", isBungalow: false,
     notes: "Non-bungalow ✓. Strong match; 3D tour. Confirm Sun open house is active",
     url: "https://www.zillow.com/homedetails/1029-Longfellow-Ave-Royal-Oak-MI-48067/24649120_zpid/",
-    userRating: 4, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "3", address: "3803 Linwood Ave", city: "Royal Oak, MI", zip: "48073",
@@ -35,7 +35,7 @@ const properties = [
     style: "Colonial", isBungalow: false,
     notes: "Non-bungalow ✓ (Realtor.com mistags 'bungalow'). Top of budget.",
     url: "https://www.zillow.com/homedetails/3803-Linwood-Ave-Royal-Oak-MI-48073/24616754_zpid/",
-    userRating: 4, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "4", address: "4518 Woodland Ave", city: "Royal Oak, MI", zip: "48073",
@@ -47,7 +47,7 @@ const properties = [
     style: "Colonial / 1.5-story", isBungalow: false,
     notes: "STYLE CONFLICT: Zillow=Colonial, Trulia=Bungalow. Verify style + south of 14 Mile",
     url: "https://www.zillow.com/homedetails/4518-Woodland-Ave-Royal-Oak-MI-48073/24615972_zpid/",
-    userRating: 3, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "5", address: "305 Devillen Ave", city: "Royal Oak, MI", zip: "48073",
@@ -59,7 +59,7 @@ const properties = [
     style: "BUNGALOW", isBungalow: true,
     notes: "⚠️ Listed as a bungalow — excludes per your criteria. Under budget",
     url: "https://www.zillow.com/homedetails/305-Devillen-Ave-Royal-Oak-MI-48073/24624924_zpid/",
-    userRating: 2, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "6", address: "1616 N Vermont Ave", city: "Royal Oak, MI", zip: "48067",
@@ -71,7 +71,7 @@ const properties = [
     style: "BUNGALOW", isBungalow: true,
     notes: "⚠️ Architectural style = Bungalow — excludes per criteria.",
     url: "https://www.zillow.com/homedetails/1616-N-Vermont-Ave-Royal-Oak-MI-48067/24634323_zpid/",
-    userRating: 1, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "7", address: "1815 Massoit Rd", city: "Royal Oak, MI", zip: "48073",
@@ -83,7 +83,7 @@ const properties = [
     style: "Ranch", isBungalow: false,
     notes: "Non-bungalow ✓ but only 1,426 sq ft ABOVE grade.",
     url: "https://www.zillow.com/homedetails/1815-Massoit-Rd-Royal-Oak-MI-48073/24616115_zpid/",
-    userRating: 2, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "8", address: "309 Amelia Ave", city: "Royal Oak, MI", zip: "48073",
@@ -95,7 +95,7 @@ const properties = [
     style: "Colonial", isBungalow: false,
     notes: "⚠️ Open houses were last wknd. Confirm if re-listed.",
     url: "https://www.zillow.com/homedetails/309-Amelia-Ave-Royal-Oak-MI-48073/24612671_zpid/",
-    userRating: 3, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "12", address: "116 S Kenwood Ave", city: "Royal Oak, MI", zip: "48067",
@@ -107,7 +107,7 @@ const properties = [
     style: "Traditional", isBungalow: false,
     notes: "Non-bungalow ✓. Near Downtown Royal Oak; Sunday open house.",
     url: "https://www.zillow.com/homedetails/116-S-Kenwood-Ave-Royal-Oak-MI-48067/24650296_zpid/",
-    userRating: 4, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "13", address: "827 Gardenia Ave", city: "Royal Oak, MI", zip: "48067",
@@ -119,7 +119,7 @@ const properties = [
     style: "Craftsman", isBungalow: false,
     notes: "Non-bungalow ✓. Updated interior; Sunday open house.",
     url: "https://www.zillow.com/homes/827-Gardenia-Ave-Royal-Oak,-MI-48067_rb/",
-    userRating: 4, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "14", address: "2925 Bembridge Rd", city: "Royal Oak, MI", zip: "48073",
@@ -131,7 +131,7 @@ const properties = [
     style: "Colonial", isBungalow: false,
     notes: "Non-bungalow ✓. Spacious layout in North Royal Oak; Sunday open house.",
     url: "https://www.zillow.com/homedetails/2925-Bembridge-Rd-Royal-Oak-MI-48073/24621416_zpid/",
-    userRating: 5, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "15", address: "1207 Irving Ave", city: "Royal Oak, MI", zip: "48067",
@@ -143,7 +143,7 @@ const properties = [
     style: "2-Story", isBungalow: false,
     notes: "Non-bungalow ✓. Added Sunday open house schedule.",
     url: "https://www.zillow.com/homes/1207-Irving-Ave-Royal-Oak,-MI-48067_rb/",
-    userRating: 4, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "16", address: "223 N Alexander Ave", city: "Royal Oak, MI", zip: "48067",
@@ -155,7 +155,7 @@ const properties = [
     style: "BUNGALOW", isBungalow: true,
     notes: "⚠️ Architectural style = Bungalow — excludes per criteria.",
     url: "https://www.zillow.com/homes/223-N-Alexander-Ave-Royal-Oak,-MI-48067_rb/",
-    userRating: 2, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "17", address: "3210 Harvard Rd", city: "Royal Oak, MI", zip: "48073",
@@ -167,7 +167,7 @@ const properties = [
     style: "Colonial", isBungalow: false,
     notes: "Non-bungalow ✓. Quiet neighborhood setting; Sunday open house.",
     url: "https://www.zillow.com/homes/3210-Harvard-Rd-Royal-Oak,-MI-48073_rb/",
-    userRating: 5, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "18", address: "2436 N Vermont Ave", city: "Royal Oak, MI", zip: "48073",
@@ -179,7 +179,7 @@ const properties = [
     style: "Split-Level", isBungalow: false,
     notes: "Non-bungalow ✓. Sunday open house scheduled.",
     url: "https://www.zillow.com/homes/2436-N-Vermont-Ave-Royal-Oak,-MI-48073_rb/",
-    userRating: 3, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   },
   {
     id: "19", address: "1102 N Lafayette Ave", city: "Royal Oak, MI", zip: "48067",
@@ -191,6 +191,6 @@ const properties = [
     style: "Craftsman", isBungalow: false,
     notes: "Non-bungalow ✓. Prime Lafayette corridor location; Sunday open house.",
     url: "https://www.zillow.com/homes/1102-N-Lafayette-Ave-Royal-Oak,-MI-48067_rb/",
-    userRating: 5, pros: "", cons: ""
+    userRating: 0, pros: "", cons: ""
   }
 ];
