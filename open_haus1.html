@@ -340,15 +340,39 @@
       display: block;
     }
 
-    @keyframes runAcross {
-      0% { left: -260px; }
-      88% { left: calc(100vw - 200px); }
-      100% { left: calc(100vw + 100px); }
+    /* 12s total: enter -> center (stop 1.5s) -> bump right -> center (stop 1.5s)
+       -> bump left -> center (stop 1.5s) -> exit right. A small up/down bounce
+       (translateY) is layered on top while moving, and held flat during stops. */
+    @keyframes walkAcross {
+      0%      { left: -260px;                 transform: translateY(0); }
+      3.125%  {                                transform: translateY(-6px); }
+      6.25%   {                                transform: translateY(0); }
+      9.375%  {                                transform: translateY(-6px); }
+      12.5%   {                                transform: translateY(0); }
+      15.625% {                                transform: translateY(-6px); }
+      18.75%  { left: calc(50vw - 80px);       transform: translateY(0); }  /* arrive center */
+      31.25%  { left: calc(50vw - 80px);       transform: translateY(0); }  /* stop 1 ends */
+      34.375% {                                transform: translateY(-6px); }
+      37.5%   { left: calc(50vw + 30px);       transform: translateY(0); }  /* bump right */
+      40.625% {                                transform: translateY(-6px); }
+      43.75%  { left: calc(50vw - 80px);       transform: translateY(0); }  /* back to center */
+      56.25%  { left: calc(50vw - 80px);       transform: translateY(0); }  /* stop 2 ends */
+      59.375% {                                transform: translateY(-6px); }
+      62.5%   { left: calc(50vw - 190px);      transform: translateY(0); }  /* bump left */
+      65.625% {                                transform: translateY(-6px); }
+      68.75%  { left: calc(50vw - 80px);       transform: translateY(0); }  /* back to center */
+      81.25%  { left: calc(50vw - 80px);       transform: translateY(0); }  /* stop 3 ends */
+      84.375% {                                transform: translateY(-6px); }
+      87.5%   {                                transform: translateY(0); }
+      90.625% {                                transform: translateY(-6px); }
+      93.75%  {                                transform: translateY(0); }
+      96.875% {                                transform: translateY(-6px); }
+      100%    { left: calc(100vw + 100px);     transform: translateY(0); }
     }
 
     .easter-egg-runner.running {
       display: block;
-      animation: runAcross 5s linear forwards;
+      animation: walkAcross 12s linear forwards;
     }
     .filter-wrapper {
       position: sticky;
@@ -1385,7 +1409,7 @@
         <span class="settings-status" id="settingsStatus"></span>
 
         <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Ratings &amp; Notes</label>
-        <p style="margin-top:4px;">Clears every star rating, pro, and con you've entered for all listings. This can't be undone.</p>
+        <p style="margin-top:4px;">Clears every star rating, pro, and con you've entered for all listings, and resets the easter egg so it can appear again. This can't be undone.</p>
         <button class="btn-secondary" style="width:100%;" onclick="resetAllRatingsAndNotes()">Reset All Ratings &amp; Notes</button>
       </div>
       <div class="settings-modal-footer">
@@ -1648,7 +1672,7 @@
     }
 
     function resetAllRatingsAndNotes() {
-      if (!confirm('Reset star ratings, pros, and cons for every listing? This cannot be undone.')) return;
+      if (!confirm('Reset star ratings, pros, and cons for every listing, and reset the easter egg? This cannot be undone.')) return;
 
       properties.forEach(p => {
         localStorage.removeItem(`rating_${p.id}`);
@@ -1659,10 +1683,12 @@
         p.cons = '';
       });
 
+      setCookie('royaloak_easteregg_seen', '', -1);
+
       applyFilters();
 
       const status = document.getElementById('settingsStatus');
-      status.innerText = 'All ratings and notes reset.';
+      status.innerText = 'All ratings, notes, and the easter egg have been reset.';
       status.classList.add('saved');
     }
 
@@ -2005,7 +2031,7 @@
 
       setTimeout(() => {
         runner.classList.remove('running');
-      }, 5200);
+      }, 12200);
     }
 
     function exportRoute() {
