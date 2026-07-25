@@ -644,7 +644,10 @@
       background-color: #fffdfc;
     }
 
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 10px; }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 10px; }
+
+    .card-address-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .card-address-row .dual-rating { align-items: flex-end; flex-shrink: 0; }
 
     /* House Photo — Card Thumbnail */
     .card-photo-wrap {
@@ -932,19 +935,31 @@
     .eval-column-name { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
 
     /* Feature ratings grid */
-    .feature-ratings-grid { display: flex; flex-direction: column; gap: 4px; }
+    .feature-ratings-grid { display: flex; flex-direction: column; gap: 2px; }
     .feature-ratings-header, .feature-rating-row {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr 92px 92px;
       align-items: center;
       gap: 14px;
-      padding: 6px 0;
+      padding: 4px 0;
     }
-    .feature-ratings-header { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 4px; }
-    .feature-ratings-header span { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--muted); text-align: center; }
+    .feature-ratings-header { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 6px; }
+    .feature-ratings-header span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--muted); text-align: center; }
     .feature-ratings-header span:first-child { text-align: left; }
     .feature-rating-row:not(:last-child) { border-bottom: 1px dashed var(--border); }
-    .feature-rating-label { font-size: 0.86rem; color: var(--text); }
+    .feature-rating-label { font-size: 0.82rem; color: var(--text); }
+    .feature-rating-row .rating-stars { justify-self: center; }
+
+    .feature-group-header {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      padding: 12px 0 5px;
+      border-bottom: 1px solid var(--border);
+    }
+    .feature-group-header:first-child { padding-top: 2px; }
 
     @media (max-width: 640px) {
       .eval-columns { flex-direction: column; gap: 18px; }
@@ -1001,17 +1016,6 @@
       margin-bottom: 16px;
     }
 
-    .card-notes {
-      font-size: 0.85rem;
-      color: var(--muted);
-      line-height: 1.4;
-      margin-bottom: 18px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
     .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 10px; }
 
     .btn-link {
@@ -1060,8 +1064,7 @@
       position: fixed;
       top: 0;
       right: 0;
-      width: 100%;
-      max-width: 540px;
+      width: 75vw;
       height: 100%;
       background: #ffffff;
       z-index: 1001;
@@ -1122,6 +1125,33 @@
     }
 
     .panel-section-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+
+    .panel-description {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+      background: var(--bg);
+      padding: 12px 16px;
+      border-radius: 8px;
+      white-space: pre-line;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .panel-description.expanded { -webkit-line-clamp: unset; overflow: visible; }
+
+    .description-toggle {
+      background: none;
+      border: none;
+      color: var(--coral-dark);
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 8px 0 0;
+    }
+    .description-toggle:hover { color: var(--navy); }
+    .description-toggle.hidden { display: none; }
 
     .form-group { display: flex; flex-direction: column; gap: 8px; }
 
@@ -1187,6 +1217,8 @@
     @media (max-width: 640px) {
       body { padding: 14px 10px; }
 
+      .map-panel { height: 170px; }
+
       .header { padding: 16px 18px; border-radius: 16px; }
       .header-titles h1 { font-size: 1.4rem; }
       .header-titles p { font-size: 0.78rem; }
@@ -1228,8 +1260,11 @@
       .select-pill, .toggle-pill { width: 100%; justify-content: space-between; }
 
       .cards-grid { grid-template-columns: 1fr; }
-      .slide-panel { max-width: 100%; }
       .panel-body { padding: 20px; }
+    }
+
+    @media (max-width: 767px) {
+      .slide-panel { width: 100vw; }
     }
   </style>
 </head>
@@ -1398,10 +1433,11 @@
         </div>
 
         <div>
-          <div class="panel-section-title">Curator Notes</div>
-          <p style="font-size:0.9rem; color:var(--muted); line-height:1.5; background:var(--bg); padding:12px 16px; border-radius:8px;" id="panelNotes">
+          <div class="panel-section-title">Description</div>
+          <p class="panel-description" id="panelDescription">
             Non-bungalow ✓. Just listed 7/22; confirm open time holds.
           </p>
+          <button class="description-toggle" id="descriptionToggle" onclick="toggleDescription()">Read more</button>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:16px;">
@@ -1510,21 +1546,21 @@
     ];
 
     const FEATURES = [
-      { key: 'curbAppeal', label: 'Curb Appeal' },
-      { key: 'familyRoom', label: 'Family Room' },
-      { key: 'kitchen', label: 'Kitchen' },
-      { key: 'basement', label: 'Basement' },
-      { key: 'mainBedroom', label: 'Main Bedroom' },
-      { key: 'bedroom2', label: 'Bedroom #2' },
-      { key: 'bedroom3', label: 'Bedroom #3' },
-      { key: 'mainBathroom', label: 'Main Bathroom' },
-      { key: 'otherBathroom', label: 'Other Bathroom' },
-      { key: 'closetSpace', label: 'Closet Space' },
-      { key: 'backYard', label: 'Back Yard' },
-      { key: 'naturalLight', label: 'Natural Light' },
-      { key: 'garageStorage', label: 'Garage/Storage' },
-      { key: 'layoutFlow', label: 'Layout & Flow' },
-      { key: 'overallCondition', label: 'Overall Condition' }
+      { key: 'kitchen', label: 'Kitchen', group: 'Interior' },
+      { key: 'mainBedroom', label: 'Main Bedroom', group: 'Interior' },
+      { key: 'bedroom2', label: 'Bedroom #2', group: 'Interior' },
+      { key: 'bedroom3', label: 'Bedroom #3', group: 'Interior' },
+      { key: 'mainBathroom', label: 'Main Bathroom', group: 'Interior' },
+      { key: 'otherBathroom', label: 'Other Bathroom', group: 'Interior' },
+      { key: 'closetSpace', label: 'Closet Space', group: 'Interior' },
+      { key: 'curbAppeal', label: 'Curb Appeal', group: 'Exterior' },
+      { key: 'backYard', label: 'Back Yard', group: 'Exterior' },
+      { key: 'garageStorage', label: 'Garage/Storage', group: 'Exterior' },
+      { key: 'familyRoom', label: 'Family Room', group: 'Overall' },
+      { key: 'basement', label: 'Basement', group: 'Overall' },
+      { key: 'naturalLight', label: 'Natural Light', group: 'Overall' },
+      { key: 'layoutFlow', label: 'Layout & Flow', group: 'Overall' },
+      { key: 'overallCondition', label: 'Overall Condition', group: 'Overall' }
     ];
 
     function avgRating(p) {
@@ -1897,13 +1933,19 @@
     }
 
     function renderFeatureRatingsHtml(property) {
-      return FEATURES.map(({ key: featureKey, label }) => `
-        <div class="feature-rating-row">
-          <span class="feature-rating-label">${label}</span>
-          ${renderFeatureStarsHtml(property.id, 'adam', featureKey, property.features.adam[featureKey])}
-          ${renderFeatureStarsHtml(property.id, 'lauren', featureKey, property.features.lauren[featureKey])}
-        </div>
-      `).join('');
+      let lastGroup = null;
+      return FEATURES.map(({ key: featureKey, label, group }) => {
+        const groupHeader = group !== lastGroup ? `<div class="feature-group-header">${group}</div>` : '';
+        lastGroup = group;
+        return `
+          ${groupHeader}
+          <div class="feature-rating-row">
+            <span class="feature-rating-label">${label}</span>
+            ${renderFeatureStarsHtml(property.id, 'adam', featureKey, property.features.adam[featureKey])}
+            ${renderFeatureStarsHtml(property.id, 'lauren', featureKey, property.features.lauren[featureKey])}
+          </div>
+        `;
+      }).join('');
     }
 
     function renderFeatureStarsHtml(id, person, featureKey, rating) {
@@ -1963,19 +2005,21 @@
 
             <div class="card-top">
               <span class="badge ${item.priorityClass}">${getCleanPriorityLabel(item.priorityGroup)}</span>
-              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-                <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
-                  <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
-                  <span class="tour-checkbox-box">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  </span>
-                </label>
-                ${renderCardDualRatingHtml(item)}
-              </div>
+              <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
+                <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
+                <span class="tour-checkbox-box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+              </label>
             </div>
 
-            <h3 class="card-address">${item.address}</h3>
-            <div class="card-city">${item.city}</div>
+            <div class="card-address-row">
+              <div>
+                <h3 class="card-address">${item.address}</h3>
+                <div class="card-city">${item.city}</div>
+              </div>
+              ${renderCardDualRatingHtml(item)}
+            </div>
 
             <div class="card-price-row">
               <span class="card-price">${item.price}</span>
@@ -1995,14 +2039,16 @@
                 <div class="val">${item.sqft}</div>
                 <div class="lbl">Sq Ft</div>
               </div>
+              <div class="stat-item">
+                <div class="val">${item.yearBuilt || '—'}</div>
+                <div class="lbl">Built</div>
+              </div>
             </div>
 
             <div class="card-open-house">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/></svg>
               ${item.day === '—' ? 'No Open House Announced' : `Open ${item.day}: ${item.openHouse}`}
             </div>
-
-            <p class="card-notes">${item.notes}</p>
           </div>
 
           <div class="card-footer">
@@ -2308,7 +2354,15 @@
 
       document.getElementById('panelOpenHouse').innerHTML = `<strong>Open House:</strong> ${property.day === '—' ? 'None scheduled' : `${property.day} ${property.openHouse}`}`;
       document.getElementById('panelStyle').innerHTML = `<strong>Style:</strong> ${property.style}`;
-      document.getElementById('panelNotes').innerText = property.notes;
+
+      const descriptionEl = document.getElementById('panelDescription');
+      const toggleEl = document.getElementById('descriptionToggle');
+      descriptionEl.innerText = property.description || '';
+      descriptionEl.classList.remove('expanded');
+      toggleEl.innerText = 'Read more';
+      requestAnimationFrame(() => {
+        toggleEl.classList.toggle('hidden', descriptionEl.scrollHeight <= descriptionEl.clientHeight + 1);
+      });
 
       document.getElementById('panelBadge').innerText = getCleanPriorityLabel(property.priorityGroup);
       document.getElementById('panelBadge').className = `badge ${property.priorityClass}`;
@@ -2325,6 +2379,13 @@
       loadPanelPhoto(property);
 
       document.getElementById('panelBackdrop').classList.add('open');
+    }
+
+    function toggleDescription() {
+      const descriptionEl = document.getElementById('panelDescription');
+      const toggleEl = document.getElementById('descriptionToggle');
+      const expanded = descriptionEl.classList.toggle('expanded');
+      toggleEl.innerText = expanded ? 'Show less' : 'Read more';
     }
 
     function closeModal() {

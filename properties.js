@@ -10,6 +10,12 @@ const properties = [
     beds: 5, baths: 2.0, sqft: "2,845", rawSqft: 2845,
     style: "Craftsman", isBungalow: false,
     notes: "Non-bungalow ✓. Just listed 7/22; confirm open time holds",
+    yearBuilt: 1924,
+    description: `Just a short walk from the heart of downtown Royal Oak, this beautifully updated 1920 home blends timeless character with the conveniences that are nearly impossible to find in a home of this era. With five bedrooms, a spacious walk-in closet in the primary suite, an attached garage, and the ultimate mudroom, it offers the charm of an established neighborhood without asking you to compromise on the features today's buyers want most. Top it all off with a private rooftop deck off the primary bedroom—the perfect place to enjoy your morning coffee or unwind after a long day.
+
+Take a stroll downtown for dinner, grab coffee on Saturday mornings, or enjoy everything this vibrant community has to offer just minutes from your front door. Inside, you'll find generous living spaces filled with warmth and character, while thoughtful updates make everyday living feel effortless. The finished basement adds even more flexibility—whether you envision the ultimate movie room, home gym, playroom, office, or the perfect spot to gather for game day.
+
+Homes like this don't come along often—a classic Royal Oak home that seamlessly combines historic charm with the modern conveniences buyers rarely find. If you've been waiting for a home that offers character, functionality, and an unbeatable location, this is it.`,
     url: "https://www.zillow.com/homedetails/915-E-6th-St-Royal-Oak-MI-48067/24648628_zpid/",
   },
   {
@@ -21,6 +27,8 @@ const properties = [
     beds: 3, baths: 2.0, sqft: "2,230", rawSqft: 2230,
     style: "2-Story", isBungalow: false,
     notes: "Non-bungalow ✓. Strong match; 3D tour. Confirm Sun open house is active",
+    yearBuilt: 1925,
+    description: `ROYAL OAK HOME SHOPPERS, make sure to look at this beautiful Royal Oak Home which is a perfect combination of modern luxurious updates and timeless charm in an unbeatable location! Just steps from Lawson Park, perfect for children and teens, and even closer to Franklin Park, which is just a corner away, offering free Tennis courts, and only a short walk away from downtown Royal Oak, where you can enjoy shopping, the Royal Oak Farmers Market, movie theaters and theaters, bars, restaurants and so much more. You can even walk to the Detroit Zoo! Besides the amazing location, this residence will be a happy place, completely updated with high-quality upgrades, including energy-efficient windows, new siding, and gutters, blinds, ring camera, new flooring, painting, HVAC ultraviolet light air purifier, light fixtures, and many more completing an entire renovation. A spacious main level welcomes you with high ceilings and lots of natural light. The inviting living room features a cozy fireplace and a stylish built-in bar area, perfect for entertaining and full of character. The formal dining room is very spacious and sourounded with windows. The modern classy kitchen with brand-new stainless steel appliances, a gas range, quartz countertops, and custom cabinetry offers elegance and functionality with high end materials. The convenient main-floor laundry room and full bath with a sleek walk-in shower add everyday ease. On the second floor you'll find three generously sized bedrooms with good closet space, along with a beautiful and classy updated full bathroom. The finished lower level provides versatile additional living space—ideal for a home theater, fitness area, or recreation room. Enjoy a beautiful fenced in backyard perfect for entertaining, relaxing, gardening or play, along with a detached two-car garage. Another highlight of the home is the beautiful modern season's room welcoming to the home and adding additional sqf for home living quality. Entire Ring system incl.`,
     url: "https://www.zillow.com/homedetails/1029-Longfellow-Ave-Royal-Oak-MI-48067/24649120_zpid/",
   },
   {
@@ -32,6 +40,8 @@ const properties = [
     beds: 3, baths: 3.0, sqft: "2,741", rawSqft: 2741,
     style: "Colonial", isBungalow: false,
     notes: "Non-bungalow ✓ (Realtor.com mistags 'bungalow'). Top of budget.",
+    yearBuilt: 1954,
+    description: `Welcome to this fully updated 3 bedroom, 3 Bath home with outstanding curb appeal! Dream kitchen w/ SS appliances, double oven, gas range, plenty of cabinets, quartz countertops w/ breakfast bar seating. Recess lighting and hardwood floors throughout. Large bedrooms w/ additional family room w/ door to your private backyard. Spacious and amazing upper primary bedroom w/ attached bathroom w/ dual vanities and Euro shower. 2 huge walk-in closets w/ additional linen closet. Natural light throughout. Finished LL w/ 3rd bathroom. 1 1/2 car garage. Sleek exterior fencing. Sit back and enjoy the cement patio surrounded w/ beautiful landscaping, your private oasis! Walk to Normandy Oaks Park. Close to Freeways, Restaurants and Shopping. BATVIA`,
     url: "https://www.zillow.com/homedetails/3803-Linwood-Ave-Royal-Oak-MI-48073/24616754_zpid/",
   },
   {
@@ -43,6 +53,8 @@ const properties = [
     beds: 4, baths: 2.0, sqft: "1,530", rawSqft: 1530,
     style: "Colonial / 1.5-story", isBungalow: false,
     notes: "STYLE CONFLICT: Zillow=Colonial, Trulia=Bungalow. Verify style + south of 14 Mile",
+    yearBuilt: 1955,
+    description: `Welcome to this classic 4-bedroom, 2-bathroom home designed for comfort and flexibility! Featuring two spacious bedrooms on the main level and two upstairs, plus a full bathroom on each floor, this functional layout offers ideal versatility for any living arrangement. Inside, beautiful floors flow through bright, inviting living spaces. Unwind in the bright back sunroom, which offers serene views of your expansive backyard—a perfect backdrop for outdoor entertaining, gardening, and play. Downstairs, the full basement provides exceptional potential for additional storage, a home workshop, or a future recreation space. Parking and extra storage are a breeze with the 2-car garage. With its great layout, generous outdoor space, and timeless charm, this home is ready for its next owner. Schedule your private showing today and experience all it has to offer!`,
     url: "https://www.zillow.com/homedetails/4518-Woodland-Ave-Royal-Oak-MI-48073/24615972_zpid/",
   },
   {
@@ -54,6 +66,8 @@ const properties = [
     beds: 3, baths: 2.0, sqft: "1,733", rawSqft: 1733,
     style: "BUNGALOW", isBungalow: true,
     notes: "⚠️ Listed as a bungalow — excludes per your criteria. Under budget",
+    yearBuilt: 1948,
+    description: `Welcome to one of Royal Oak's most beautifully updated bungalows in a very desirable neighborhood. Featuring three bedrooms, two full baths. The entire house has been tastefully updated with new kitchen cabinets, quartz countertops, backsplash, stainless steel appliances and fixtures. Both bathrooms have been redesigned with new tiles, vanities and fixtures. Beautiful hardwood floors throughout accented with all new base molding. New paint throughout. Finished basement with a full bath. Brand new A/C for your comfort and convenience. New sewer line installed in 2024. The backyard is fully fenced with a large 2 1/2 car garage. Short walk to Oak Ridge Elementary, McDonald's and Dairy Queen. The house is a must see.`,
     url: "https://www.zillow.com/homedetails/305-Devillen-Ave-Royal-Oak-MI-48073/24624924_zpid/",
   },
   {
@@ -65,6 +79,8 @@ const properties = [
     beds: 3, baths: 2.0, sqft: "1,720", rawSqft: 1720,
     style: "BUNGALOW", isBungalow: true,
     notes: "⚠️ Architectural style = Bungalow — excludes per criteria.",
+    yearBuilt: 1941,
+    description: `Welcome to this beautifully updated 3-bedroom, 2 full-bath home in the heart of Royal Oak! Full of character and charm, this home perfectly blends timeless details with modern updates. The spacious upstairs primary suite offers a private retreat with a large walk-in closet, while both bathrooms have been beautifully renovated with stylish finishes. The extra-spacious kitchen is perfect for everyday living and entertaining, featuring a brand-new kitchen appliance package and plenty of cabinet and counter space. Additional highlights include a detached 1.5-car garage, numerous thoughtful updates, and true turnkey convenience. Perfect for first-time buyers or anyone looking to move right in and enjoy all that Royal Oak has to offer, just minutes from downtown dining, shopping, and entertainment.`,
     url: "https://www.zillow.com/homedetails/1616-N-Vermont-Ave-Royal-Oak-MI-48067/24634323_zpid/",
   },
   {
@@ -76,6 +92,8 @@ const properties = [
     beds: 3, baths: 1.5, sqft: "2,100", rawSqft: 2100,
     style: "Ranch", isBungalow: false,
     notes: "Non-bungalow ✓ but only 1,426 sq ft ABOVE grade.",
+    yearBuilt: 1958,
+    description: `Open house! Saturday, July 25th from 12pm-2pm. Royal Oak's leading home seller presents this classic brick ranch that pairs timeless character with easy everyday comfort, offering three bedrooms, one and a half baths, a sunny back family room, and a fenced yard made for entertaining. Step inside to a bright entry living room anchored by a large bay window. The layout carries into a central kitchen and dining area with generous cabinet space. Just beyond, the back family room features warm wood paneling, a cozy brick fireplace, and a sliding glass door that opens to the backyard. Three nice sized bedrooms share a full bath down the hallway. Downstairs, the partially finished basement adds valuable extra space with a half bath, laundry, and plenty of storage. Out back, the fenced yard offers room to gather along with a detached two car garage. ORIGINAL owner and first time ever on the market! Welcome Home!`,
     url: "https://www.zillow.com/homedetails/1815-Massoit-Rd-Royal-Oak-MI-48073/24616115_zpid/",
   },
   {
@@ -87,6 +105,8 @@ const properties = [
     beds: 4, baths: 1.5, sqft: "2,180", rawSqft: 2180,
     style: "Colonial", isBungalow: false,
     notes: "⚠️ Open houses were last wknd. Confirm if re-listed.",
+    yearBuilt: 1967,
+    description: `Beautiful Park like setting on beautiful fenced treed lot in North Royal Oak. Beautiful public park just down the road and easy access to Clawson and Birmingham. This spacious home is beautifully updated with a brand-new kitchen with stainless appliances, new granite counters and new laminate flooring. There is newer carpet on the main level and beautiful hardwood floors on the second level. The home interior has been freshly painted and there is a formal dining room, family room with natural fireplace, 3 season sunroom, and extra living space and storage in the finished basement. The large back yard has a beautiful paver brick patio and a garden shed for all of the lawn tools. The home offers a large covered front porch, attached garage, and underground sprinklers.`,
     url: "https://www.zillow.com/homedetails/309-Amelia-Ave-Royal-Oak-MI-48073/24612671_zpid/",
   },
   {
@@ -98,6 +118,8 @@ const properties = [
     beds: 3, baths: 2.0, sqft: "2,050", rawSqft: 2050,
     style: "Traditional", isBungalow: false,
     notes: "Non-bungalow ✓. Near Downtown Royal Oak; Sunday open house.",
+    yearBuilt: 1923,
+    description: `Welcome to this charming 1923 three-bedroom, one-and-a-half-bath brick and wood Tudor offering over 1,500 square feet just minutes from downtown Royal Oak. Enter through the arched front door into a welcoming foyer with basketweave tile, then step into the inviting living room featuring a wood-burning fireplace, large crown molding, and hardwood floors throughout. The living room flows into the formal dining room, which leads into the kitchen featuring white cabinetry, dark countertops, generous storage, a gas stove, and stainless steel appliances, including a newer refrigerator and dishwasher. The first floor also offers a home office, a convenient half bath with wainscoting, and a bright four-season room overlooking the fenced backyard. Upstairs, you'll find three spacious bedrooms and a full bath. The unfinished basement provides extra storage and potential for additional living space. Recent updates include a roof (approximately 9 years old), an electrical panel (updated 4 years ago), a new sewer liner with a 50-year warranty (May 2026), and a new sewer cleanout. Outside, enjoy a patio, fenced backyard, and detached 2.5-car garage. Don't miss your opportunity to own this timeless Royal Oak Tudor.`,
     url: "https://www.zillow.com/homedetails/116-S-Kenwood-Ave-Royal-Oak-MI-48067/24650296_zpid/",
   },
   {
@@ -109,6 +131,8 @@ const properties = [
     beds: 3, baths: 2.0, sqft: "1,820", rawSqft: 1820,
     style: "Craftsman", isBungalow: false,
     notes: "Non-bungalow ✓. Updated interior; Sunday open house.",
+    yearBuilt: 1923,
+    description: `Some homes ask you to choose between city energy and quiet nights in. This one in Royal Oak does not. A short walk brings you into the restaurants, coffee shops, and steady weekend activity that make downtown Royal Oak one of the most searched neighborhoods in Metro Detroit. Head back and the pace changes. A patio sits off the back of the home, a natural fire pit anchors the yard, and the primary bedroom has been renovated into an ensuite. This three bedroom, two bathroom bungalow was fully renovated with a new kitchen, floors, roof, and plumbing, and the basement is waterproofed with a warranty. A smart washer and dryer tower has been added, and the home has been freshly painted throughout. You're positioned minutes from major highways, putting most places in the Metro Detroit area about 20 minutes away, including Downtown Detroit. It is a rare combination in Royal Oak, walkable to everything downtown offers, and quiet enough to feel completely removed from it.`,
     url: "https://www.zillow.com/homes/827-Gardenia-Ave-Royal-Oak,-MI-48067_rb/",
   },
   {
@@ -120,6 +144,16 @@ const properties = [
     beds: 4, baths: 2.5, sqft: "2,450", rawSqft: 2450,
     style: "Colonial", isBungalow: false,
     notes: "Non-bungalow ✓. Spacious layout in North Royal Oak; Sunday open house.",
+    yearBuilt: 1948,
+    description: `Welcome to this beautifully maintained Royal Oak bungalow offering a bright, open floor plan, stunning hardwood floors, an updated open kitchen, and a partially finished basement. The inviting living room features coved ceilings, recessed lighting, and a charming gas fireplace, flowing seamlessly into the central dining room with French doors opening to the enclosed 3 seasons back porch with built-in seating.
+
+The kitchen door was expanded showcasing white cabinetry, granite countertops, and a timeless subway tile backsplash. Two main-floor bedrooms include pristine hardwood floors, large closets, along with a full bath conveniently located off the hallway.
+
+Upstairs, you'll find the hallway has abundant built-in storage, two additional bedrooms with generous closet space, and a second full bath. One bedroom can serve as a home office or playroom. The finished basement offers flexible living space, separate laundry, and plenty of additional storage, adding to the home's functionality and versatility.
+
+Outside, enjoy exceptional curb appeal with attractive landscaping, a welcoming covered front porch, recently installed gutter guards, irrigation in both the front and back yards, a large fenced backyard, patio and a two-car garage. Ideally situated just a short distance to neighborhood parks and the shopping, dining, and entertainment along Woodward Avenue.
+
+This move-in-ready, turnkey home perfectly blends classic bungalow charm with modern updates in a highly desirable Royal Oak location. Welcome Home!`,
     url: "https://www.zillow.com/homedetails/2925-Bembridge-Rd-Royal-Oak-MI-48073/24621416_zpid/",
   },
   {
@@ -131,6 +165,8 @@ const properties = [
     beds: 3, baths: 2.0, sqft: "1,950", rawSqft: 1950,
     style: "2-Story", isBungalow: false,
     notes: "Non-bungalow ✓. Added Sunday open house schedule.",
+    yearBuilt: 1927,
+    description: `Exceptional Colonial Just Moments from Downtown Royal Oak! From the moment you arrive, this charming, updated Colonial captivates with its lush perennial landscaping and standout curb appeal. Step inside to discover an inviting layout that seamlessly blends classic architectural details, coved ceilings, graceful arched doorways, and gorgeous oak hardwood floors, with modern upgrades. The sun-drenched living room serves as a cozy focal point, featuring a natural fireplace framed by elegant beveled windows. Gather in the formal dining room surrounded by walls of windows, or utilize the main-level bonus room as a quiet home office or a 4th bedroom! The heart of the home is a bright, spacious kitchen equipped with stainless steel appliances, a deep undermount stainless sink, timeless oak cabinetry, a planter-box window, a charming beadboard ceiling, and abundant counter space. A doorwall off the kitchen leads directly out to the back deck for seamless indoor-outdoor living. Upstairs, the second level hosts three generously sized bedrooms and a completely renovated full bath complete with a dual quartz-topped vanity and a luxurious Mr. Steam Euro-shower. Need even more space? The dry, finished basement adds valuable living area with a cozy family room, an impressive second full bath, a dedicated utility/storage area, and privacy glassblock windows. Out back, entertain effortlessly in the deep, fully fenced backyard anchored by a detached 2-car garage. Unbeatable location - enjoy quick access to Downtown Royal Oak's premier dining, shopping, and nightlife, with effortless commutes via I-75, Woodward, and Corewell Health (Beaumont). This exceptional property won't last long... schedule your tour today!`,
     url: "https://www.zillow.com/homes/1207-Irving-Ave-Royal-Oak,-MI-48067_rb/",
   },
   {
@@ -142,6 +178,8 @@ const properties = [
     beds: 3, baths: 1.5, sqft: "1,600", rawSqft: 1600,
     style: "BUNGALOW", isBungalow: true,
     notes: "⚠️ Architectural style = Bungalow — excludes per criteria.",
+    yearBuilt: 1939,
+    description: `Quality workmanship in this newly updated bungalow by Farhat Family Homes! Located in the heart of downtown Royal Oak, just steps from Whittier Park, this home blends timeless charm with modern updates. The maintenance free exterior features an oversized covered front porch, mature landscaping w irrigation, front and rear lighting and a detached 2 car garage. Exterior updates include roof, windows, siding, gutters, gutter guards, garage door with opener, exterior doors, privacy fence and driveway. Step inside to the warm and inviting living room filled with natural light that seamlessly flows into the dining area. Newly refinished hardwood floors throughout creating an ideal layout for everyday living and entertaining. The updated kitchen features soft closing custom cabinetry, quartzite countertops, tile backsplash, under cabinet lighting, and Frigidaire Pro stainless steel appliances including 6 burner stove w hood fan and drawer microwave. Two bedrooms and a thoughtfully remodeled full bath complete the main level. Upstairs, you'll find a private primary retreat featuring vaulted ceilings, recessed lighting, an amazing walk-in-closet, and plenty of room for a sitting area or desk/vanity. The finished basement features a full bath with tile shower, an additional living space for entertaining, a proper laundry area with front load washer/dryer included, and mudroom lockers with additional built ins. Large storage room for all your needs. Step outside to the oversized newly refinished deck and private backyard with plenty of space to host or enjoy outdoor activities. All new mechanicals including furnace, water tank, AC, electrical and plumbing. Additional updates include all high end plumbing and electrical fixtures, refinished hardwood floors, and new trim and solid wood doors throughout. New security system included. No expense spared. Agent owned.`,
     url: "https://www.zillow.com/homes/223-N-Alexander-Ave-Royal-Oak,-MI-48067_rb/",
   },
   {
@@ -153,6 +191,8 @@ const properties = [
     beds: 4, baths: 2.5, sqft: "2,300", rawSqft: 2300,
     style: "Colonial", isBungalow: false,
     notes: "Non-bungalow ✓. Quiet neighborhood setting; Sunday open house.",
+    yearBuilt: 1920,
+    description: `Thoughtfully rebuilt and expanded in 2021 by John Graham, this 3-bedroom, 2.1-bathroom home offers over 3,000 square feet of total finished living space, including a finished basement completed in 2023. Situated on a professionally landscaped lot and just a short walk to downtown Berkley, the home combines modern design with everyday functionality. The open-concept main level features recessed lighting, crown moulding, and a beautifully appointed kitchen with granite-topped shaker cabinetry, stainless steel appliances, and a large island with seating. The dining area opens to a custom stone-paver patio and private fenced backyard, creating seamless indoor-outdoor living. The first-floor primary suite offers a spacious walk-in closet and an updated bath with dual vanities and an oversized tiled shower. Upstairs are two additional bedrooms with walk-in closets, a full bath, and second-floor laundry. The finished lower level adds exceptional versatility with a built-in bar and ample space for entertaining, recreation, or a home office. Additional highlights include zoned heating and cooling with two furnaces and two air-conditioning units, and an attached oversized two-car garage. Ideally located between Royal Oak and Berkley, this move-in-ready home offers space, style, and a highly desirable walkable lifestyle.`,
     url: "https://www.zillow.com/homes/3210-Harvard-Rd-Royal-Oak,-MI-48073_rb/",
   },
   {
@@ -164,6 +204,8 @@ const properties = [
     beds: 3, baths: 2.0, sqft: "1,880", rawSqft: 1880,
     style: "Split-Level", isBungalow: false,
     notes: "Non-bungalow ✓. Sunday open house scheduled.",
+    yearBuilt: 1948,
+    description: `Welcome to this meticulously maintained brick bungalow in the heart of Royal Oak, perfectly positioned across from Red Run Golf Club. One of this home's greatest advantages is the peace of mind that comes with its major improvements. Featuring a newer roof, newer windows, a beautifully finished basement (2021), and a newly built garage (2021), many of the costly updates have already been completed for you! Offering 3 bedrooms, 2 full bathrooms, and timeless charm throughout, this move-in-ready home seamlessly blends character, comfort, and modern updates. The thoughtfully designed kitchen serves as the heart of the home, providing a functional and inviting space for everyday living and entertaining. The remodeled main-floor bathroom adds style and convenience, while the welcoming family room features a cozy wood-burning fireplace, creating the perfect gathering space. Two bedrooms with beautiful hardwood floors are located on the main level, while the spacious upstairs bedroom offers privacy and abundant closet space. The finished lower level provides valuable additional living space and features a full bathroom, laundry area, and flexible space perfect for a recreation room, home office, or gym. Step outside to your private backyard retreat, complete with a patio ideal for entertaining, relaxing, or enjoying warm summer evenings. The newer 2.5-car garage includes a dedicated workshop area, offering plenty of room for hobbies, storage, and projects. Minutes from downtown Royal Oak and downtown Berkley and within walking distance to Red Run park. With numerous updates, and pride of ownership evident throughout, this exceptional home offers a rare opportunity to enjoy the highly desirable Royal Oak lifestyle in a truly turnkey setting.`,
     url: "https://www.zillow.com/homes/2436-N-Vermont-Ave-Royal-Oak,-MI-48073_rb/",
   },
   {
@@ -175,6 +217,8 @@ const properties = [
     beds: 3, baths: 2.0, sqft: "2,120", rawSqft: 2120,
     style: "Craftsman", isBungalow: false,
     notes: "Non-bungalow ✓. Prime Lafayette corridor location; Sunday open house.",
+    yearBuilt: 1949,
+    description: `Introducing an exceptional opportunity to own this charming brick bungalow in the heart of Royal Oak, offering nearly 1,700 square feet of living space and an unbeatable location just moments from Downtown Royal Oak. Combining timeless character, spacious living areas, and everyday convenience, this home provides the perfect blend of comfort and lifestyle. Upon entry, you are welcomed by beautiful hardwood floors, abundant natural light from plantation shutters, and a warm, inviting atmosphere. The spacious living room is anchored by a charming fireplace, creating the perfect setting for relaxing. The adjoining cozy dining area flows seamlessly into the galley kitchen, featuring stainless steel appliances, a Viking gas range, Viking wine cooler, generous cabinetry, and functional workspace. The main level offers two spacious bedrooms and a full bathroom, while the upper level serves as a private primary retreat featuring a spacious bedroom, full bathroom, skylights, French doors, custom window treatments, and a flexible loft area filled with natural light. The oversized primary bathroom features a whirlpool tub and separate shower. French doors open to a private upper level deck overlooking the backyard, offering the perfect place to relax and unwind. Outside, enjoy a rare oversized double lot with a fully fenced backyard offering exceptional privacy and outdoor space seldom found this close to Downtown Royal Oak. A spacious deck creates the perfect setting for outdoor dining and summer gatherings, while the detached one car detached garage provides added convenience. The basement offers abundant storage and outstanding potential for future finishing, creating opportunities for additional living space. Located within walking distance of Downtown Royal Oak and just minutes from premier dining, shopping, parks, schools, and major commuter routes, this home offers the ideal combination of location, charm, and functionality, Welcome Home!`,
     url: "https://www.zillow.com/homes/1102-N-Lafayette-Ave-Royal-Oak,-MI-48067_rb/",
   }
 ];
