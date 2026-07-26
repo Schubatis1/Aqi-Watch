@@ -1060,20 +1060,37 @@
     .badge-good { background-color: #eef1f4; color: var(--navy-light); border: 1px solid rgba(44,62,80,0.15); }
     .badge-verify { background-color: var(--gray-light); color: var(--muted); }
 
-    /* Interactive Gold Stars */
-    .rating-stars { display: inline-flex; gap: 2px; color: #e2e8f0; cursor: pointer; user-select: none; }
-    .rating-stars span { font-size: 1.1rem; transition: transform 0.15s ease, color 0.15s ease; color: #cbd5e1; }
-    .rating-stars span.filled { color: var(--gold); }
-    .rating-stars span:hover { transform: scale(1.25); }
+    /* Interactive Gold Stars (layered glyphs so a star can be half-filled) */
+    .rating-stars { display: inline-flex; gap: 2px; user-select: none; }
+    .rating-stars .star-wrap { position: relative; display: inline-block; font-size: 1.1rem; line-height: 1; cursor: pointer; transition: transform 0.15s ease; }
+    .rating-stars .star-wrap:hover { transform: scale(1.15); }
+    .rating-stars .star-bg, .rating-stars .star-fill { display: block; }
+    .rating-stars .star-bg { color: #cbd5e1; }
+    .rating-stars .star-fill { position: absolute; top: 0; left: 0; overflow: hidden; white-space: nowrap; color: var(--gold); pointer-events: none; }
 
-    .rating-stars.small span { font-size: 0.85rem; }
+    .rating-stars.small .star-wrap { font-size: 0.85rem; }
+    .rating-stars.large .star-wrap { font-size: 2.1rem; }
+    .rating-stars.readonly .star-wrap { cursor: default; }
+    .rating-stars.readonly .star-wrap:hover { transform: none; }
 
     /* Card-level dual rating (Adam / Lauren), compact */
     .dual-rating { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
     .dual-rating .rating-person { display: flex; align-items: center; gap: 5px; }
     .dual-rating .rating-person-label { font-size: 0.68rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
 
-    /* Personal Evaluation: side-by-side Adam / Lauren columns */
+    /* Personal Evaluation: read-only summary vs. single-person edit mode */
+    .rating-readonly-view { display: flex; flex-direction: column; gap: 12px; }
+    .rating-readonly-row { display: flex; align-items: center; gap: 14px; }
+    .rating-readonly-label { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); width: 56px; flex-shrink: 0; }
+
+    .rating-edit-view { display: flex; flex-direction: column; gap: 14px; }
+    .rating-person-switcher { display: inline-flex; gap: 6px; background: var(--bg); padding: 4px; border-radius: 10px; align-self: flex-start; }
+    .rating-person-btn { border: none; background: none; padding: 6px 16px; border-radius: 7px; font-size: 0.82rem; font-weight: 800; color: var(--muted); cursor: pointer; transition: var(--transition); }
+    .rating-person-btn.active { background: #ffffff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+
+    .rating-readonly-view.hidden, .rating-edit-view.hidden { display: none; }
+
+    /* Personal Evaluation: side-by-side Adam / Lauren notes columns */
     .eval-columns { display: flex; gap: 20px; }
     .eval-column { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
     .eval-column-name { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
@@ -1208,7 +1225,7 @@
       position: fixed;
       top: 0;
       right: 0;
-      width: 75vw;
+      width: 50vw;
       height: 100%;
       background: #ffffff;
       z-index: 1001;
@@ -1378,6 +1395,7 @@
       .map-panel { flex: none; width: 100%; height: 340px; min-height: 0; position: relative; top: 0; }
       .cards-panel { flex: none; width: 100%; }
       .filter-wrapper { top: 8px; }
+      .slide-panel { width: 75vw; }
     }
 
     @media (max-width: 640px) {
@@ -1496,6 +1514,8 @@
 
         <!-- Expandable Controls -->
         <div class="filter-controls-extra" id="filterControlsExtra">
+
+          <select id="weekendFilter" class="select-pill" onchange="selectWeekend(this.value)"></select>
 
           <select id="dayFilter" class="select-pill" onchange="applyFilters()">
             <option value="ALL">All Schedule Days</option>
@@ -1624,12 +1644,33 @@
         </div>
 
         <div style="display:flex; flex-direction:column; gap:16px;">
-          <div class="panel-section-title">Personal Evaluation</div>
+          <div class="panel-section-title" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <span>Personal Evaluation</span>
+            <button type="button" class="btn-link" id="ratingEditToggle" onclick="toggleRatingEditMode()">Edit Ratings</button>
+          </div>
+
+          <div id="ratingReadonlyView" class="rating-readonly-view">
+            <div class="rating-readonly-row">
+              <span class="rating-readonly-label">Adam</span>
+              <div id="ratingContainer-adam-readonly" class="rating-stars large readonly"></div>
+            </div>
+            <div class="rating-readonly-row">
+              <span class="rating-readonly-label">Lauren</span>
+              <div id="ratingContainer-lauren-readonly" class="rating-stars large readonly"></div>
+            </div>
+          </div>
+
+          <div id="ratingEditView" class="rating-edit-view hidden">
+            <div class="rating-person-switcher">
+              <button type="button" class="rating-person-btn" data-person="adam" onclick="setActiveRatingPerson('adam')">Adam</button>
+              <button type="button" class="rating-person-btn" data-person="lauren" onclick="setActiveRatingPerson('lauren')">Lauren</button>
+            </div>
+            <div id="ratingContainer-active" class="rating-stars large"></div>
+          </div>
 
           <div class="eval-columns">
             <div class="eval-column">
               <div class="eval-column-name">Adam</div>
-              <div id="ratingContainer-adam" class="rating-stars"></div>
               <div class="form-group">
                 <label>Notes</label>
                 <textarea id="evalNotes-adam" rows="4" placeholder="Adam's thoughts on this house..."></textarea>
@@ -1637,7 +1678,6 @@
             </div>
             <div class="eval-column">
               <div class="eval-column-name">Lauren</div>
-              <div id="ratingContainer-lauren" class="rating-stars"></div>
               <div class="form-group">
                 <label>Notes</label>
                 <textarea id="evalNotes-lauren" rows="4" placeholder="Lauren's thoughts on this house..."></textarea>
@@ -1768,26 +1808,50 @@
     }
 
     // Compute Price Per Sq Ft & Load per-person ratings/notes/features from LocalStorage
-    properties.forEach(p => {
-      p.pricePerSqFt = Math.round(p.rawPrice / p.rawSqft);
+    function initPropertyDerivedData(list) {
+      list.forEach(p => {
+        p.pricePerSqFt = Math.round(p.rawPrice / p.rawSqft);
 
-      p.ratings = {};
-      p.evalNotes = {};
-      p.features = {};
+        p.ratings = {};
+        p.evalNotes = {};
+        p.features = {};
 
-      PEOPLE.forEach(({ key: person }) => {
-        const savedRating = localStorage.getItem(`rating_${person}_${p.id}`);
-        p.ratings[person] = savedRating !== null ? parseInt(savedRating, 10) : 0;
+        PEOPLE.forEach(({ key: person }) => {
+          const savedRating = localStorage.getItem(`rating_${person}_${p.id}`);
+          p.ratings[person] = savedRating !== null ? parseFloat(savedRating) : 0;
 
-        p.evalNotes[person] = localStorage.getItem(`notes_${person}_${p.id}`) || '';
+          p.evalNotes[person] = localStorage.getItem(`notes_${person}_${p.id}`) || '';
 
-        p.features[person] = {};
-        FEATURES.forEach(({ key: featureKey }) => {
-          const savedFeature = localStorage.getItem(`feat_${person}_${featureKey}_${p.id}`);
-          p.features[person][featureKey] = savedFeature !== null ? parseInt(savedFeature, 10) : 0;
+          p.features[person] = {};
+          FEATURES.forEach(({ key: featureKey }) => {
+            const savedFeature = localStorage.getItem(`feat_${person}_${featureKey}_${p.id}`);
+            p.features[person][featureKey] = savedFeature !== null ? parseInt(savedFeature, 10) : 0;
+          });
         });
       });
-    });
+    }
+
+    WEEKENDS.forEach(w => initPropertyDerivedData(w.data));
+
+    // Populate the weekend dropdown and restore the last-selected weekend (if any)
+    function initWeekendFilter() {
+      const select = document.getElementById('weekendFilter');
+      select.innerHTML = WEEKENDS.map(w => `<option value="${w.id}">${w.label}</option>`).join('');
+
+      const savedWeekendId = localStorage.getItem('selectedWeekendId');
+      const activeWeekend = WEEKENDS.find(w => w.id === savedWeekendId) || WEEKENDS[0];
+      select.value = activeWeekend.id;
+      properties = activeWeekend.data;
+    }
+    initWeekendFilter();
+
+    function selectWeekend(weekendId) {
+      const weekend = WEEKENDS.find(w => w.id === weekendId);
+      if (!weekend) return;
+      properties = weekend.data;
+      localStorage.setItem('selectedWeekendId', weekend.id);
+      applyFilters();
+    }
 
     // --- Firebase Firestore sync (cross-device ratings/notes) ---
     let db = null;
@@ -1833,9 +1897,7 @@
       });
 
       if (activeEvalId === id) {
-        PEOPLE.forEach(({ key: person }) => {
-          document.getElementById(`ratingContainer-${person}`).innerHTML = renderStarSpans(id, person, property.ratings[person]);
-        });
+        refreshRatingViews(property);
         document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
       }
     }
@@ -2131,6 +2193,42 @@
     let markers = {};
     let activeEvalId = null;
     let selectedForTour = new Set();
+    let ratingEditMode = false;
+    let activeRatingPerson = 'adam';
+
+    function refreshRatingViews(property) {
+      PEOPLE.forEach(({ key: person }) => {
+        const readonlyEl = document.getElementById(`ratingContainer-${person}-readonly`);
+        if (readonlyEl) {
+          readonlyEl.innerHTML = renderStarSpans(property.id, person, property.ratings[person], { interactive: false });
+        }
+      });
+      if (ratingEditMode) {
+        document.getElementById('ratingContainer-active').innerHTML =
+          renderStarSpans(property.id, activeRatingPerson, property.ratings[activeRatingPerson], { interactive: true, allowHalf: true });
+      }
+    }
+
+    function toggleRatingEditMode() {
+      ratingEditMode = !ratingEditMode;
+      document.getElementById('ratingReadonlyView').classList.toggle('hidden', ratingEditMode);
+      document.getElementById('ratingEditView').classList.toggle('hidden', !ratingEditMode);
+      document.getElementById('ratingEditToggle').innerText = ratingEditMode ? 'Done' : 'Edit Ratings';
+      if (ratingEditMode) {
+        setActiveRatingPerson(activeRatingPerson);
+      }
+    }
+
+    function setActiveRatingPerson(person) {
+      activeRatingPerson = person;
+      document.querySelectorAll('.rating-person-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.person === person);
+      });
+      const property = properties.find(p => p.id === activeEvalId);
+      if (!property) return;
+      document.getElementById('ratingContainer-active').innerHTML =
+        renderStarSpans(activeEvalId, person, property.ratings[person], { interactive: true, allowHalf: true });
+    }
 
     function getCleanPriorityLabel(group) {
       if (group === 'Top') return 'Top Match';
@@ -2138,17 +2236,37 @@
       return 'Verify';
     }
 
-    function renderStarSpans(id, person, rating) {
+    function starFillPercent(rating, i) {
+      if (rating >= i) return 100;
+      if (rating >= i - 0.5) return 50;
+      return 0;
+    }
+
+    function renderStarSpans(id, person, rating, opts = {}) {
+      const { interactive = true, allowHalf = false } = opts;
       let stars = '';
       for (let i = 1; i <= 5; i++) {
-        const isFilled = i <= rating ? 'filled' : '';
-        stars += `<span class="${isFilled}" onclick="event.stopPropagation(); setRating('${id}', '${person}', ${i})">★</span>`;
+        const pct = starFillPercent(rating, i);
+        const clickAttr = interactive
+          ? `onclick="event.stopPropagation(); handleStarClick(event, '${id}', '${person}', ${i}, ${allowHalf})"`
+          : '';
+        stars += `<span class="star-wrap" ${clickAttr}><span class="star-bg">★</span><span class="star-fill" style="width:${pct}%">★</span></span>`;
       }
       return stars;
     }
 
-    function renderStarsHtml(id, person, rating, extraClass = '') {
-      return `<div class="rating-stars ${extraClass}">${renderStarSpans(id, person, rating)}</div>`;
+    function renderStarsHtml(id, person, rating, extraClass = '', opts = {}) {
+      return `<div class="rating-stars ${extraClass}">${renderStarSpans(id, person, rating, opts)}</div>`;
+    }
+
+    function handleStarClick(evt, id, person, starIndex, allowHalf) {
+      let value = starIndex;
+      if (allowHalf) {
+        const rect = evt.currentTarget.getBoundingClientRect();
+        const clickX = evt.clientX - rect.left;
+        if (clickX < rect.width / 2) value = starIndex - 0.5;
+      }
+      setRating(id, person, value);
     }
 
     function renderCardDualRatingHtml(item) {
@@ -2183,8 +2301,8 @@
     function renderFeatureStarsHtml(id, person, featureKey, rating) {
       let stars = '';
       for (let i = 1; i <= 5; i++) {
-        const isFilled = i <= rating ? 'filled' : '';
-        stars += `<span class="${isFilled}" onclick="event.stopPropagation(); setFeatureRating('${id}', '${person}', '${featureKey}', ${i})">★</span>`;
+        const pct = starFillPercent(rating, i);
+        stars += `<span class="star-wrap" onclick="event.stopPropagation(); setFeatureRating('${id}', '${person}', '${featureKey}', ${i})"><span class="star-bg">★</span><span class="star-fill" style="width:${pct}%">★</span></span>`;
       }
       return `<div class="rating-stars small">${stars}</div>`;
     }
@@ -2564,7 +2682,7 @@
         showToast(`${person === 'adam' ? 'Adam' : 'Lauren'}'s rating updated to ${ratingValue} stars`);
         applyFilters();
         if (activeEvalId === id) {
-          document.getElementById(`ratingContainer-${person}`).innerHTML = renderStarSpans(id, person, ratingValue);
+          refreshRatingViews(property);
         }
       }
     }
@@ -2611,9 +2729,18 @@
       document.getElementById('panelBadge').className = `badge ${property.priorityClass}`;
 
       PEOPLE.forEach(({ key: person }) => {
-        document.getElementById(`ratingContainer-${person}`).innerHTML = renderStarSpans(id, person, property.ratings[person]);
         document.getElementById(`evalNotes-${person}`).value = property.evalNotes[person] || '';
       });
+
+      ratingEditMode = false;
+      activeRatingPerson = 'adam';
+      document.getElementById('ratingReadonlyView').classList.remove('hidden');
+      document.getElementById('ratingEditView').classList.add('hidden');
+      document.getElementById('ratingEditToggle').innerText = 'Edit Ratings';
+      document.querySelectorAll('.rating-person-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.person === 'adam');
+      });
+      refreshRatingViews(property);
 
       document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
 

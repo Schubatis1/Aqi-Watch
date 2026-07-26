@@ -1,6 +1,8 @@
 // Royal Oak open house listings.
 // Edit this file to add/update/remove properties without touching the app markup.
-const properties = [
+// Multiple weekends are supported: each weekend has its own array of properties,
+// and WEEKENDS below lists them for the weekend dropdown in the app header.
+const properties_jul24 = [
   {
     id: "1", address: "915 E 6th St", city: "Royal Oak, MI", zip: "48067",
     lat: 42.4862, lng: -83.1362,
@@ -222,3 +224,73 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
     url: "https://www.zillow.com/homes/223-N-Alexander-Ave-Royal-Oak,-MI-48067_rb/",
   },
 ];
+
+// July 10-12 weekend listings.
+// Only basic listing details were captured for this weekend (address, price,
+// beds/baths, year built, sq ft, link) — ratings/notes/description are blank
+// until filled in. Lat/lng are approximate neighborhood placements for the
+// map pin and can be refined with an exact geocode later.
+const properties_jul10 = [
+  {
+    id: "w0710-1", address: "707 S Laurel St", city: "Royal Oak, MI", zip: "48067",
+    lat: 42.4715, lng: -83.1428,
+    priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+    day: "—", openHouse: "Visited 7/10–7/12 weekend",
+    price: "$525,000", rawPrice: 525000,
+    beds: 3, baths: 3.0, sqft: "1,781", rawSqft: 1781,
+    style: "N/A", isBungalow: false,
+    notes: "Visited during the July 10–12 weekend. Details TBD.",
+    yearBuilt: null,
+    description: "",
+    url: "https://www.zillow.com/homes/707-S-Laurel-St-Royal-Oak,-MI-48067_rb/",
+  },
+  {
+    id: "w0710-2", address: "10504 Borgman Ave", city: "Huntington Woods, MI", zip: "48070",
+    lat: 42.4732, lng: -83.1522,
+    priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+    day: "—", openHouse: "Visited 7/10–7/12 weekend",
+    price: "$539,000", rawPrice: 539000,
+    beds: 3, baths: 2.0, sqft: "1,761", rawSqft: 1761,
+    style: "N/A", isBungalow: false,
+    notes: "Visited during the July 10–12 weekend. Details TBD.",
+    yearBuilt: null,
+    description: "",
+    url: "https://www.zillow.com/homes/10504-Borgman-Ave-Huntington-Woods,-MI-48070_rb/",
+  },
+  {
+    id: "w0710-3", address: "13154 Lasalle Blvd", city: "Huntington Woods, MI", zip: "48070",
+    lat: 42.4726, lng: -83.1478,
+    priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+    day: "—", openHouse: "Visited 7/10–7/12 weekend",
+    price: "$449,000", rawPrice: 449000,
+    beds: 3, baths: 2.0, sqft: "2,450", rawSqft: 2450,
+    style: "N/A", isBungalow: false,
+    notes: "Visited during the July 10–12 weekend. Details TBD.",
+    yearBuilt: null,
+    description: "",
+    url: "https://www.zillow.com/homes/13154-Lasalle-Blvd-Huntington-Woods,-MI-48070_rb/",
+  },
+  {
+    id: "w0710-4", address: "908 Marywood Dr", city: "Royal Oak, MI", zip: "48067",
+    lat: 42.4748, lng: -83.1452,
+    priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
+    day: "—", openHouse: "Visited 7/10–7/12 weekend",
+    price: "$475,000", rawPrice: 475000,
+    beds: 3, baths: 2.0, sqft: "2,024", rawSqft: 2024,
+    style: "N/A", isBungalow: false,
+    notes: "Visited during the July 10–12 weekend. Details TBD.",
+    yearBuilt: 1961,
+    description: "",
+    url: "https://www.zillow.com/homedetails/908-Marywood-Dr-Royal-Oak-MI-48067/24637916_zpid/",
+  },
+];
+
+// List of available weekends for the dropdown, most recent first.
+const WEEKENDS = [
+  { id: "jul24", label: "July 24–26", data: properties_jul24 },
+  { id: "jul10", label: "July 10–12", data: properties_jul10 },
+];
+
+// Active dataset — the app reads/mutates this global; selectWeekend() in
+// open_haus1.html swaps it to another weekend's array.
+let properties = properties_jul24;
