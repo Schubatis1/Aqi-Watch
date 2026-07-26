@@ -2030,6 +2030,13 @@
     // ---- Settings Modal ----
 
     // ---- Theme ----
+    function getMarkerColor(priorityGroup) {
+      const styles = getComputedStyle(document.documentElement);
+      if (priorityGroup === 'Top') return styles.getPropertyValue('--coral').trim();
+      if (priorityGroup === 'Good') return styles.getPropertyValue('--navy').trim();
+      return styles.getPropertyValue('--muted').trim();
+    }
+
     function applyTheme(theme) {
       if (theme === 'house-hunters') {
         document.documentElement.setAttribute('data-theme', theme);
@@ -2044,6 +2051,7 @@
     function setTheme(theme) {
       localStorage.setItem('appTheme', theme);
       applyTheme(theme);
+      if (typeof map !== 'undefined' && map) applyFilters();
     }
 
     function openSettings() {
@@ -2285,7 +2293,7 @@
         grid.appendChild(card);
         registerLazyPhoto(item);
 
-        const markerColor = item.priorityGroup === 'Top' ? '#e0603f' : item.priorityGroup === 'Good' ? '#2c3e50' : '#8a94a0';
+        const markerColor = getMarkerColor(item.priorityGroup);
 
         const customIcon = L.divIcon({
           className: 'custom-leaflet-pin',
