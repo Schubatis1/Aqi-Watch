@@ -1106,6 +1106,21 @@
     .heart-btn:hover { transform: scale(1.15); }
     .heart-btn.loved { color: var(--coral); }
 
+    .binoculars-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: var(--transition);
+    }
+    .binoculars-btn svg { width: 20px; height: 20px; }
+    .binoculars-btn:hover { transform: scale(1.15); }
+    .binoculars-btn.watching { color: #3b82f6; }
+
     .tour-count-badge {
       display: inline-flex;
       align-items: center;
@@ -2141,6 +2156,8 @@
         p.hidden = hiddenFlag !== null ? hiddenFlag === '1' : !!p.hidden;
         const lovedFlag = localStorage.getItem(`loved_${p.id}`);
         p.loved = lovedFlag !== null ? lovedFlag === '1' : !!p.loved;
+        const watchlistFlag = localStorage.getItem(`watchlist_${p.id}`);
+        p.watchlist = watchlistFlag !== null ? watchlistFlag === '1' : !!p.watchlist;
       });
     }
 
@@ -2157,11 +2174,12 @@
       select.innerHTML = `
         <option value="all">View All</option>
         <option value="loved">View Loved ♥</option>
+        <option value="watchlist">View Watchlist 🔭</option>
         ${weekendOptions}
       `;
 
       const savedWeekendId = localStorage.getItem('selectedWeekendId');
-      const validIds = ['all', 'loved', ...WEEKENDS.map(w => w.id)];
+      const validIds = ['all', 'loved', 'watchlist', ...WEEKENDS.map(w => w.id)];
       select.value = validIds.includes(savedWeekendId) ? savedWeekendId : WEEKENDS[0].id;
     }
     initWeekendFilter();
@@ -2230,6 +2248,10 @@
       if (data.loved !== undefined) {
         property.loved = data.loved;
         localStorage.setItem(`loved_${id}`, data.loved ? '1' : '0');
+      }
+      if (data.watchlist !== undefined) {
+        property.watchlist = data.watchlist;
+        localStorage.setItem(`watchlist_${id}`, data.watchlist ? '1' : '0');
       }
 
       PEOPLE.forEach(({ key: person }) => {
@@ -2769,6 +2791,9 @@
                 <button type="button" class="heart-btn ${item.loved ? 'loved' : ''}" onclick="event.stopPropagation(); toggleLovedForProperty('${item.id}')" title="${item.loved ? 'Remove from Loved' : 'Mark as Loved'}">
                   <svg viewBox="0 0 24 24" fill="${item.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
                 </button>
+                <button type="button" class="binoculars-btn ${item.watchlist ? 'watching' : ''}" onclick="event.stopPropagation(); toggleWatchlistForProperty('${item.id}')" title="${item.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
+                  <svg viewBox="0 0 24 24" fill="${item.watchlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10h4"/><path d="M19 7v2a1 1 0 0 1-1 1a2 2 0 0 0-2 2v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-4l-.4-2"/><path d="M5 7v2a1 1 0 0 0 1 1a2 2 0 0 1 2 2v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-4l.4-2"/><path d="M6 7a1 1 0 0 1-1-1v-1a2 2 0 0 1 4 0v3"/><path d="M18 7a1 1 0 0 0 1-1v-1a2 2 0 0 0-4 0v3"/></svg>
+                </button>
                 <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
                   <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
                   <span class="tour-checkbox-box">
@@ -2875,6 +2900,7 @@
         if (item.hidden) return false;
         const matchesWeekend = weekendId === 'all' ? true
           : weekendId === 'loved' ? !!item.loved
+          : weekendId === 'watchlist' ? !!item.watchlist
           : (item.weekends || []).includes(weekendId);
         const matchesSearch = item.address.toLowerCase().includes(search) ||
                               item.notes.toLowerCase().includes(search) ||
@@ -3072,15 +3098,16 @@
 
       if (isCustom) {
         localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
-        syncPropertyToFirestore(id, { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved });
+        syncPropertyToFirestore(id, { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist });
       } else {
         const { ratings, evalNotes, features, pricePerSqFt, ...corePatch } = property;
         localStorage.setItem(`override_${id}`, JSON.stringify(corePatch));
-        syncPropertyToFirestore(id, { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved });
+        syncPropertyToFirestore(id, { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist });
       }
       localStorage.setItem(`weekends_${id}`, JSON.stringify(property.weekends || []));
       localStorage.setItem(`hidden_${id}`, property.hidden ? '1' : '0');
       localStorage.setItem(`loved_${id}`, property.loved ? '1' : '0');
+      localStorage.setItem(`watchlist_${id}`, property.watchlist ? '1' : '0');
     }
 
     function openManageHomes() {
@@ -3110,6 +3137,9 @@
               <div style="display:flex; align-items:center; gap:6px;">
                 <button type="button" class="heart-btn ${p.loved ? 'loved' : ''}" onclick="toggleLovedForProperty('${p.id}')" title="${p.loved ? 'Remove from Loved' : 'Mark as Loved'}">
                   <svg viewBox="0 0 24 24" fill="${p.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
+                </button>
+                <button type="button" class="binoculars-btn ${p.watchlist ? 'watching' : ''}" onclick="toggleWatchlistForProperty('${p.id}')" title="${p.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
+                  <svg viewBox="0 0 24 24" fill="${p.watchlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10h4"/><path d="M19 7v2a1 1 0 0 1-1 1a2 2 0 0 0-2 2v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-4l-.4-2"/><path d="M5 7v2a1 1 0 0 0 1 1a2 2 0 0 1 2 2v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-4l.4-2"/><path d="M6 7a1 1 0 0 1-1-1v-1a2 2 0 0 1 4 0v3"/><path d="M18 7a1 1 0 0 0 1-1v-1a2 2 0 0 0-4 0v3"/></svg>
                 </button>
                 <div>
                   <div class="manage-address">${p.address}</div>
@@ -3164,6 +3194,18 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.loved = !property.loved;
+      persistPropertyState(property);
+      applyFilters();
+      if (document.getElementById('manageBackdrop').classList.contains('open')) {
+        renderManageHomesList();
+      }
+    }
+
+    // Homes to flag for the realtor that nobody has toured in person yet.
+    function toggleWatchlistForProperty(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.watchlist = !property.watchlist;
       persistPropertyState(property);
       applyFilters();
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
