@@ -2372,7 +2372,14 @@
         localStorage.removeItem(cacheKey(fullAddress));
       }
 
-      return { get, clearCacheForAddress, getApiKey };
+      // Pre-seeds the cache with a photo from an external source (e.g. a
+      // OneHome HAR import) so the normal card/panel rendering picks it up
+      // exactly like a provider-resolved photo, no separate code path.
+      function setCachedPhoto(fullAddress, provider, image) {
+        setCached(fullAddress, provider, image);
+      }
+
+      return { get, clearCacheForAddress, getApiKey, setCachedPhoto };
     })();
 
     // ---- Lazy loading via IntersectionObserver ----
@@ -3281,10 +3288,25 @@
       return content.text;
     }
 
-    // Scans every POST/GraphQL entry in the HAR for OneHome listing-summary
-    // responses (listingsBySavedSearchId) and listing-detail responses
-    // (listingDetail), keyed by OneHome's own listing id so a detail
-    // response can enrich a summary row captured earlier in the same file.
+    // OneHome's "Thumbnail" size is null in practice — the populated field is
+    // "Medium" (~296x222). Prefer Large > Medium > Thumbnail, whichever the
+    // response actually filled in.
+    function pickOneHomeMediaUrl(image) {
+      if (!image) return null;
+      const size = image.Large || image.Medium || image.Thumbnail;
+      return (size && size.mediaUrl) || null;
+    }
+
+    // Scans every entry in the HAR:
+    // - POST/GraphQL responses for OneHome listing summaries
+    //   (listingsBySavedSearchId) and listing detail (listingDetail), keyed
+    //   by OneHome's own listing id so a detail response can enrich a
+    //   summary row captured earlier in the same file.
+    // - GET responses for the actual photo bytes (matrixmedia.realcomponline.com),
+    //   keyed by their exact request URL, so an imported home's photo comes
+    //   from the real image data captured in the file rather than the
+    //   short-lived signed URL (which expires ~30 min after capture and
+    //   would otherwise go stale before anyone gets around to importing it).
     function parseOneHomeHarText(harText) {
       let har;
       try { har = JSON.parse(harText); } catch (e) { throw new Error('That file is not valid JSON/HAR.'); }
@@ -3292,12 +3314,23 @@
 
       const listingsById = new Map();
       const detailById = new Map();
+      const imageDataByUrl = new Map();
 
       entries.forEach(entry => {
         const req = entry.request || {};
-        if (req.method !== 'POST' || !(req.url || '').includes('graphql')) return;
+        const res = entry.response || {};
+        const mimeType = (res.content && res.content.mimeType) || '';
 
-        const bodyText = decodeHarContent(entry.response && entry.response.content);
+        if (req.method === 'GET' && mimeType.startsWith('image/')) {
+          const raw = res.content && res.content.text;
+          if (raw && res.content.encoding === 'base64') {
+            imageDataByUrl.set(req.url, `data:${mimeType};base64,${raw}`);
+          }
+          return;
+        }
+
+        if (req.method !== 'POST' || !(req.url || '').includes('graphql')) return;
+        const bodyText = decodeHarContent(res.content);
         if (!bodyText) return;
         let json;
         try { json = JSON.parse(bodyText); } catch (e) { return; }
@@ -3310,15 +3343,18 @@
         if (detail && detail.id) detailById.set(detail.id, detail);
       });
 
-      return Array.from(listingsById.values()).map(l => ({
-        onehomeId: l.id,
-        property: l.property,
-        detailProperty: (detailById.get(l.id) || {}).property || null,
-        thumbnail: (l.media && l.media[0] && l.media[0].Image && l.media[0].Image.Thumbnail)
-          ? l.media[0].Image.Thumbnail.mediaUrl : null,
-        openHouse: (l.openHouse && l.openHouse[0]) || null,
-        existing: findExistingPropertyForOneHomeListing(l.property)
-      }));
+      return Array.from(listingsById.values()).map(l => {
+        const mediaUrl = pickOneHomeMediaUrl(l.media && l.media[0] && l.media[0].Image);
+        return {
+          onehomeId: l.id,
+          property: l.property,
+          detailProperty: (detailById.get(l.id) || {}).property || null,
+          thumbnail: mediaUrl,
+          photoDataUrl: mediaUrl ? (imageDataByUrl.get(mediaUrl) || null) : null,
+          openHouse: (l.openHouse && l.openHouse[0]) || null,
+          existing: findExistingPropertyForOneHomeListing(l.property)
+        };
+      });
     }
 
     // ===== Direct OneHome API path (disabled in the UI — kept to troubleshoot later) =====
@@ -3387,7 +3423,7 @@
               City StateOrProvince PostalCode ListPrice ListingId LivingArea BedroomsTotal
               BathroomsTotalInteger Latitude Longitude StandardStatus
             }
-            media { Image { Thumbnail { mediaUrl } } }
+            media { Image { Thumbnail { mediaUrl } Medium { mediaUrl } Large { mediaUrl } } }
             openHouse { OpenHouseDate OpenHouseStartTime OpenHouseEndTime OpenHouseStatus }
           }
         }
@@ -3442,8 +3478,8 @@
           onehomeId: l.id,
           property: l.property,
           detailProperty: null,
-          thumbnail: (l.media && l.media[0] && l.media[0].Image && l.media[0].Image.Thumbnail)
-            ? l.media[0].Image.Thumbnail.mediaUrl : null,
+          thumbnail: pickOneHomeMediaUrl(l.media && l.media[0] && l.media[0].Image),
+          photoDataUrl: null,
           openHouse: (l.openHouse && l.openHouse[0]) || null,
           existing: findExistingPropertyForOneHomeListing(l.property)
         }));
@@ -3575,8 +3611,9 @@
         const badge = r.existing
           ? `<span class="badge badge-verify">Already in app</span>`
           : `<span class="badge badge-good">New</span>`;
-        const thumb = r.thumbnail
-          ? `<img src="${r.thumbnail}" alt="">`
+        const imgSrc = r.photoDataUrl || r.thumbnail;
+        const thumb = imgSrc
+          ? `<img src="${imgSrc}" alt="">`
           : `<div style="width:56px;height:56px;border-radius:8px;background:var(--bg);flex-shrink:0;"></div>`;
 
         return `
@@ -3658,6 +3695,14 @@
 
       initPropertyDerivedData([property]);
       persistPropertyState(property);
+
+      // Seed the existing photo cache with the image captured in the HAR
+      // (actual bytes, not the short-lived signed URL) so the card/panel
+      // photo pipeline picks it up immediately, same as any other provider.
+      if (result.photoDataUrl) {
+        const fullAddress = `${property.address}, ${property.city} ${property.zip}`;
+        HousePhotoService.setCachedPhoto(fullAddress, 'onehome', result.photoDataUrl);
+      }
     }
 
     async function finalizeImportSelection() {
