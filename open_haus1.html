@@ -1717,6 +1717,46 @@
 
     .panel-close:hover { background: var(--gray-light); color: var(--text); }
 
+    .panel-header-actions { display: flex; align-items: center; gap: 8px; }
+
+    .panel-share-btn {
+      background: var(--bg);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      transition: var(--transition);
+    }
+    .panel-share-btn:hover { background: var(--gray-light); color: var(--text); }
+    .panel-share-btn svg { width: 17px; height: 17px; }
+
+    .share-modal {
+      max-width: 460px;
+    }
+    .share-link-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .share-link-row input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .share-copy-btn { flex-shrink: 0; white-space: nowrap; }
+    .share-copy-btn.copied { background-color: var(--navy); color: #ffffff; }
+
     .panel-body { padding: 30px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 26px; }
 
     .panel-address-title {
@@ -2113,7 +2153,12 @@
         <div>
           <span class="badge" id="panelBadge">Top Match</span>
         </div>
-        <button class="panel-close" onclick="closeModal()">&times;</button>
+        <div class="panel-header-actions">
+          <button class="panel-share-btn" onclick="shareProperty()" title="Share a link to this home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
+          <button class="panel-close" onclick="closeModal()">&times;</button>
+        </div>
       </div>
 
       <div class="panel-body">
@@ -2531,6 +2576,23 @@
         <div style="display:flex; gap:10px;">
           <button class="btn-secondary" style="flex:1;" id="oneHomeCloseBtn" onclick="closeOneHomeImport()">Close</button>
           <button class="btn-primary hidden" id="oneHomeImportBtn" style="flex:1; justify-content:center;" onclick="finalizeImportSelection()">Import Selected</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Link Modal -->
+  <div class="settings-backdrop" id="shareBackdrop" onclick="closeShareModal()">
+    <div class="settings-modal share-modal" onclick="event.stopPropagation()">
+      <div class="settings-modal-header">
+        <h2>Share This Home</h2>
+        <button class="panel-close" onclick="closeShareModal()">&times;</button>
+      </div>
+      <div class="settings-modal-body">
+        <p>Anyone with this link who opens the app will see this home's details.</p>
+        <div class="share-link-row">
+          <input type="text" id="shareLinkInput" readonly onclick="this.select()">
+          <button class="btn-primary share-copy-btn" id="shareCopyBtn" onclick="copyShareLink()">Copy Link</button>
         </div>
       </div>
     </div>
@@ -5502,6 +5564,64 @@
       document.getElementById('panelBackdrop').classList.remove('open');
     }
 
+    // ---- Share / permalink ----
+    function buildPropertyShareLink(id) {
+      const url = new URL(window.location.href);
+      url.hash = '';
+      url.searchParams.set('property', id);
+      return url.toString();
+    }
+
+    function shareProperty() {
+      if (!activeEvalId) return;
+      const link = buildPropertyShareLink(activeEvalId);
+      const input = document.getElementById('shareLinkInput');
+      input.value = link;
+      const copyBtn = document.getElementById('shareCopyBtn');
+      copyBtn.innerText = 'Copy Link';
+      copyBtn.classList.remove('copied');
+      document.getElementById('shareBackdrop').classList.add('open');
+      setTimeout(() => input.select(), 50);
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareBackdrop').classList.remove('open');
+    }
+
+    async function copyShareLink() {
+      const input = document.getElementById('shareLinkInput');
+      const copyBtn = document.getElementById('shareCopyBtn');
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(input.value);
+        } else {
+          input.select();
+          document.execCommand('copy');
+        }
+        copyBtn.innerText = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.innerText = 'Copy Link';
+          copyBtn.classList.remove('copied');
+        }, 1800);
+      } catch (err) {
+        input.select();
+        copyBtn.innerText = 'Press Ctrl/Cmd+C';
+      }
+    }
+
+    // A ?property=<id> link (from the Share button) opens straight to that
+    // home's fly-in panel on load, regardless of the current weekend/
+    // filter selection — the property doesn't need to be in the currently
+    // visible filtered set for its detail data to exist.
+    function openSharedPropertyFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('property');
+      if (!id) return;
+      const property = properties.find(p => p.id === id);
+      if (property) openModal(id);
+    }
+
     function saveEvaluation() {
       const property = properties.find(p => p.id === activeEvalId);
       if (property) {
@@ -5559,6 +5679,7 @@
     applyTheme(localStorage.getItem('appTheme') || 'royal-oak');
     applyFilters();
     updateTourButtonBadge();
+    openSharedPropertyFromUrl();
     initFirebaseSync();
     autoSyncOneHomeInBackground();
   </script>
