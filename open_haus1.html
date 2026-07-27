@@ -527,6 +527,10 @@
       font-weight: 700;
     }
     .manage-table tbody tr.hidden-row { opacity: 0.5; }
+    .sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+    .sortable-th:hover { color: var(--text); }
+    .sort-arrow { display: inline-block; width: 12px; margin-left: 2px; }
+    .sortable-th.sort-active { color: var(--navy); }
     .manage-address { font-family: var(--font-display); font-weight: 700; color: var(--text); }
     .manage-weekend-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
     .manage-weekend-chip {
@@ -2484,14 +2488,14 @@
         <table class="manage-table">
           <thead>
             <tr>
-              <th>Address</th>
-              <th>Price</th>
-              <th>Beds / Baths</th>
-              <th>Sq Ft</th>
-              <th>Built</th>
-              <th>Match</th>
+              <th class="sortable-th" data-field="address" onclick="sortManageHomesBy('address')">Address<span class="sort-arrow"></span></th>
+              <th class="sortable-th" data-field="price" onclick="sortManageHomesBy('price')">Price<span class="sort-arrow"></span></th>
+              <th class="sortable-th" data-field="beds" onclick="sortManageHomesBy('beds')">Beds / Baths<span class="sort-arrow"></span></th>
+              <th class="sortable-th" data-field="sqft" onclick="sortManageHomesBy('sqft')">Sq Ft<span class="sort-arrow"></span></th>
+              <th class="sortable-th" data-field="built" onclick="sortManageHomesBy('built')">Built<span class="sort-arrow"></span></th>
+              <th class="sortable-th" data-field="match" onclick="sortManageHomesBy('match')">Match<span class="sort-arrow"></span></th>
               <th>Weekends</th>
-              <th>Source</th>
+              <th class="sortable-th" data-field="source" onclick="sortManageHomesBy('source')">Source<span class="sort-arrow"></span></th>
               <th>Status</th>
               <th></th>
             </tr>
@@ -4369,9 +4373,49 @@
       saveMatchTierCutoffs();
     }
 
+    let manageSortField = 'address';
+    let manageSortDir = 'asc';
+
+    function getManageSortValue(p, field) {
+      switch (field) {
+        case 'address': return (p.address || '').toLowerCase();
+        case 'price': return p.rawPrice || 0;
+        case 'beds': return p.beds || 0;
+        case 'sqft': return p.rawSqft || 0;
+        case 'built': return p.yearBuilt || 0;
+        case 'match': return computeMatchScore(p, properties);
+        case 'source': return (SOURCE_LABELS[p.source] || p.source || '').toLowerCase();
+        default: return 0;
+      }
+    }
+
+    function sortManageHomesBy(field) {
+      if (manageSortField === field) {
+        manageSortDir = manageSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        manageSortField = field;
+        // Numbers default to descending first (highest price/score first
+        // is usually more useful than lowest); address/source default
+        // ascending (alphabetical).
+        manageSortDir = (field === 'address' || field === 'source') ? 'asc' : 'desc';
+      }
+      renderManageHomesList();
+    }
+
     function renderManageHomesList() {
       const tbody = document.getElementById('manageHomesTableBody');
-      const sorted = properties.slice().sort((a, b) => a.address.localeCompare(b.address));
+      const sorted = properties.slice().sort((a, b) => {
+        const va = getManageSortValue(a, manageSortField);
+        const vb = getManageSortValue(b, manageSortField);
+        const cmp = typeof va === 'string' ? va.localeCompare(vb) : va - vb;
+        return manageSortDir === 'asc' ? cmp : -cmp;
+      });
+
+      document.querySelectorAll('.sortable-th').forEach(th => {
+        const isActive = th.dataset.field === manageSortField;
+        th.classList.toggle('sort-active', isActive);
+        th.querySelector('.sort-arrow').innerText = isActive ? (manageSortDir === 'asc' ? '▲' : '▼') : '';
+      });
 
       tbody.innerHTML = sorted.map(p => {
         const weekendChips = WEEKENDS.map(w => {
@@ -4875,8 +4919,14 @@
       const query = `query ListingById($listingId: String!, $groupId: String!, $savedSearchId: String) {
         listingDetail(listingId: $listingId, groupId: $groupId, savedSearchId: $savedSearchId, suppressEvent: true) {
           id
-          property { YearBuilt ArchitecturalStyle PublicRemarks BathroomsFull BathroomsHalf }
+          property {
+            YearBuilt ArchitecturalStyle PublicRemarks BathroomsFull BathroomsHalf
+            OriginatingSystemKey StreetNumber StreetDirPrefix StreetName StreetSuffix StreetDirSuffix
+            City StateOrProvince PostalCode ListPrice ListingId LivingArea BedroomsTotal
+            BathroomsTotalInteger Latitude Longitude StandardStatus ListingContractDate Cooling Heating
+          }
           media { Image { Medium { mediaUrl } Large { mediaUrl } Thumbnail { mediaUrl } } }
+          openHouse { OpenHouseDate OpenHouseStartTime OpenHouseEndTime OpenHouseStatus }
         }
       }`;
       const data = await oneHomeGraphQL('ListingById', query, { listingId: onehomeId, groupId, savedSearchId }, sessionToken);
@@ -4924,6 +4974,120 @@
       }));
     }
 
+    // A property's oneHomeUrl can be a deep link straight to a specific
+    // listing (portal.onehome.com/en-US/property/<id>?token=...&searchId=
+    // ...) rather than the generic saved-search page — set automatically
+    // by importOneHomeListing, or pasted in manually via the edit form.
+    // Extracting the listing id + searchId from it lets that one listing
+    // be looked up directly, regardless of whether it's still part of the
+    // default saved search.
+    function extractOneHomeDeepLinkInfo(url) {
+      if (!url) return null;
+      try {
+        const u = new URL(url);
+        const match = u.pathname.match(/\/property\/([^/]+)$/);
+        if (!match) return null;
+        // A link opened outside any specific saved search carries
+        // searchId=new-search (not a usable id) alongside a defaultId that
+        // actually is one — prefer that when present.
+        const searchId = u.searchParams.get('defaultId') || u.searchParams.get('searchId');
+        if (!searchId) return null;
+        return { onehomeId: decodeURIComponent(match[1]), searchId };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Keeps any home with a direct OneHome listing link fully in sync —
+    // price, photos, open house dates, beds/baths/sqft, location,
+    // heating/cooling — regardless of how it was originally added
+    // (manual, Zillow, hardcoded seed) or whether that listing is still
+    // part of the default saved search. Unlike the broader saved-search
+    // auto-sync (photos-only, to avoid undoing a manual "Clear All Open
+    // House Times"), this only touches homes explicitly linked by the
+    // user, so a full silent refresh is the intended behavior here.
+    async function syncDirectlyLinkedProperties(groupId, sessionToken) {
+      const linked = properties
+        .map(p => ({ p, link: extractOneHomeDeepLinkInfo(p.oneHomeUrl) }))
+        .filter(x => x.link);
+      if (!linked.length) return;
+
+      await runWithConcurrency(linked, 4, async ({ p, link }) => {
+        try {
+          const detail = await fetchOneHomeListingDetail(groupId, link.searchId, link.onehomeId, sessionToken);
+          if (!detail || !detail.property) return;
+          const dp = detail.property;
+          let changed = false;
+
+          if (dp.ListPrice != null) {
+            const rawPrice = Math.round(dp.ListPrice);
+            if (p.rawPrice !== rawPrice) {
+              p.rawPrice = rawPrice;
+              p.price = `$${rawPrice.toLocaleString()}`;
+              if (p.rawSqft) p.pricePerSqFt = Math.round(rawPrice / p.rawSqft);
+              changed = true;
+            }
+          }
+          if (dp.LivingArea != null) {
+            const rawSqft = Math.round(dp.LivingArea);
+            if (p.rawSqft !== rawSqft) {
+              p.rawSqft = rawSqft;
+              p.sqft = rawSqft.toLocaleString();
+              if (p.rawPrice) p.pricePerSqFt = Math.round(p.rawPrice / rawSqft);
+              changed = true;
+            }
+          }
+          if (dp.BedroomsTotal != null && p.beds !== dp.BedroomsTotal) { p.beds = dp.BedroomsTotal; changed = true; }
+          const baths = dp.BathroomsFull != null
+            ? dp.BathroomsFull + (dp.BathroomsHalf ? dp.BathroomsHalf * 0.5 : 0)
+            : (dp.BathroomsTotalInteger != null ? dp.BathroomsTotalInteger : null);
+          if (baths != null && p.baths !== baths) { p.baths = baths; changed = true; }
+          if (dp.Latitude != null && dp.Longitude != null && (p.lat !== dp.Latitude || p.lng !== dp.Longitude)) {
+            p.lat = dp.Latitude; p.lng = dp.Longitude; changed = true;
+          }
+          if (dp.YearBuilt && p.yearBuilt !== dp.YearBuilt) { p.yearBuilt = dp.YearBuilt; changed = true; }
+          if (dp.ArchitecturalStyle && dp.ArchitecturalStyle[0] && p.style !== dp.ArchitecturalStyle[0]) {
+            p.style = dp.ArchitecturalStyle[0];
+            p.isBungalow = /bungalow/i.test(p.style);
+            changed = true;
+          }
+          if (dp.PublicRemarks && p.description !== dp.PublicRemarks) { p.description = dp.PublicRemarks; changed = true; }
+          if (dp.ListingContractDate && p.listingDate !== dp.ListingContractDate) { p.listingDate = dp.ListingContractDate; changed = true; }
+          if (dp.Heating && dp.Heating.length) {
+            const heating = dp.Heating.map(splitCamelCase);
+            if (JSON.stringify(p.heating || []) !== JSON.stringify(heating)) { p.heating = heating; changed = true; }
+          }
+          if (dp.Cooling && dp.Cooling.length) {
+            const cooling = dp.Cooling.map(splitCamelCase);
+            if (JSON.stringify(p.cooling || []) !== JSON.stringify(cooling)) { p.cooling = cooling; changed = true; }
+          }
+
+          const ohDisplay = buildOpenHouseDisplay(detail.openHouse);
+          const entriesChanged = JSON.stringify(p.openHouses || []) !== JSON.stringify(ohDisplay.entries);
+          if (p.day !== ohDisplay.day || p.openHouse !== ohDisplay.openHouse || entriesChanged) {
+            p.day = ohDisplay.day; p.openHouse = ohDisplay.openHouse; p.openHouses = ohDisplay.entries;
+            changed = true;
+          }
+
+          const mediaUrls = extractOneHomeMediaUrls(detail.media);
+          if (mediaUrls.length) {
+            const photos = await fetchPhotosFromMediaUrls(mediaUrls);
+            if (photos.length) {
+              await GalleryStore.savePhotos(p.id, photos);
+              const fullAddress = `${p.address}, ${p.city} ${p.zip}`;
+              HousePhotoService.setCachedPhoto(fullAddress, 'onehome', photos[0]);
+            }
+          }
+
+          if (changed) persistPropertyState(p);
+        } catch (err) {
+          console.warn('Direct OneHome link sync failed for', p.address, err);
+        }
+      });
+
+      applyFilters();
+    }
+
     async function runOneHomeImport() {
       const status = document.getElementById('oneHomeStatus');
       const urlInput = document.getElementById('oneHomeUrlInput').value.trim();
@@ -4942,6 +5106,7 @@
         document.getElementById('oneHomeImportBtn').classList.remove('hidden');
         refreshLocationScheduleAndPriceForExistingMatches();
         backfillPhotosForExistingMatches();
+        await syncDirectlyLinkedProperties(oneHomeSession.groupId, oneHomeSession.sessionToken);
       } catch (err) {
         console.warn('OneHome import failed', err);
         status.innerText = `Couldn't load that link: ${err.message}`;
@@ -4969,6 +5134,11 @@
         await loadOneHomeResultsFromUrl(DEFAULT_ONEHOME_URL);
         localStorage.setItem('oneHomeAutoSyncAt', String(Date.now()));
         await backfillPhotosForExistingMatches();
+        // Homes with an explicit OneHome link get a full silent refresh
+        // (price/schedule/photos/etc), not just photos — see
+        // syncDirectlyLinkedProperties for why that's safe here even
+        // though the broader saved-search sync stays photos-only.
+        await syncDirectlyLinkedProperties(oneHomeSession.groupId, oneHomeSession.sessionToken);
       } catch (err) {
         console.warn('OneHome background sync failed', err);
       }
