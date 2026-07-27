@@ -1588,6 +1588,8 @@
       line-height: 1.25;
       margin-bottom: 4px;
     }
+    .card-address a { color: inherit; text-decoration: none; }
+    .card-address a:hover { text-decoration: underline; }
 
     .card-city { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; font-weight: 600; }
 
@@ -1766,6 +1768,8 @@
       line-height: 1.2;
       color: var(--text);
     }
+    .panel-address-title a { color: inherit; text-decoration: none; }
+    .panel-address-title a:hover { text-decoration: underline; }
 
     .panel-price { font-size: 1.75rem; font-weight: 800; color: var(--coral-dark); margin-top: 6px; }
 
@@ -2180,7 +2184,7 @@
             <div class="panel-address-badge">
               <svg viewBox="0 0 100 100"><path d="M50 8 L92 44 L78 44 L78 92 L22 92 L22 44 L8 44 Z" fill="var(--navy)"/></svg>
             </div>
-            <h2 class="panel-address-title" id="panelAddress">915 E 6th St</h2>
+            <h2 class="panel-address-title"><a href="#" id="panelAddress" target="_blank" rel="noopener" title="Get directions">915 E 6th St</a></h2>
           </div>
           <p style="color:var(--muted); font-size:0.9rem;" id="panelCity">Royal Oak, MI 48067</p>
           <div class="panel-price" id="panelPrice">$475,000</div>
@@ -3438,6 +3442,11 @@
       return 'Verify';
     }
 
+    function buildGoogleMapsUrl(item) {
+      const fullAddress = `${item.address}, ${item.city} ${item.zip}`;
+      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress)}`;
+    }
+
     // Each open house slot gets its own line ("Open Wed: 5–7:30 PM" /
     // "Open Sat: 10 AM–12 PM") rather than cramming multiple days into one
     // combined line — falls back to the single day/openHouse strings for
@@ -3629,7 +3638,7 @@
 
             <div class="card-address-row">
               <div>
-                <h3 class="card-address">${item.address}</h3>
+                <h3 class="card-address"><a href="${buildGoogleMapsUrl(item)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Get directions">${item.address}</a></h3>
                 <div class="card-city">${item.city}</div>
               </div>
               ${renderCardDualRatingHtml(item)}
@@ -5482,7 +5491,9 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
 
-      document.getElementById('panelAddress').innerText = property.address;
+      const panelAddressLink = document.getElementById('panelAddress');
+      panelAddressLink.innerText = property.address;
+      panelAddressLink.href = buildGoogleMapsUrl(property);
       document.getElementById('panelCity').innerText = `${property.city} ${property.zip}`;
       document.getElementById('panelPrice').innerText = property.price;
       refreshTouredView(property);

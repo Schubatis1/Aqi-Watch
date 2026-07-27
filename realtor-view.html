@@ -154,6 +154,8 @@
 
   .card-address-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
   .card-address { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--text); margin: 0 0 2px; }
+  .card-address a { color: inherit; text-decoration: none; }
+  .card-address a:hover { text-decoration: underline; }
   .card-city { color: var(--muted); font-size: 0.85rem; margin: 0 0 10px; }
 
   .card-price-row {
@@ -229,6 +231,8 @@
     position: sticky; top: 0; background: var(--card); z-index: 2;
   }
   .panel-header h2 { font-family: var(--font-display); margin: 0; font-size: 1.2rem; }
+  .panel-header h2 a { color: inherit; text-decoration: none; }
+  .panel-header h2 a:hover { text-decoration: underline; }
   .panel-close {
     background: none; border: none; font-size: 1.6rem; line-height: 1;
     cursor: pointer; color: var(--muted);
@@ -322,7 +326,7 @@
   <div class="panel-backdrop" id="panelBackdrop" onclick="closePanel()"></div>
   <div class="panel" id="panel">
     <div class="panel-header">
-      <h2 id="panelAddress"></h2>
+      <h2><a href="#" id="panelAddress" target="_blank" rel="noopener" title="Get directions"></a></h2>
       <button class="panel-close" onclick="closePanel()">&times;</button>
     </div>
     <div class="panel-body">
@@ -708,6 +712,11 @@
     return { getPhotos };
   })();
 
+  function buildGoogleMapsUrl(item) {
+    const fullAddress = `${item.address}, ${item.city} ${item.zip}`;
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress)}`;
+  }
+
   // ---- Star rendering (strictly read-only; no click handlers at all) ----
   function starFillPercent(rating, i) {
     if (rating >= i) return 100;
@@ -804,7 +813,7 @@
           </div>
           <div class="card-address-row">
             <div>
-              <p class="card-address">${item.address}</p>
+              <p class="card-address"><a href="${buildGoogleMapsUrl(item)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Get directions">${item.address}</a></p>
               <p class="card-city">${item.city} ${item.zip}</p>
             </div>
           </div>
@@ -866,7 +875,9 @@
   }
 
   async function renderPanel(item) {
-    document.getElementById('panelAddress').innerText = `${item.address}`;
+    const panelAddressLink = document.getElementById('panelAddress');
+    panelAddressLink.innerText = item.address;
+    panelAddressLink.href = buildGoogleMapsUrl(item);
     document.getElementById('panelStats').innerText =
       `${item.price || ''} • ${item.beds} bd • ${item.baths} ba • ${item.sqft} sqft${item.yearBuilt ? ' • built ' + item.yearBuilt : ''}`;
 
