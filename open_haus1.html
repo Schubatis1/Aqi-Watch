@@ -2381,6 +2381,10 @@
         <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Open House Schedule</label>
         <p style="margin-top:4px;">Open house day/time goes stale every week. Clears it back to "Not yet scheduled" for every home at once — everything else (price, notes, ratings, photos) is untouched.</p>
         <button class="btn-secondary" style="width:100%;" onclick="clearAllOpenHouseTimes()">Clear All Open House Times</button>
+
+        <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Match Tier</label>
+        <p style="margin-top:4px;">Recomputes Top Match / Good Match / blank for every home from price, style, size, freshness, and location. Any home whose Match Tier you've manually set yourself keeps that choice.</p>
+        <button class="btn-secondary" style="width:100%;" onclick="recomputeAllMatchTiers()">Recompute Match Tiers</button>
       </div>
       <div class="settings-modal-footer">
         <button class="btn-secondary" style="flex:1;" onclick="clearApiKey()">Clear Key</button>
@@ -3424,6 +3428,26 @@
       status.classList.add('saved');
     }
 
+    function recomputeAllMatchTiers() {
+      if (!confirm('Recompute Match Tier (Top Match / Good Match / blank) for every home using the current scoring rules? Homes with a manually-set tier are left as-is.')) return;
+
+      let changedCount = 0;
+      properties.forEach(p => {
+        if (applyAutoMatchTier(p, properties)) changedCount++;
+        persistPropertyState(p);
+      });
+
+      applyFilters();
+      if (activeEvalId) {
+        const active = properties.find(p => p.id === activeEvalId);
+        if (active) openModal(active.id);
+      }
+
+      const status = document.getElementById('settingsStatus');
+      status.innerText = `Recomputed Match Tier for ${properties.length} home${properties.length === 1 ? '' : 's'} (${changedCount} changed).`;
+      status.classList.add('saved');
+    }
+
     let markers = {};
     let activeEvalId = null;
     let selectedForTour = new Set();
@@ -3485,6 +3509,90 @@
       if (group === 'Top') return 'Top Match';
       if (group === 'Good') return 'Good Match';
       return '';
+    }
+
+    // =====================================================================
+    // Match Tier auto-scoring — six gates, each worth points toward
+    // Top Match (4+), Good Match (2+), or blank (everything else). The
+    // score itself is never shown, only the resulting tier. Runs on every
+    // import (new or re-imported) unless the tier was manually set via the
+    // edit form, and via the explicit "Recompute Match Tiers" button in
+    // Settings for a one-off pass over everything already in the app.
+    // =====================================================================
+    const DOWNTOWN_ROYAL_OAK = { lat: 42.4894, lng: -83.1446 };
+
+    function haversineMiles(lat1, lng1, lat2, lng2) {
+      const toRad = d => d * Math.PI / 180;
+      const R = 3958.8;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function computeMatchScore(property, allProperties) {
+      let score = 0;
+
+      // 1. Price between $380k and $525k.
+      if (property.rawPrice >= 380000 && property.rawPrice <= 525000) score += 1;
+
+      // 2. Not a bungalow.
+      if (!property.isBungalow) score += 1;
+
+      // 3. At least 3 beds and 1.5 baths.
+      if ((property.beds || 0) >= 3 && (property.baths || 0) >= 1.5) score += 1;
+
+      // 4. On the market less than 3 weeks (needs a real listing date —
+      // OneHome's ListingContractDate, or Zillow's daysOnZillow backed
+      // into an approximate date; manually-added homes have neither, so
+      // this gate just contributes nothing rather than guessing).
+      if (property.listingDate) {
+        const days = (Date.now() - new Date(`${property.listingDate}T00:00:00`).getTime()) / 86400000;
+        if (days >= 0 && days < 21) score += 1;
+      }
+
+      // 5. Distance from downtown Royal Oak: closer is worth more.
+      if (property.lat != null && property.lng != null) {
+        const miles = haversineMiles(property.lat, property.lng, DOWNTOWN_ROYAL_OAK.lat, DOWNTOWN_ROYAL_OAK.lng);
+        if (miles <= 0.5) score += 3;
+        else if (miles <= 1) score += 2;
+        else if (miles <= 1.5) score += 1;
+      }
+
+      // 6. Price per square foot at or below the median of everything
+      // currently tracked — a relative value signal that adapts as homes
+      // are added/removed instead of a hardcoded dollar figure.
+      const validPpsf = (allProperties || [])
+        .map(p => p.pricePerSqFt)
+        .filter(v => v != null && isFinite(v) && v > 0)
+        .sort((a, b) => a - b);
+      if (validPpsf.length && property.pricePerSqFt != null) {
+        const mid = Math.floor(validPpsf.length / 2);
+        const median = validPpsf.length % 2 ? validPpsf[mid] : (validPpsf[mid - 1] + validPpsf[mid]) / 2;
+        if (property.pricePerSqFt <= median) score += 1;
+      }
+
+      return score;
+    }
+
+    function matchScoreToTier(score) {
+      if (score >= 4) return { priority: 'Top', priorityGroup: 'Top', priorityClass: 'badge-top' };
+      if (score >= 2) return { priority: 'Good', priorityGroup: 'Good', priorityClass: 'badge-good' };
+      return { priority: '', priorityGroup: '', priorityClass: '' };
+    }
+
+    // Returns true if the tier actually changed. `force` bypasses the
+    // manual-override guard (used by the bulk "Recompute" button); regular
+    // import-time calls always respect a manual choice.
+    function applyAutoMatchTier(property, allProperties, force) {
+      if (!force && property.priorityAuto === false) return false;
+      const tier = matchScoreToTier(computeMatchScore(property, allProperties));
+      const changed = property.priorityGroup !== tier.priorityGroup;
+      property.priority = tier.priority;
+      property.priorityGroup = tier.priorityGroup;
+      property.priorityClass = tier.priorityClass;
+      property.priorityAuto = true;
+      return changed;
     }
 
     function buildGoogleMapsUrl(item) {
@@ -4184,6 +4292,7 @@
     // ===== Edit / Add Home form =====
 
     let editingPropertyId = null;
+    let editPriorityOriginalValue = '';
 
     function openEditPropertyForm(id) {
       editingPropertyId = id;
@@ -4192,6 +4301,10 @@
       document.getElementById('editPropertyTitle').innerText = property ? 'Edit Home' : 'Add Home';
       document.getElementById('editAddress').value = property ? property.address : '';
       document.getElementById('editPriority').value = property ? (property.priorityGroup || '') : '';
+      // Only flag the tier as manually overridden if the user actually
+      // changes this field before saving — merely re-saving the form with
+      // it untouched shouldn't block future auto-scoring on import.
+      editPriorityOriginalValue = document.getElementById('editPriority').value;
       document.getElementById('editCity').value = property ? property.city : '';
       document.getElementById('editZip').value = property ? property.zip : '';
       document.getElementById('editPrice').value = property ? property.rawPrice : '';
@@ -4227,10 +4340,12 @@
       const style = document.getElementById('editStyle').value.trim() || 'N/A';
       const priorityGroup = document.getElementById('editPriority').value;
       const priorityClass = priorityGroup === 'Top' ? 'badge-top' : priorityGroup === 'Good' ? 'badge-good' : '';
+      const priorityManuallyChanged = priorityGroup !== editPriorityOriginalValue;
 
       const fields = {
         address,
         priority: priorityGroup, priorityGroup, priorityClass,
+        ...(priorityManuallyChanged ? { priorityAuto: false } : {}),
         city: document.getElementById('editCity').value.trim(),
         zip: document.getElementById('editZip').value.trim(),
         rawPrice,
@@ -4492,7 +4607,7 @@
             property {
               OriginatingSystemKey StreetNumber StreetDirPrefix StreetName StreetSuffix StreetDirSuffix
               City StateOrProvince PostalCode ListPrice ListingId LivingArea BedroomsTotal
-              BathroomsTotalInteger Latitude Longitude StandardStatus
+              BathroomsTotalInteger Latitude Longitude StandardStatus ListingContractDate
             }
             media { Image { Thumbnail { mediaUrl } Medium { mediaUrl } Large { mediaUrl } } }
             openHouse { OpenHouseDate OpenHouseStartTime OpenHouseEndTime OpenHouseStatus }
@@ -4966,8 +5081,14 @@
       const yearBuilt = grab(/"yearBuilt":(\d+)/);
       const lat = grab(/"latitude":(-?[0-9.]+)/);
       const lng = grab(/"longitude":(-?[0-9.]+)/);
+      const daysOnZillow = grab(/"daysOnZillow":(\d+)/);
       const zpidMatch = pageUrl.match(/(\d+)_zpid/);
       const zpid = zpidMatch ? zpidMatch[1] : null;
+      // Zillow gives an age-in-days, not a list date — back into an
+      // approximate ISO date for the "on market < 3 weeks" Match Tier gate.
+      const listingDate = daysOnZillow != null
+        ? new Date(Date.now() - parseInt(daysOnZillow, 10) * 86400000).toISOString().slice(0, 10)
+        : null;
 
       // Photo fingerprints, in gallery order, from the responsivePhotos
       // block — then matched against whatever base64 image bytes the HAR
@@ -5023,6 +5144,7 @@
         harPhotoDataUrls: photos,
         openHouse: null,
         zillowUrl: pageUrl,
+        listingDate,
         existing: findExistingPropertyForOneHomeListing(propertyLike)
       }];
     }
@@ -5210,6 +5332,7 @@
         weekends: selectedWeekends.slice(),
         hidden: false,
         source: sourceType === 'zillowHar' ? 'zillow' : 'onehome',
+        listingDate: sourceType === 'zillowHar' ? (result.listingDate || null) : (p.ListingContractDate || null),
       };
       if (sourceType === 'zillowHar') {
         record.url = result.zillowUrl;
@@ -5239,18 +5362,16 @@
       } else {
         record.id = `custom-${mlsKey}`;
         record.dateAdded = new Date().toISOString().slice(0, 10);
-        // Only set on brand-new imports — an existing property keeps
-        // whatever Match Tier was manually assigned, if any, rather than
-        // getting silently reset to unclassified on every re-import.
-        record.priority = '';
-        record.priorityGroup = '';
-        record.priorityClass = '';
         property = record;
         properties.push(property);
         registerNewCustomProperty(property);
       }
 
       initPropertyDerivedData([property]);
+      // Auto-score the Match Tier now that pricePerSqFt is available —
+      // respects a manually-set tier (priorityAuto === false) rather than
+      // overwriting it on re-import.
+      applyAutoMatchTier(property, properties);
       persistPropertyState(property);
 
       // Build the full photo gallery: HAR mode already has real bytes for
