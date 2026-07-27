@@ -2020,15 +2020,15 @@
           <button class="btn-primary" style="align-self:flex-start;" onclick="runOneHomeHarImport()">Parse HAR File</button>
         </div>
 
-        <div id="oneHomeDirectSection" class="hidden" style="opacity:0.5; pointer-events:none;">
+        <div id="oneHomeDirectSection" class="hidden">
           <div class="form-group">
             <label>OneHome Link</label>
-            <input type="text" id="oneHomeUrlInput" placeholder="Paste a OneHome portal link (with ?token=...)" disabled>
+            <input type="text" id="oneHomeUrlInput" placeholder="Paste a OneHome portal link (with ?token=...)">
           </div>
           <p style="font-size:0.78rem; color:var(--muted);">
-            Disabled for now — the GraphQL calls behind the token exchange reject requests from outside the portal (likely needs a session cookie this page can't create). The code is still here to troubleshoot later.
+            Pulls the live saved-search results directly — no HAR export needed. Photos still come through the app's usual photo lookup rather than OneHome's (those links expire quickly).
           </p>
-          <button class="btn-primary" style="align-self:flex-start;" onclick="runOneHomeImport()" disabled>Load Listings</button>
+          <button class="btn-primary" style="align-self:flex-start;" onclick="runOneHomeImport()">Load Listings</button>
         </div>
 
         <span class="settings-status" id="oneHomeStatus"></span>
@@ -3420,18 +3420,20 @@
       }
     }
 
-    async function oneHomeFetchJson(path, body) {
+    async function oneHomeFetchJson(path, body, sessionToken) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
       const res = await fetch(`${ONEHOME_API}${path}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error(`OneHome request failed (HTTP ${res.status}).`);
       return res.json();
     }
 
-    async function oneHomeGraphQL(operationName, query, variables) {
-      const json = await oneHomeFetchJson(`/graphql?${operationName}`, { operationName, query, variables });
+    async function oneHomeGraphQL(operationName, query, variables, sessionToken) {
+      const json = await oneHomeFetchJson(`/graphql?${operationName}`, { operationName, query, variables }, sessionToken);
       if (json.errors && json.errors.length) {
         throw new Error(json.errors[0].message || `OneHome error in ${operationName}.`);
       }
@@ -3443,18 +3445,25 @@
       if (!json.groupID || !json.savedSearchID) {
         throw new Error('That link did not resolve to a saved search.');
       }
-      return { groupId: json.groupID, savedSearchId: json.savedSearchID };
+      if (!json.sessionToken) {
+        throw new Error('OneHome did not return a session token for this link.');
+      }
+      // The GraphQL calls behind the token exchange reject requests unless this
+      // session token (returned alongside groupID/savedSearchID) is presented
+      // as a Bearer token — it's not visible as a header in a HAR capture
+      // because the real portal must set it via JS after the exchange.
+      return { groupId: json.groupID, savedSearchId: json.savedSearchID, sessionToken: json.sessionToken };
     }
 
-    async function fetchOneHomeListingIds(savedSearchId) {
+    async function fetchOneHomeListingIds(savedSearchId, sessionToken) {
       const query = `query GetSavedSearchBySearchId($searchId: String!) {
         savedSearch(id: $searchId) { id listingIds }
       }`;
-      const data = await oneHomeGraphQL('GetSavedSearchBySearchId', query, { searchId: savedSearchId });
+      const data = await oneHomeGraphQL('GetSavedSearchBySearchId', query, { searchId: savedSearchId }, sessionToken);
       return (data.savedSearch && data.savedSearch.listingIds) || [];
     }
 
-    async function fetchOneHomeSavedListings(groupId, savedSearchId, listingIds) {
+    async function fetchOneHomeSavedListings(groupId, savedSearchId, listingIds, sessionToken) {
       const query = `query GetSavedListings($groupId: String!, $listingIds: [String!]!, $pageInput: PageInput, $savedSearchId: String!) {
         listingsBySavedSearchId(groupId: $groupId, osks: $listingIds, pageInput: $pageInput, savedSearchId: $savedSearchId, includeDislikes: false, suppressEvent: true) {
           pageInfo { totalElements totalPages pageNumber pageSize }
@@ -3477,7 +3486,7 @@
       do {
         const data = await oneHomeGraphQL('GetSavedListings', query, {
           groupId, savedSearchId, listingIds, pageInput: { pageNum, size: 25 }
-        });
+        }, sessionToken);
         const block = data.listingsBySavedSearchId || {};
         all = all.concat(block.listings || []);
         totalPages = block.pageInfo ? block.pageInfo.totalPages : 1;
@@ -3486,14 +3495,14 @@
       return all;
     }
 
-    async function fetchOneHomeListingDetail(groupId, savedSearchId, onehomeId) {
+    async function fetchOneHomeListingDetail(groupId, savedSearchId, onehomeId, sessionToken) {
       const query = `query ListingById($listingId: String!, $groupId: String!, $savedSearchId: String) {
         listingDetail(listingId: $listingId, groupId: $groupId, savedSearchId: $savedSearchId, suppressEvent: true) {
           id
           property { YearBuilt ArchitecturalStyle PublicRemarks BathroomsFull BathroomsHalf }
         }
       }`;
-      const data = await oneHomeGraphQL('ListingById', query, { listingId: onehomeId, groupId, savedSearchId });
+      const data = await oneHomeGraphQL('ListingById', query, { listingId: onehomeId, groupId, savedSearchId }, sessionToken);
       return data.listingDetail;
     }
 
@@ -3508,14 +3517,14 @@
 
       status.innerText = 'Loading listings from OneHome…';
       try {
-        const { groupId, savedSearchId } = await fetchOneHomeToken(token);
-        const listingIds = await fetchOneHomeListingIds(savedSearchId);
+        const { groupId, savedSearchId, sessionToken } = await fetchOneHomeToken(token);
+        const listingIds = await fetchOneHomeListingIds(savedSearchId, sessionToken);
         if (!listingIds.length) {
           status.innerText = 'That saved search has no listings.';
           return;
         }
-        const listings = await fetchOneHomeSavedListings(groupId, savedSearchId, listingIds);
-        oneHomeSession = { groupId, savedSearchId, sourceUrl: urlInput };
+        const listings = await fetchOneHomeSavedListings(groupId, savedSearchId, listingIds, sessionToken);
+        oneHomeSession = { groupId, savedSearchId, sessionToken, sourceUrl: urlInput };
         oneHomeResults = listings.map(l => ({
           onehomeId: l.id,
           property: l.property,
@@ -3683,7 +3692,7 @@
       let dp = result.detailProperty || {};
       if (!result.detailProperty && oneHomeSession && oneHomeSession.groupId) {
         try {
-          const detail = await fetchOneHomeListingDetail(oneHomeSession.groupId, oneHomeSession.savedSearchId, result.onehomeId);
+          const detail = await fetchOneHomeListingDetail(oneHomeSession.groupId, oneHomeSession.savedSearchId, result.onehomeId, oneHomeSession.sessionToken);
           dp = (detail && detail.property) || {};
         } catch (err) {
           console.warn('Could not load full listing detail, importing with summary data only.', err);
