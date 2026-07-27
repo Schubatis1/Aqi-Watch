@@ -2906,6 +2906,7 @@
           }
         });
         applyFilters();
+        retryOpenSharedProperty();
       }, err => console.warn('Firestore listener error', err));
     }
 
@@ -5566,9 +5567,16 @@
 
     // ---- Share / permalink ----
     function buildPropertyShareLink(id) {
+      const property = properties.find(p => p.id === id);
       const url = new URL(window.location.href);
       url.hash = '';
       url.searchParams.set('property', id);
+      // The address doubles as a search-bar filter on load — so the home
+      // is isolated in the grid (and the panel auto-opens once its data
+      // is available) even before Firestore has synced this property to
+      // whoever's opening the link, e.g. a home neither of you has ever
+      // pulled up on that particular device/browser before.
+      if (property) url.searchParams.set('addr', property.address);
       return url.toString();
     }
 
@@ -5610,16 +5618,48 @@
       }
     }
 
-    // A ?property=<id> link (from the Share button) opens straight to that
-    // home's fly-in panel on load, regardless of the current weekend/
-    // filter selection — the property doesn't need to be in the currently
-    // visible filtered set for its detail data to exist.
+    // A ?property=<id>&addr=<address> link (from the Share button):
+    // - The address goes into the search bar and the weekend filter is
+    //   forced to "all", so the grid narrows to just that one home no
+    //   matter what filters were previously set — a visible result even
+    //   if the id lookup below can't resolve yet.
+    // - The id opens the fly-in panel directly once it resolves. If this
+    //   device hasn't synced that property from Firestore yet (e.g. a
+    //   custom/imported home neither of you has opened here before), it
+    //   won't resolve on this first pass — sharedPropertyId stays set so
+    //   the Firestore listener can retry once the data actually arrives.
+    let sharedPropertyId = null;
     function openSharedPropertyFromUrl() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get('property');
-      if (!id) return;
-      const property = properties.find(p => p.id === id);
-      if (property) openModal(id);
+      const addr = params.get('addr');
+      if (!id && !addr) return;
+
+      if (addr) {
+        document.getElementById('weekendFilter').value = 'all';
+        document.getElementById('searchInput').value = addr;
+        applyFilters();
+      }
+
+      if (id) {
+        sharedPropertyId = id;
+        const property = properties.find(p => p.id === id);
+        if (property) {
+          openModal(id);
+          sharedPropertyId = null;
+        }
+      }
+    }
+
+    // Called after every Firestore snapshot — picks up a shared property
+    // that wasn't locally known yet when the page first loaded.
+    function retryOpenSharedProperty() {
+      if (!sharedPropertyId) return;
+      const property = properties.find(p => p.id === sharedPropertyId);
+      if (property) {
+        openModal(sharedPropertyId);
+        sharedPropertyId = null;
+      }
     }
 
     function saveEvaluation() {
