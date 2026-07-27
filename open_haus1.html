@@ -3601,6 +3601,38 @@
       return (size && size.mediaUrl) || null;
     }
 
+    function extractOneHomeMediaUrls(media) {
+      return (media || []).map(m => pickOneHomeMediaUrl(m.Image)).filter(Boolean);
+    }
+
+    // Fetches every photo for one listing in parallel (a listing can have
+    // 15-30 photos; doing them one at a time made backfill painfully slow).
+    // A failed photo doesn't take down the rest — order is preserved.
+    async function fetchPhotosFromMediaUrls(mediaUrls) {
+      const results = await Promise.allSettled(mediaUrls.map(url => fetchImageAsDataUrl(url)));
+      const photos = [];
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') photos.push(r.value);
+        else console.warn('Could not fetch gallery photo', mediaUrls[i], r.reason);
+      });
+      return photos;
+    }
+
+    // Runs async work over a list with at most `limit` items in flight at
+    // once — used so backfill processes several homes concurrently instead
+    // of one at a time, without firing dozens of requests simultaneously.
+    async function runWithConcurrency(items, limit, worker) {
+      let cursor = 0;
+      async function runNext() {
+        while (cursor < items.length) {
+          const i = cursor++;
+          await worker(items[i], i);
+        }
+      }
+      const runners = Array.from({ length: Math.min(limit, items.length) }, runNext);
+      await Promise.all(runners);
+    }
+
     // Scans every entry in the HAR:
     // - POST/GraphQL responses for OneHome listing summaries
     //   (listingsBySavedSearchId) and listing detail (listingDetail), keyed
@@ -3816,10 +3848,67 @@
         renderOneHomeResults();
         document.getElementById('oneHomeResultsWrap').classList.remove('hidden');
         document.getElementById('oneHomeImportBtn').classList.remove('hidden');
+        backfillPhotosForExistingMatches();
       } catch (err) {
         console.warn('OneHome import failed', err);
         status.innerText = `Couldn't load that link: ${err.message}`;
       }
+    }
+
+    // Runs automatically after loading results (either mode) — for any
+    // matched listing that's already in the app but has no photo gallery
+    // yet (e.g. added by hand, or imported before this feature existed),
+    // silently fetch and attach its photos in the background. Doesn't
+    // touch price/description/notes/weekends — photos only. Skips homes
+    // that already have a gallery, so this is safe to run every time
+    // "Load Listings" is clicked without re-fetching redundantly.
+    async function backfillPhotosForExistingMatches() {
+      const status = document.getElementById('oneHomeStatus');
+      const candidates = [];
+      for (const r of oneHomeResults) {
+        if (!r.existing) continue;
+        const already = await GalleryStore.getPhotos(r.existing.id);
+        if (!already || !already.length) candidates.push(r);
+      }
+      if (!candidates.length) return;
+
+      let backfilled = 0;
+      let done = 0;
+      status.innerText = `Backfilling photos for ${candidates.length} existing home${candidates.length === 1 ? '' : 's'}…`;
+
+      // Up to 4 homes at once (each home's own photos already fetch in
+      // parallel too) — fast without hammering the proxy/OneHome API.
+      await runWithConcurrency(candidates, 4, async (r) => {
+        const existing = r.existing;
+        let photos = (r.harPhotoDataUrls && r.harPhotoDataUrls.length) ? r.harPhotoDataUrls : [];
+
+        if (!photos.length && oneHomeSession && oneHomeSession.groupId) {
+          try {
+            const detail = await fetchOneHomeListingDetail(oneHomeSession.groupId, oneHomeSession.savedSearchId, r.onehomeId, oneHomeSession.sessionToken);
+            photos = await fetchPhotosFromMediaUrls(extractOneHomeMediaUrls(detail && detail.media));
+          } catch (err) {
+            console.warn('Could not backfill photos for', existing.address, err);
+          }
+        }
+
+        if (!photos.length && r.photoDataUrl) photos = [r.photoDataUrl];
+        done++;
+        if (!photos.length) return;
+
+        await GalleryStore.savePhotos(existing.id, photos);
+        const fullAddress = `${existing.address}, ${existing.city} ${existing.zip}`;
+        HousePhotoService.setCachedPhoto(fullAddress, 'onehome', photos[0]);
+        backfilled++;
+        status.innerText = `Backfilling photos for existing homes… (${done} of ${candidates.length})`;
+        applyFilters();
+        if (activeEvalId === existing.id && document.getElementById('panelBackdrop').classList.contains('open')) {
+          loadPanelPhoto(existing);
+        }
+      });
+
+      status.innerText = backfilled > 0
+        ? `Backfilled photos for ${backfilled} existing home${backfilled === 1 ? '' : 's'}.`
+        : `Loaded ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'} — no missing photos to backfill.`;
     }
 
     function setOneHomeImportMode(mode) {
@@ -3917,6 +4006,7 @@
         renderOneHomeResults();
         document.getElementById('oneHomeResultsWrap').classList.remove('hidden');
         document.getElementById('oneHomeImportBtn').classList.remove('hidden');
+        backfillPhotosForExistingMatches();
       } catch (err) {
         console.warn('HAR import failed', err);
         status.innerText = `Couldn't read that file: ${err.message}`;
@@ -4040,14 +4130,7 @@
         : [];
 
       if (!photos.length && liveDetailMedia) {
-        const mediaUrls = liveDetailMedia.map(m => pickOneHomeMediaUrl(m.Image)).filter(Boolean);
-        for (const mediaUrl of mediaUrls) {
-          try {
-            photos.push(await fetchImageAsDataUrl(mediaUrl));
-          } catch (err) {
-            console.warn('Could not fetch gallery photo', mediaUrl, err);
-          }
-        }
+        photos = await fetchPhotosFromMediaUrls(extractOneHomeMediaUrls(liveDetailMedia));
       }
 
       if (!photos.length && result.photoDataUrl) {
