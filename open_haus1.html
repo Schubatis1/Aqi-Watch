@@ -1830,7 +1830,7 @@
 
     .panel-stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       background: var(--bg);
       padding: 16px;
@@ -2270,12 +2270,22 @@
             <div class="val" id="panelPpsq">$167</div>
             <div class="lbl">$/Sq Ft</div>
           </div>
+          <div>
+            <div class="val" id="panelBuilt">1924</div>
+            <div class="lbl">Built</div>
+          </div>
+          <div>
+            <div class="val" id="panelDaysOnMarket">—</div>
+            <div class="lbl">Days on Market</div>
+          </div>
         </div>
 
         <div>
           <div class="panel-section-title">Schedule & Style</div>
           <p style="font-size:0.9rem; color:var(--text); margin-bottom: 4px;" id="panelOpenHouse"><strong>Open House:</strong> Sun 1:00–3:00 PM</p>
           <p style="font-size:0.9rem; color:var(--muted);" id="panelStyle"><strong>Architectural Style:</strong> Craftsman</p>
+          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelHeating"><strong>Heating:</strong> —</p>
+          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelCooling"><strong>Cooling:</strong> —</p>
         </div>
 
         <div>
@@ -3596,7 +3606,7 @@
 
     // Max possible score, given the current point weights below — used to
     // size the cutoff inputs and the Manage Homes tooltip.
-    const MAX_MATCH_SCORE = 3 + 3 + 2 + 1 + 3 + 3; // 15
+    const MAX_MATCH_SCORE = 3 + 3 + 2 + 1 + 3 + 3 + 3; // 18
 
     // Full breakdown (used by Manage Homes to explain the score) — a plain
     // total-only score is just the sum of gate.points below.
@@ -3662,6 +3672,14 @@
         label: 'Price/sqft quartile',
         detail: property.pricePerSqFt == null ? 'unknown' : `$${property.pricePerSqFt}/sqft (25th pct $${q1 != null ? Math.round(q1) : '?'})`,
         points: ppsfPoints
+      });
+
+      // 7. Central air.
+      const hasCentralAir = !!(property.cooling && property.cooling.some(c => /central air/i.test(c)));
+      gates.push({
+        label: 'Central air',
+        detail: property.cooling && property.cooling.length ? property.cooling.join(', ') : 'unknown',
+        points: hasCentralAir ? 3 : 0
       });
 
       const score = gates.reduce((sum, g) => sum + g.points, 0);
@@ -3763,6 +3781,20 @@
     function buildGoogleMapsUrl(item) {
       const fullAddress = `${item.address}, ${item.city} ${item.zip}`;
       return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress)}`;
+    }
+
+    // Same listingDate used by the Match Tier freshness gate — computed on
+    // the fly for display rather than persisted, since "today" changes.
+    // OneHome's Heating/Cooling enums come back as CamelCase tokens like
+    // "CentralAir" or "ForcedAir" — split into readable words for display.
+    function splitCamelCase(str) {
+      return String(str).replace(/([a-z])([A-Z])/g, '$1 $2');
+    }
+
+    function getDaysOnMarketDisplay(item) {
+      if (!item.listingDate) return '—';
+      const days = Math.round((Date.now() - new Date(`${item.listingDate}T00:00:00`).getTime()) / 86400000);
+      return days >= 0 ? `${days}` : '—';
     }
 
     // Each open house slot gets its own line ("Open Wed: 5–7:30 PM" /
@@ -3983,6 +4015,14 @@
               <div class="stat-item">
                 <div class="val">${item.yearBuilt || '—'}</div>
                 <div class="lbl">Built</div>
+              </div>
+              <div class="stat-item">
+                <div class="val">${getDaysOnMarketDisplay(item)}</div>
+                <div class="lbl">Days on Market</div>
+              </div>
+              <div class="stat-item">
+                <div class="val">${item.style || '—'}</div>
+                <div class="lbl">Style</div>
               </div>
             </div>
 
@@ -4808,7 +4848,7 @@
             property {
               OriginatingSystemKey StreetNumber StreetDirPrefix StreetName StreetSuffix StreetDirSuffix
               City StateOrProvince PostalCode ListPrice ListingId LivingArea BedroomsTotal
-              BathroomsTotalInteger Latitude Longitude StandardStatus ListingContractDate
+              BathroomsTotalInteger Latitude Longitude StandardStatus ListingContractDate Cooling Heating
             }
             media { Image { Thumbnail { mediaUrl } Medium { mediaUrl } Large { mediaUrl } } }
             openHouse { OpenHouseDate OpenHouseStartTime OpenHouseEndTime OpenHouseStatus }
@@ -4997,6 +5037,27 @@
             existing.price = `$${rawPrice.toLocaleString()}`;
             if (existing.rawSqft) existing.pricePerSqFt = Math.round(rawPrice / existing.rawSqft);
             pricesFixed++;
+            changed = true;
+          }
+        }
+
+        // Listing date and heating/cooling only ever fill in when OneHome
+        // actually has the value — never clobbered back to unknown.
+        if (r.property.ListingContractDate && existing.listingDate !== r.property.ListingContractDate) {
+          existing.listingDate = r.property.ListingContractDate;
+          changed = true;
+        }
+        if (r.property.Heating && r.property.Heating.length) {
+          const heating = r.property.Heating.map(splitCamelCase);
+          if (JSON.stringify(existing.heating || []) !== JSON.stringify(heating)) {
+            existing.heating = heating;
+            changed = true;
+          }
+        }
+        if (r.property.Cooling && r.property.Cooling.length) {
+          const cooling = r.property.Cooling.map(splitCamelCase);
+          if (JSON.stringify(existing.cooling || []) !== JSON.stringify(cooling)) {
+            existing.cooling = cooling;
             changed = true;
           }
         }
@@ -5535,6 +5596,12 @@
         source: sourceType === 'zillowHar' ? 'zillow' : 'onehome',
         listingDate: sourceType === 'zillowHar' ? (result.listingDate || null) : (p.ListingContractDate || null),
       };
+      // Zillow's captured page data doesn't expose heating/cooling, and
+      // OneHome doesn't always either — only set these keys when there's
+      // an actual value, so a re-import from a source without this data
+      // doesn't clobber what an earlier OneHome import already found.
+      if (sourceType !== 'zillowHar' && p.Heating && p.Heating.length) record.heating = p.Heating.map(splitCamelCase);
+      if (sourceType !== 'zillowHar' && p.Cooling && p.Cooling.length) record.cooling = p.Cooling.map(splitCamelCase);
       if (sourceType === 'zillowHar') {
         record.url = result.zillowUrl;
       } else if (oneHomeSession.token && oneHomeSession.savedSearchId && result.onehomeId) {
@@ -5878,11 +5945,15 @@
       document.getElementById('panelBaths').innerText = property.baths;
       document.getElementById('panelSqft').innerText = property.sqft;
       document.getElementById('panelPpsq').innerText = `$${property.pricePerSqFt}`;
+      document.getElementById('panelBuilt').innerText = property.yearBuilt || '—';
+      document.getElementById('panelDaysOnMarket').innerText = getDaysOnMarketDisplay(property);
 
       document.getElementById('panelOpenHouse').innerHTML = (property.openHouses && property.openHouses.length)
         ? `<strong>Open House:</strong><br>${property.openHouses.map(e => `${e.day} (${formatOneHomeDateShort(e.date)}): ${e.time}`).join('<br>')}`
         : `<strong>Open House:</strong> ${property.day === '—' ? 'None scheduled' : `${property.day} ${property.openHouse}`}`;
       document.getElementById('panelStyle').innerHTML = `<strong>Style:</strong> ${property.style}`;
+      document.getElementById('panelHeating').innerHTML = `<strong>Heating:</strong> ${(property.heating && property.heating.length) ? property.heating.join(', ') : 'Unknown'}`;
+      document.getElementById('panelCooling').innerHTML = `<strong>Cooling:</strong> ${(property.cooling && property.cooling.length) ? property.cooling.join(', ') : 'Unknown'}`;
 
       const descriptionEl = document.getElementById('panelDescription');
       const toggleEl = document.getElementById('descriptionToggle');
