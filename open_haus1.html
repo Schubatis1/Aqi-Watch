@@ -2070,10 +2070,14 @@
     </div>
 
     <div class="sidebar-section">
-      <span class="sidebar-label">Preferences</span>
+      <span class="sidebar-label">Settings</span>
       <button class="sidebar-nav-btn" onclick="closeSidebar(); openSettings();">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Settings
+      </button>
+      <button class="sidebar-nav-btn" onclick="closeSidebar(); openPreferences();">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2Z"/></svg>
+        Preferences
       </button>
     </div>
   </nav>
@@ -2373,24 +2377,12 @@
 
   <!-- Settings Modal -->
   <div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()">
-    <div class="settings-modal" onclick="event.stopPropagation()">
+    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:1100px;">
       <div class="settings-modal-header">
-        <h2>Photo Settings</h2>
+        <h2>Settings</h2>
         <button class="panel-close" onclick="closeSettings()">&times;</button>
       </div>
       <div class="settings-modal-body">
-        <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted);">Theme</label>
-        <div class="theme-picker" id="themePicker">
-          <button type="button" class="theme-option" data-theme="royal-oak" onclick="setTheme('royal-oak')">
-            <span class="theme-swatch theme-swatch-royal-oak"></span>
-            Royal Oak
-          </button>
-          <button type="button" class="theme-option" data-theme="house-hunters" onclick="setTheme('house-hunters')">
-            <span class="theme-swatch theme-swatch-hh"></span>
-            House Hunters
-          </button>
-        </div>
-
         <p style="margin-top:8px;">House photos are pulled from Google Street View using your own API key. The key is stored only in this browser's local storage — never sent anywhere else, never committed to any repository.</p>
         <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted);">Google Maps API Key</label>
         <input type="password" id="settingsApiKeyInput" placeholder="Paste your Street View Static API key">
@@ -2405,12 +2397,38 @@
         <button class="btn-secondary" style="width:100%;" onclick="clearAllOpenHouseTimes()">Clear All Open House Times</button>
 
         <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Match Tier</label>
-        <p style="margin-top:4px;">Recomputes Top Match / Good Match / blank for every home from price, style, size, freshness, and location. Any home whose Match Tier you've manually set yourself keeps that choice.</p>
+        <p style="margin-top:4px;">Recomputes Top Match / Good Match / blank for every home from price, style, size, freshness, and location. Any home whose Match Tier you've manually set yourself keeps that choice. Cutoffs are set from Manage Homes.</p>
         <button class="btn-secondary" style="width:100%;" onclick="recomputeAllMatchTiers()">Recompute Match Tiers</button>
       </div>
       <div class="settings-modal-footer">
         <button class="btn-secondary" style="flex:1;" onclick="clearApiKey()">Clear Key</button>
         <button class="btn-primary" style="flex:1; justify-content:center;" onclick="saveApiKey()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preferences (Theme) -->
+  <div class="settings-backdrop" id="preferencesBackdrop" onclick="closePreferences()">
+    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:1100px;">
+      <div class="settings-modal-header">
+        <h2>Preferences</h2>
+        <button class="panel-close" onclick="closePreferences()">&times;</button>
+      </div>
+      <div class="settings-modal-body">
+        <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted);">Theme</label>
+        <div class="theme-picker" id="themePicker">
+          <button type="button" class="theme-option" data-theme="royal-oak" onclick="setTheme('royal-oak')">
+            <span class="theme-swatch theme-swatch-royal-oak"></span>
+            Royal Oak
+          </button>
+          <button type="button" class="theme-option" data-theme="house-hunters" onclick="setTheme('house-hunters')">
+            <span class="theme-swatch theme-swatch-hh"></span>
+            House Hunters
+          </button>
+        </div>
+      </div>
+      <div class="settings-modal-footer">
+        <button class="btn-secondary" style="flex:1;" onclick="closePreferences()">Close</button>
       </div>
     </div>
   </div>
@@ -3369,12 +3387,20 @@
       input.value = HousePhotoService.getApiKey();
       document.getElementById('settingsStatus').innerText = '';
       document.getElementById('settingsStatus').classList.remove('saved');
-      applyTheme(localStorage.getItem('appTheme') || 'royal-oak');
       document.getElementById('settingsBackdrop').classList.add('open');
     }
 
     function closeSettings() {
       document.getElementById('settingsBackdrop').classList.remove('open');
+    }
+
+    function openPreferences() {
+      applyTheme(localStorage.getItem('appTheme') || 'royal-oak');
+      document.getElementById('preferencesBackdrop').classList.add('open');
+    }
+
+    function closePreferences() {
+      document.getElementById('preferencesBackdrop').classList.remove('open');
     }
 
     function saveApiKey() {
