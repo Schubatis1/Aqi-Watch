@@ -2432,6 +2432,7 @@
               <th>Beds / Baths</th>
               <th>Sq Ft</th>
               <th>Built</th>
+              <th>Match</th>
               <th>Weekends</th>
               <th>Source</th>
               <th>Status</th>
@@ -3530,34 +3531,43 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    function computeMatchScore(property, allProperties) {
-      let score = 0;
+    // Full breakdown (used by Manage Homes to explain the score) — a plain
+    // total-only score is just the sum of gate.points below.
+    function computeMatchScoreBreakdown(property, allProperties) {
+      const gates = [];
 
       // 1. Price between $380k and $525k.
-      if (property.rawPrice >= 380000 && property.rawPrice <= 525000) score += 1;
+      const inPriceBand = property.rawPrice >= 380000 && property.rawPrice <= 525000;
+      gates.push({ label: 'Price $380k–$525k', detail: property.rawPrice ? `$${property.rawPrice.toLocaleString()}` : 'unknown', points: inPriceBand ? 1 : 0 });
 
       // 2. Not a bungalow.
-      if (!property.isBungalow) score += 1;
+      gates.push({ label: 'Not a bungalow', detail: property.isBungalow ? 'is a bungalow' : 'not a bungalow', points: property.isBungalow ? 0 : 1 });
 
       // 3. At least 3 beds and 1.5 baths.
-      if ((property.beds || 0) >= 3 && (property.baths || 0) >= 1.5) score += 1;
+      const meetsBedsBaths = (property.beds || 0) >= 3 && (property.baths || 0) >= 1.5;
+      gates.push({ label: '3+ beds, 1.5+ baths', detail: `${property.beds || 0} bd / ${property.baths || 0} ba`, points: meetsBedsBaths ? 1 : 0 });
 
       // 4. On the market less than 3 weeks (needs a real listing date —
       // OneHome's ListingContractDate, or Zillow's daysOnZillow backed
       // into an approximate date; manually-added homes have neither, so
       // this gate just contributes nothing rather than guessing).
+      let daysOnMarket = null;
       if (property.listingDate) {
-        const days = (Date.now() - new Date(`${property.listingDate}T00:00:00`).getTime()) / 86400000;
-        if (days >= 0 && days < 21) score += 1;
+        daysOnMarket = Math.round((Date.now() - new Date(`${property.listingDate}T00:00:00`).getTime()) / 86400000);
       }
+      const isFresh = daysOnMarket != null && daysOnMarket >= 0 && daysOnMarket < 21;
+      gates.push({ label: 'On market < 3 weeks', detail: daysOnMarket == null ? 'no listing date' : `${daysOnMarket} days`, points: isFresh ? 1 : 0 });
 
       // 5. Distance from downtown Royal Oak: closer is worth more.
+      let miles = null;
+      let distPoints = 0;
       if (property.lat != null && property.lng != null) {
-        const miles = haversineMiles(property.lat, property.lng, DOWNTOWN_ROYAL_OAK.lat, DOWNTOWN_ROYAL_OAK.lng);
-        if (miles <= 0.5) score += 3;
-        else if (miles <= 1) score += 2;
-        else if (miles <= 1.5) score += 1;
+        miles = haversineMiles(property.lat, property.lng, DOWNTOWN_ROYAL_OAK.lat, DOWNTOWN_ROYAL_OAK.lng);
+        if (miles <= 0.5) distPoints = 3;
+        else if (miles <= 1) distPoints = 2;
+        else if (miles <= 1.5) distPoints = 1;
       }
+      gates.push({ label: 'Distance from downtown', detail: miles == null ? 'unknown' : `${miles.toFixed(2)} mi`, points: distPoints });
 
       // 6. Price per square foot at or below the median of everything
       // currently tracked — a relative value signal that adapts as homes
@@ -3566,13 +3576,25 @@
         .map(p => p.pricePerSqFt)
         .filter(v => v != null && isFinite(v) && v > 0)
         .sort((a, b) => a - b);
-      if (validPpsf.length && property.pricePerSqFt != null) {
+      let median = null;
+      let belowMedian = false;
+      if (validPpsf.length) {
         const mid = Math.floor(validPpsf.length / 2);
-        const median = validPpsf.length % 2 ? validPpsf[mid] : (validPpsf[mid - 1] + validPpsf[mid]) / 2;
-        if (property.pricePerSqFt <= median) score += 1;
+        median = validPpsf.length % 2 ? validPpsf[mid] : (validPpsf[mid - 1] + validPpsf[mid]) / 2;
+        belowMedian = property.pricePerSqFt != null && property.pricePerSqFt <= median;
       }
+      gates.push({
+        label: 'Price/sqft ≤ median',
+        detail: property.pricePerSqFt == null ? 'unknown' : `$${property.pricePerSqFt}/sqft vs. $${median != null ? Math.round(median) : '?'} median`,
+        points: belowMedian ? 1 : 0
+      });
 
-      return score;
+      const score = gates.reduce((sum, g) => sum + g.points, 0);
+      return { score, gates };
+    }
+
+    function computeMatchScore(property, allProperties) {
+      return computeMatchScoreBreakdown(property, allProperties).score;
     }
 
     function matchScoreToTier(score) {
@@ -3764,7 +3786,7 @@
             </div>
 
             <div class="card-top">
-              <span class="badge ${item.priorityClass}" ${item.priorityGroup ? '' : 'style="visibility:hidden;"'}>${getCleanPriorityLabel(item.priorityGroup) || ' '}</span>
+              <span class="badge ${item.priorityClass}" style="${item.priorityGroup ? '' : 'background-color:var(--card); border:none; box-shadow:none; color:var(--card);'}">${getCleanPriorityLabel(item.priorityGroup) || ' '}</span>
               <div style="display:flex; align-items:center; gap:6px;">
                 <button type="button" class="heart-btn ${item.loved ? 'loved' : ''}" onclick="event.stopPropagation(); toggleLovedForProperty('${item.id}')" title="${item.loved ? 'Remove from Loved' : 'Mark as Loved'}">
                   <svg viewBox="0 0 24 24" fill="${item.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
@@ -4148,6 +4170,11 @@
         }).join('');
         const unassignedTag = (!p.weekends || p.weekends.length === 0)
           ? '<span class="manage-unassigned-tag">Unassigned</span>' : '';
+        const breakdown = computeMatchScoreBreakdown(p, properties);
+        const breakdownTooltip = breakdown.gates
+          .map(g => `${g.points > 0 ? '✓' : '✗'} ${g.label} (+${g.points}) — ${g.detail}`)
+          .concat([`Total: ${breakdown.score}/8 → ${getCleanPriorityLabel(p.priorityGroup) || 'Unclassified'}`])
+          .join('\n');
 
         return `
           <tr class="${p.hidden ? 'hidden-row' : ''}">
@@ -4169,6 +4196,10 @@
             <td>${p.beds} bd / ${p.baths} ba</td>
             <td>${p.sqft}</td>
             <td>${p.yearBuilt || '—'}</td>
+            <td title="${breakdownTooltip.replace(/"/g, '&quot;')}" style="cursor:help; white-space:nowrap;">
+              ${p.priorityGroup ? `<span class="badge ${p.priorityClass}" style="padding:3px 8px; font-size:0.65rem;">${getCleanPriorityLabel(p.priorityGroup)}</span>` : '<span style="color:var(--muted);">—</span>'}
+              <div style="font-size:0.72rem; color:var(--muted); margin-top:2px;">${breakdown.score}/8</div>
+            </td>
             <td><div class="manage-weekend-chips">${weekendChips}${unassignedTag}</div></td>
             <td style="font-size:0.78rem; color:var(--muted);">
               ${SOURCE_LABELS[p.source] || p.source || '—'}${p.dateAdded ? `<br>${p.dateAdded}` : ''}
