@@ -278,6 +278,13 @@
       border-color: var(--muted);
     }
 
+    .btn-secondary.disabled-link {
+      color: var(--muted);
+      opacity: 0.55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     .btn-outline-primary {
       background-color: transparent;
       color: var(--navy);
@@ -1223,6 +1230,10 @@
 
     @media (min-width: 1025px) {
       body { padding-left: 264px; }
+      /* Center these against the visible content area, not the full
+         viewport — otherwise they render partially hidden behind the
+         always-visible sidebar. */
+      .settings-backdrop, .compare-backdrop { left: 240px; }
     }
 
     @media (max-width: 1024px) {
@@ -1435,6 +1446,21 @@
     .binoculars-btn:hover { transform: scale(1.15); }
     .binoculars-btn.watching { color: #3b82f6; }
 
+    .toured-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: var(--transition);
+    }
+    .toured-btn svg { width: 20px; height: 20px; }
+    .toured-btn:hover { transform: scale(1.15); }
+    .toured-btn.toured { color: #2f9e44; }
+
     .tour-count-badge {
       display: inline-flex;
       align-items: center;
@@ -1501,6 +1527,8 @@
     .eval-column-name { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
 
     /* Feature ratings grid */
+    .feature-ratings-columns { display: flex; flex-direction: column; gap: 0; }
+    .feature-ratings-column:first-child { margin-bottom: 18px; }
     .feature-ratings-grid { display: flex; flex-direction: column; gap: 2px; }
     .feature-ratings-header, .feature-rating-row {
       display: grid;
@@ -1515,6 +1543,17 @@
     .feature-rating-row:not(:last-child) { border-bottom: 1px dashed var(--border); }
     .feature-rating-label { font-size: 0.82rem; color: var(--text); }
     .feature-rating-row .rating-stars { justify-self: center; }
+
+    /* Two columns once the panel has room to breathe (it's 50% of the
+       viewport on desktop) — Interior on the left, Exterior + Overall on
+       the right, closing the empty space a single stacked list left. */
+    @media (min-width: 900px) {
+      .feature-ratings-columns { flex-direction: row; gap: 32px; align-items: flex-start; }
+      .feature-ratings-column { flex: 1; min-width: 0; }
+      .feature-ratings-column:first-child { margin-bottom: 0; }
+      .feature-ratings-header, .feature-rating-row { grid-template-columns: 1fr 80px 80px; }
+      .feature-rating-row .rating-stars .star-wrap { font-size: 1.3rem; }
+    }
 
     /* Feature ratings, single-person edit view */
     .feature-ratings-grid-single { display: flex; flex-direction: column; gap: 2px; }
@@ -1765,6 +1804,24 @@
 
     .panel-actions { display: flex; gap: 12px; margin-top: auto; padding-top: 20px; }
 
+    .toured-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0 0;
+      font-size: 0.88rem;
+    }
+    .toured-row-label { display: flex; align-items: center; gap: 6px; font-weight: 700; color: var(--text); cursor: pointer; }
+    .toured-row-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: #2f9e44; }
+    .toured-row input[type="date"] {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 10px;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
     /* Toast Notification */
     .toast {
       position: fixed;
@@ -2004,6 +2061,12 @@
             Hide Bungalows
           </label>
 
+          <label class="toggle-pill">
+            <input type="checkbox" id="openHouseNextWeekendOnly" onchange="applyFilters()">
+            <span class="toggle-switch"></span>
+            Open House Next Weekend
+          </label>
+
           <div class="filter-meta mobile-visible">
             <span class="result-count" id="resultCountMobile">19 properties</span>
           </div>
@@ -2153,12 +2216,24 @@
           <div class="panel-section-title">Feature Ratings</div>
 
           <div id="featureRatingsReadonlyView">
-            <div class="feature-ratings-header">
-              <span></span>
-              <span>Adam</span>
-              <span>Lauren</span>
+            <div class="feature-ratings-columns">
+              <div class="feature-ratings-column">
+                <div class="feature-ratings-header">
+                  <span></span>
+                  <span>Adam</span>
+                  <span>Lauren</span>
+                </div>
+                <div class="feature-ratings-grid" id="featureRatingsGridReadonlyCol1"></div>
+              </div>
+              <div class="feature-ratings-column">
+                <div class="feature-ratings-header">
+                  <span></span>
+                  <span>Adam</span>
+                  <span>Lauren</span>
+                </div>
+                <div class="feature-ratings-grid" id="featureRatingsGridReadonlyCol2"></div>
+              </div>
             </div>
-            <div class="feature-ratings-grid" id="featureRatingsGridReadonly"></div>
           </div>
 
           <div id="featureRatingsEditView" class="hidden">
@@ -2166,9 +2241,17 @@
           </div>
         </div>
 
+        <div class="toured-row">
+          <label class="toured-row-label">
+            <input type="checkbox" id="panelTouredCheckbox" onchange="toggleTouredForPanel(this.checked)">
+            Toured
+          </label>
+          <input type="date" id="panelTouredDate" onchange="setTouredDateFromPanel(this.value)">
+        </div>
+
         <div class="panel-actions">
-          <a id="panelZillowBtn" href="#" target="_blank" class="btn-secondary hidden" style="text-decoration:none; text-align:center; flex:1;">View on Zillow</a>
-          <a id="panelOneHomeBtn" href="#" target="_blank" class="btn-secondary hidden" style="text-decoration:none; text-align:center; flex:1;">View on OneHome</a>
+          <a id="panelZillowBtn" href="#" target="_blank" class="btn-secondary" style="text-decoration:none; text-align:center; flex:1;">View on Zillow</a>
+          <a id="panelOneHomeBtn" href="#" target="_blank" class="btn-secondary" style="text-decoration:none; text-align:center; flex:1;">View on OneHome</a>
           <button class="btn-primary" style="flex:1; justify-content:center;" onclick="saveEvaluation()">Save Notes</button>
         </div>
       </div>
@@ -2255,6 +2338,7 @@
               <th>Sq Ft</th>
               <th>Built</th>
               <th>Weekends</th>
+              <th>Source</th>
               <th>Status</th>
               <th></th>
             </tr>
@@ -2366,6 +2450,18 @@
         <div class="manage-weekend-chips" style="margin-bottom:2px;">
           <button type="button" class="manage-weekend-chip active" id="oneHomeModeHarBtn" onclick="setOneHomeImportMode('har')">HAR File</button>
           <button type="button" class="manage-weekend-chip" id="oneHomeModeDirectBtn" onclick="setOneHomeImportMode('direct')">Direct API</button>
+          <button type="button" class="manage-weekend-chip" id="oneHomeModeZillowBtn" onclick="setOneHomeImportMode('zillowHar')">Zillow HAR</button>
+        </div>
+
+        <div id="oneHomeZillowSection" class="hidden">
+          <div class="form-group">
+            <label>Zillow HAR File</label>
+            <input type="file" id="zillowHarInput" accept=".har,application/json">
+            <p style="font-size:0.78rem; color:var(--muted); margin-top:2px;">
+              Open the listing on zillow.com, open Chrome DevTools → Network, reload the page, then right-click → "Save all as HAR with content" and upload that file here.
+            </p>
+          </div>
+          <button class="btn-primary" style="align-self:flex-start;" onclick="runZillowHarImport()">Parse HAR File</button>
         </div>
 
         <div id="oneHomeHarSection">
@@ -2490,6 +2586,13 @@
       { key: 'lauren', label: 'Lauren' }
     ];
 
+    const SOURCE_LABELS = {
+      hardcoded: 'Hardcoded',
+      manual: 'Manual',
+      onehome: 'OneHome',
+      zillow: 'Zillow',
+    };
+
     const FEATURES = [
       { key: 'kitchen', label: 'Kitchen', group: 'Interior' },
       { key: 'mainBedroom', label: 'Main Bedroom', group: 'Interior' },
@@ -2516,6 +2619,11 @@
     function initPropertyDerivedData(list) {
       list.forEach(p => {
         p.pricePerSqFt = Math.round(p.rawPrice / p.rawSqft);
+        // Anything that reaches here without a source (i.e. no OneHome/
+        // Zillow import and no manual-add ever set one) is a properties.js
+        // seed entry — hardcoded before this tracking existed.
+        if (!p.source) p.source = 'hardcoded';
+        if (p.dateAdded === undefined) p.dateAdded = '';
 
         p.ratings = {};
         p.evalNotes = {};
@@ -2571,6 +2679,10 @@
         p.loved = lovedFlag !== null ? lovedFlag === '1' : !!p.loved;
         const watchlistFlag = localStorage.getItem(`watchlist_${p.id}`);
         p.watchlist = watchlistFlag !== null ? watchlistFlag === '1' : !!p.watchlist;
+        const touredFlag = localStorage.getItem(`toured_${p.id}`);
+        p.toured = touredFlag !== null ? touredFlag === '1' : !!p.toured;
+        const touredDate = localStorage.getItem(`touredDate_${p.id}`);
+        p.touredDate = touredDate !== null ? touredDate : (p.touredDate || '');
       });
     }
 
@@ -2674,6 +2786,14 @@
         property.watchlist = data.watchlist;
         localStorage.setItem(`watchlist_${id}`, data.watchlist ? '1' : '0');
       }
+      if (data.toured !== undefined) {
+        property.toured = data.toured;
+        localStorage.setItem(`toured_${id}`, data.toured ? '1' : '0');
+      }
+      if (data.touredDate !== undefined) {
+        property.touredDate = data.touredDate;
+        localStorage.setItem(`touredDate_${id}`, data.touredDate || '');
+      }
 
       PEOPLE.forEach(({ key: person }) => {
         if (data.ratings && data.ratings[person] !== undefined) {
@@ -2730,6 +2850,59 @@
       maxZoom: 19,
       attribution: '© OpenStreetMap © CARTO'
     }).addTo(map);
+
+    // =====================================================================
+    // HarPhotoBundle — static photo captures pulled from HAR files dropped
+    // in assets/ (Zillow, Cornerstone/MI-Realtor, etc.), extracted once and
+    // checked in as assets/har-photos.json keyed by full address. Unlike
+    // OneHome galleries (IndexedDB, local to whichever browser imported
+    // them), this is a committed static file — every device sees the same
+    // photos automatically, no import step needed.
+    // =====================================================================
+
+    const HarPhotoBundle = (function () {
+      let dataPromise = null;
+      function normalizeAddress(addr) {
+        return addr.trim().toLowerCase().replace(/\s+/g, ' ');
+      }
+      function load() {
+        if (!dataPromise) {
+          dataPromise = fetch('assets/har-photos.json')
+            .then(res => res.ok ? res.json() : { zillow: {}, cornerstone: {} })
+            .catch(() => ({ zillow: {}, cornerstone: {} }));
+        }
+        return dataPromise;
+      }
+      function findKey(dict, fullAddress) {
+        const target = normalizeAddress(fullAddress);
+        return Object.keys(dict || {}).find(k => normalizeAddress(k) === target);
+      }
+      // Best single photo, in provider priority order (Zillow before
+      // Cornerstone) — used for the card/panel primary photo.
+      async function getBestMatch(fullAddress) {
+        const data = await load();
+        const zillowKey = findKey(data.zillow, fullAddress);
+        if (zillowKey && data.zillow[zillowKey].length) {
+          return { provider: 'zillow', images: data.zillow[zillowKey] };
+        }
+        const csKey = findKey(data.cornerstone, fullAddress);
+        if (csKey && data.cornerstone[csKey].length) {
+          return { provider: 'cornerstone', images: data.cornerstone[csKey] };
+        }
+        return null;
+      }
+      // Every photo from every source, for the full gallery viewer.
+      async function getAllForAddress(fullAddress) {
+        const data = await load();
+        const zillowKey = findKey(data.zillow, fullAddress);
+        const csKey = findKey(data.cornerstone, fullAddress);
+        return {
+          zillow: (zillowKey && data.zillow[zillowKey]) || [],
+          cornerstone: (csKey && data.cornerstone[csKey]) || []
+        };
+      }
+      return { getBestMatch, getAllForAddress };
+    })();
 
     // =====================================================================
     // HousePhotoService — provider-based photo abstraction
@@ -2793,8 +2966,21 @@
       // added to this array ahead of StreetViewProvider, in priority order.
       const providers = [StreetViewProvider];
 
+      // Priority: OneHome (already-cached, live-imported) > Zillow >
+      // Cornerstone (both from the static HAR bundle) > Street View. A
+      // HAR-bundle match wins over a stale Street-View-tagged cache entry
+      // so newly-added HAR captures upgrade a photo automatically.
       async function get(fullAddress) {
         const cached = getCached(fullAddress);
+        if (cached && cached.provider === 'onehome') return cached;
+
+        const harMatch = await HarPhotoBundle.getBestMatch(fullAddress);
+        if (harMatch) {
+          const result = { provider: harMatch.provider, image: harMatch.images[0] };
+          setCached(fullAddress, result.provider, result.image);
+          return result;
+        }
+
         if (cached) return cached;
 
         for (const provider of providers) {
@@ -3141,8 +3327,10 @@
     }
 
     function refreshFeatureRatingViews(property) {
-      const readonlyEl = document.getElementById('featureRatingsGridReadonly');
-      if (readonlyEl) readonlyEl.innerHTML = renderFeatureRatingsReadonlyHtml(property);
+      const col1 = document.getElementById('featureRatingsGridReadonlyCol1');
+      if (col1) col1.innerHTML = renderFeatureRatingsReadonlyRows(property, ['Interior']);
+      const col2 = document.getElementById('featureRatingsGridReadonlyCol2');
+      if (col2) col2.innerHTML = renderFeatureRatingsReadonlyRows(property, ['Exterior', 'Overall']);
       if (ratingEditMode) {
         const editEl = document.getElementById('featureRatingsGridEdit');
         if (editEl) editEl.innerHTML = renderFeatureRatingsEditHtml(property, activeRatingPerson);
@@ -3227,9 +3415,12 @@
       return html;
     }
 
-    function renderFeatureRatingsReadonlyHtml(property) {
+    // Interior gets its own column; Exterior and Overall share the second
+    // column — keeps the two roughly balanced in row count and avoids the
+    // long empty gap a single stacked list left under a tall panel.
+    function renderFeatureRatingsReadonlyRows(property, groups) {
       let lastGroup = null;
-      return FEATURES.map(({ key: featureKey, label, group }) => {
+      return FEATURES.filter(f => groups.includes(f.group)).map(({ key: featureKey, label, group }) => {
         const groupHeader = group !== lastGroup ? `<div class="feature-group-header">${group}</div>` : '';
         lastGroup = group;
         return `
@@ -3336,6 +3527,14 @@
                 <button type="button" class="binoculars-btn ${item.watchlist ? 'watching' : ''}" onclick="event.stopPropagation(); toggleWatchlistForProperty('${item.id}')" title="${item.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
                   <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
                 </button>
+                <button type="button" id="toured-btn-${item.id}" class="toured-btn ${item.toured ? 'toured' : ''}" onclick="event.stopPropagation(); toggleTouredForProperty('${item.id}')" title="${item.toured ? `Toured${item.touredDate ? ' ' + item.touredDate : ''} — click to unmark` : 'Mark as Toured'}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="14.5" cy="15" r="8"/>
+                    <path d="M14.5 7c-2.7 3.3-2.7 12.7 0 16M14.5 7c2.7 3.3 2.7 12.7 0 16"/>
+                    <path d="M6 15h17"/>
+                    <path d="M1 9 22 1l-6 9-4-1-3 5-1-4-8-1z" fill="currentColor" stroke="none"/>
+                  </svg>
+                </button>
                 <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
                   <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
                   <span class="tour-checkbox-box">
@@ -3430,12 +3629,26 @@
       document.getElementById('subheadingText').innerText = `${data.length} listings in Royal Oak, Michigan`;
     }
 
+    // The soonest WEEKENDS entry that hasn't ended yet, relative to today —
+    // used by the "Open House Next Weekend" filter. Returns null if every
+    // known weekend is already in the past.
+    function getNextWeekendId() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const upcoming = WEEKENDS
+        .filter(w => w.end && new Date(`${w.end}T00:00:00`) >= today)
+        .sort((a, b) => new Date(a.start) - new Date(b.start));
+      return upcoming.length ? upcoming[0].id : null;
+    }
+
     function applyFilters() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const day = document.getElementById('dayFilter').value;
       const priority = document.getElementById('priorityFilter').value;
       const hideBungalows = document.getElementById('hideBungalows').checked;
       const weekendId = document.getElementById('weekendFilter').value;
+      const nextWeekendOnly = document.getElementById('openHouseNextWeekendOnly').checked;
+      const nextWeekendId = nextWeekendOnly ? getNextWeekendId() : null;
 
       updateFilterToggleState();
 
@@ -3451,8 +3664,11 @@
         const matchesDay = day === 'ALL' || item.day.includes(day);
         const matchesPriority = priority === 'ALL' || item.priorityGroup === priority;
         const matchesBungalow = !hideBungalows || !item.isBungalow;
+        const matchesNextWeekend = !nextWeekendOnly || (
+          item.day !== '—' && !!nextWeekendId && (item.weekends || []).includes(nextWeekendId)
+        );
 
-        return matchesWeekend && matchesSearch && matchesDay && matchesPriority && matchesBungalow;
+        return matchesWeekend && matchesSearch && matchesDay && matchesPriority && matchesBungalow && matchesNextWeekend;
       });
 
       renderDashboard(filtered);
@@ -3462,10 +3678,11 @@
       const day = document.getElementById('dayFilter').value;
       const priority = document.getElementById('priorityFilter').value;
       const hideBungalows = document.getElementById('hideBungalows').checked;
+      const nextWeekendOnly = document.getElementById('openHouseNextWeekendOnly').checked;
       const sort = document.getElementById('sortSelect').value;
       const btn = document.getElementById('filterToggleBtn');
 
-      const isActive = day !== 'ALL' || priority !== 'ALL' || hideBungalows || sort !== 'default';
+      const isActive = day !== 'ALL' || priority !== 'ALL' || hideBungalows || nextWeekendOnly || sort !== 'default';
       btn.classList.toggle('has-active', isActive);
     }
 
@@ -3490,6 +3707,7 @@
       document.getElementById('priorityFilter').value = 'ALL';
       document.getElementById('sortSelect').value = 'default';
       document.getElementById('hideBungalows').checked = false;
+      document.getElementById('openHouseNextWeekendOnly').checked = false;
       applyFilters();
     }
 
@@ -3642,16 +3860,18 @@
 
       if (isCustom) {
         localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
-        syncPropertyToFirestore(id, { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist });
+        syncPropertyToFirestore(id, { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' });
       } else {
         const { ratings, evalNotes, features, pricePerSqFt, ...corePatch } = property;
         localStorage.setItem(`override_${id}`, JSON.stringify(corePatch));
-        syncPropertyToFirestore(id, { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist });
+        syncPropertyToFirestore(id, { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' });
       }
       localStorage.setItem(`weekends_${id}`, JSON.stringify(property.weekends || []));
       localStorage.setItem(`hidden_${id}`, property.hidden ? '1' : '0');
       localStorage.setItem(`loved_${id}`, property.loved ? '1' : '0');
       localStorage.setItem(`watchlist_${id}`, property.watchlist ? '1' : '0');
+      localStorage.setItem(`toured_${id}`, property.toured ? '1' : '0');
+      localStorage.setItem(`touredDate_${id}`, property.touredDate || '');
     }
 
     function openManageHomes() {
@@ -3696,6 +3916,9 @@
             <td>${p.sqft}</td>
             <td>${p.yearBuilt || '—'}</td>
             <td><div class="manage-weekend-chips">${weekendChips}${unassignedTag}</div></td>
+            <td style="font-size:0.78rem; color:var(--muted);">
+              ${SOURCE_LABELS[p.source] || p.source || '—'}${p.dateAdded ? `<br>${p.dateAdded}` : ''}
+            </td>
             <td>${p.hidden ? '<span class="manage-hidden-tag">Hidden</span>' : ''}</td>
             <td>
               <div class="manage-row-actions">
@@ -3755,6 +3978,61 @@
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
         renderManageHomesList();
       }
+    }
+
+    // Marks a home as already toured (open house or private showing with
+    // our realtor). Turning it on defaults the date to today; turning it
+    // off clears the date. The exact date can be corrected afterward from
+    // the fly-in panel.
+    function toggleTouredForProperty(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.toured = !property.toured;
+      property.touredDate = property.toured ? (property.touredDate || new Date().toISOString().slice(0, 10)) : '';
+      persistPropertyState(property);
+      applyFilters();
+      if (activeEvalId === id) refreshTouredView(property);
+      if (document.getElementById('manageBackdrop').classList.contains('open')) {
+        renderManageHomesList();
+      }
+    }
+
+    function setTouredDate(id, dateStr) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.touredDate = dateStr;
+      property.toured = !!dateStr;
+      persistPropertyState(property);
+      applyFilters();
+    }
+
+    function refreshTouredView(property) {
+      const btn = document.getElementById(`toured-btn-${property.id}`);
+      if (btn) btn.classList.toggle('toured', !!property.toured);
+      const checkbox = document.getElementById('panelTouredCheckbox');
+      if (checkbox) checkbox.checked = !!property.toured;
+      const dateInput = document.getElementById('panelTouredDate');
+      if (dateInput) dateInput.value = property.touredDate || '';
+    }
+
+    function toggleTouredForPanel(checked) {
+      if (!activeEvalId) return;
+      const property = properties.find(p => p.id === activeEvalId);
+      if (!property) return;
+      property.toured = checked;
+      property.touredDate = checked ? (property.touredDate || new Date().toISOString().slice(0, 10)) : '';
+      persistPropertyState(property);
+      applyFilters();
+      refreshTouredView(property);
+      const card = document.getElementById(`toured-btn-${property.id}`);
+      if (card) card.classList.toggle('toured', checked);
+    }
+
+    function setTouredDateFromPanel(dateStr) {
+      if (!activeEvalId) return;
+      setTouredDate(activeEvalId, dateStr);
+      const property = properties.find(p => p.id === activeEvalId);
+      if (property) refreshTouredView(property);
     }
 
     // ===== Edit / Add Home form =====
@@ -3834,6 +4112,7 @@
           lat: null, lng: null,
           priority: 'Verify', priorityGroup: 'Verify', priorityClass: 'badge-verify',
           weekends: [], hidden: false,
+          source: 'manual', dateAdded: new Date().toISOString().slice(0, 10),
         }, fields);
         properties.push(property);
         registerNewCustomProperty(property);
@@ -4112,7 +4391,16 @@
 
       const listings = await fetchOneHomeSavedListings(groupId, savedSearchId, listingIds, sessionToken);
       oneHomeSession = { groupId, savedSearchId, sessionToken, sourceUrl: urlInput };
-      oneHomeResults = listings.map(l => ({
+
+      // The paginated listings query doesn't preserve any particular
+      // order, but `listingIds` (from the saved search itself) reflects
+      // the order homes were added to it — reorder results to match so
+      // new homes show up in the order they first appeared on OneHome.
+      const byId = {};
+      listings.forEach(l => { byId[l.id] = l; });
+      const orderedListings = listingIds.map(id => byId[id]).filter(Boolean);
+
+      oneHomeResults = orderedListings.map(l => ({
         onehomeId: l.id,
         property: l.property,
         detailProperty: null,
@@ -4135,10 +4423,12 @@
       status.innerText = 'Loading listings from OneHome…';
       try {
         await loadOneHomeResultsFromUrl(urlInput);
+        activeImportSourceType = 'onehome';
         status.innerText = `Loaded ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'}.`;
         renderOneHomeResults();
         document.getElementById('oneHomeResultsWrap').classList.remove('hidden');
         document.getElementById('oneHomeImportBtn').classList.remove('hidden');
+        refreshLocationScheduleAndPriceForExistingMatches();
         backfillPhotosForExistingMatches();
       } catch (err) {
         console.warn('OneHome import failed', err);
@@ -4146,16 +4436,22 @@
       }
     }
 
-    // Quietly keeps existing homes' open house time, map location, and
-    // photos fresh from OneHome without requiring a manual "Load Listings"
-    // click — runs once per page load, throttled so repeated reloads
-    // within the window don't re-hit OneHome's API unnecessarily.
+    // Quietly keeps existing homes' photos fresh from OneHome without
+    // requiring a manual "Load Listings" click — runs once per page load,
+    // throttled so repeated reloads within the window don't re-hit
+    // OneHome's API unnecessarily. Deliberately photos-only (see
+    // refreshLocationScheduleAndPriceForExistingMatches for why schedule/
+    // location/price corrections are manual-only).
     const ONEHOME_AUTO_SYNC_INTERVAL_MS = 30 * 60 * 1000;
 
     async function autoSyncOneHomeInBackground() {
       if (!DEFAULT_ONEHOME_URL) return;
       const last = parseInt(localStorage.getItem('oneHomeAutoSyncAt') || '0', 10);
       if (Date.now() - last < ONEHOME_AUTO_SYNC_INTERVAL_MS) return;
+      // Never stomp on oneHomeResults/oneHomeSession while the import
+      // modal is open — the user may have just loaded their own results
+      // (OneHome, HAR, or Zillow) that haven't been imported yet.
+      if (document.getElementById('oneHomeBackdrop').classList.contains('open')) return;
 
       try {
         await loadOneHomeResultsFromUrl(DEFAULT_ONEHOME_URL);
@@ -4166,17 +4462,17 @@
       }
     }
 
-    // Runs automatically after loading results (either mode) — for any
-    // matched listing that's already in the app but has no photo gallery
-    // yet (e.g. added by hand, or imported before this feature existed),
-    // silently fetch and attach its photos in the background. Doesn't
-    // touch price/description/notes/weekends — photos only. Skips homes
-    // that already have a gallery, so this is safe to run every time
-    // "Load Listings" is clicked without re-fetching redundantly.
-    async function backfillPhotosForExistingMatches() {
+    // Corrects location/schedule/price drift for existing matches against
+    // OneHome's live data. Deliberately NOT run by the silent background
+    // auto-sync — it would otherwise undo an intentional "Clear All Open
+    // House Times" within the next throttle window, silently re-appending
+    // whatever OneHome still reports the moment the page reloads. Only
+    // runs from an explicit, visible "Load Listings" click, so any change
+    // here is something the user just asked for.
+    function refreshLocationScheduleAndPriceForExistingMatches() {
       const status = document.getElementById('oneHomeStatus');
       const matches = oneHomeResults.filter(r => r.existing);
-      if (!matches.length) return;
+      if (!matches.length) return { locationsFixed: 0, schedulesFixed: 0, pricesFixed: 0 };
 
       // Location correction: OneHome's own Latitude/Longitude is
       // authoritative and free here (already in the loaded summary data),
@@ -4235,19 +4531,35 @@
       });
       if (locationsFixed > 0 || schedulesFixed > 0 || pricesFixed > 0) applyFilters();
 
+      const fixParts = [];
+      if (locationsFixed > 0) fixParts.push(`map location for ${locationsFixed}`);
+      if (schedulesFixed > 0) fixParts.push(`open house time for ${schedulesFixed}`);
+      if (pricesFixed > 0) fixParts.push(`price for ${pricesFixed}`);
+      if (fixParts.length) status.innerText = `Fixed ${fixParts.join(', ')} existing home${(locationsFixed + schedulesFixed + pricesFixed) === 1 ? '' : 's'}.`;
+
+      return { locationsFixed, schedulesFixed, pricesFixed };
+    }
+
+    // Runs automatically after loading results (either mode), including
+    // the silent background auto-sync — for any matched listing that's
+    // already in the app but has no photo gallery yet (e.g. added by
+    // hand, or imported before this feature existed), silently fetch and
+    // attach its photos in the background. Doesn't touch price/schedule/
+    // location/notes/weekends — photos only, so it's safe to run
+    // unattended. Skips homes that already have a gallery, so this is
+    // also safe to run every time "Load Listings" is clicked without
+    // re-fetching redundantly.
+    async function backfillPhotosForExistingMatches() {
+      const status = document.getElementById('oneHomeStatus');
+      const matches = oneHomeResults.filter(r => r.existing);
+      if (!matches.length) return;
+
       const candidates = [];
       for (const r of matches) {
         const already = await GalleryStore.getPhotos(r.existing.id);
         if (!already || !already.length) candidates.push(r);
       }
-      if (!candidates.length) {
-        const fixParts = [];
-        if (locationsFixed > 0) fixParts.push(`map location for ${locationsFixed}`);
-        if (schedulesFixed > 0) fixParts.push(`open house time for ${schedulesFixed}`);
-        if (pricesFixed > 0) fixParts.push(`price for ${pricesFixed}`);
-        if (fixParts.length) status.innerText = `Fixed ${fixParts.join(', ')} existing home${(locationsFixed + schedulesFixed + pricesFixed) === 1 ? '' : 's'}.`;
-        return;
-      }
+      if (!candidates.length) return;
 
       let backfilled = 0;
       let done = 0;
@@ -4296,8 +4608,10 @@
     function setOneHomeImportMode(mode) {
       document.getElementById('oneHomeModeHarBtn').classList.toggle('active', mode === 'har');
       document.getElementById('oneHomeModeDirectBtn').classList.toggle('active', mode === 'direct');
+      document.getElementById('oneHomeModeZillowBtn').classList.toggle('active', mode === 'zillowHar');
       document.getElementById('oneHomeHarSection').classList.toggle('hidden', mode !== 'har');
       document.getElementById('oneHomeDirectSection').classList.toggle('hidden', mode !== 'direct');
+      document.getElementById('oneHomeZillowSection').classList.toggle('hidden', mode !== 'zillowHar');
       document.getElementById('oneHomeStatus').innerText = '';
     }
 
@@ -4381,6 +4695,7 @@
 
     function openOneHomeImportModal() {
       document.getElementById('oneHomeHarInput').value = '';
+      document.getElementById('zillowHarInput').value = '';
       document.getElementById('oneHomeSourceUrlInput').value = DEFAULT_ONEHOME_URL;
       document.getElementById('oneHomeUrlInput').value = DEFAULT_ONEHOME_URL;
       document.getElementById('oneHomeStatus').innerText = '';
@@ -4389,6 +4704,7 @@
       setOneHomeImportMode('direct');
       oneHomeSession = null;
       oneHomeResults = [];
+      activeImportSourceType = 'onehome';
       oneHomeFilterOpenHouseOnly = false;
       document.getElementById('oneHomeOpenHouseFilterInput').checked = false;
       oneHomeStatusFilterValue = 'all';
@@ -4401,6 +4717,153 @@
 
     function closeOneHomeImport() {
       document.getElementById('oneHomeBackdrop').classList.remove('open');
+    }
+
+    // Where the currently-loaded oneHomeResults came from, so
+    // finalizeImportSelection() knows whether to write the result's link
+    // into `url` (Zillow) or `oneHomeUrl` (OneHome) on import.
+    let activeImportSourceType = 'onehome';
+
+    // Zillow blocks live cross-origin API access (no CORS, active bot
+    // detection) the way OneHome's GraphQL endpoint doesn't, so there's no
+    // "paste a link, fetch live" path here — same HAR-capture workflow as
+    // OneHome's HAR mode. Pulls address/price/beds/baths/photos out of the
+    // listing page's embedded schema.org + Apollo-state JSON, then shapes
+    // the result exactly like a OneHome result so the rest of the import
+    // UI (selection list, weekend picker, finalizeImportSelection) can be
+    // reused unmodified.
+    function parseZillowHarText(harText) {
+      let har;
+      try { har = JSON.parse(harText); } catch (e) { return []; }
+      const entries = (har.log && har.log.entries) || [];
+
+      let pageEntry = null;
+      let pageUrl = null;
+      for (const e of entries) {
+        const url = e.request && e.request.url;
+        if (!url || !/\/(homedetails|homes)\//.test(url)) continue;
+        const content = e.response && e.response.content;
+        const mime = (content && content.mimeType) || '';
+        if (!mime.includes('text/html')) continue;
+        const text = content.text || '';
+        if (text.includes('streetAddress') && text.includes('resoFacts')) {
+          pageEntry = e; pageUrl = url; break;
+        }
+      }
+      if (!pageEntry) return [];
+      // The rich property facts (resoFacts: bedrooms, bathrooms, living
+      // area, year built) live inside a JSON blob that's itself embedded
+      // as an escaped string within the page — every quote shows up as
+      // \" rather than ". Unescaping once up front lets the same simple
+      // field regexes work whether a field came from that blob or from
+      // the plain schema.org JSON-LD block (address/price/geo).
+      const text = pageEntry.response.content.text.replace(/\\"/g, '"');
+
+      const grab = pattern => {
+        const m = text.match(pattern);
+        return m ? m[1] : null;
+      };
+
+      const streetAddress = grab(/"streetAddress":"([^"]+)"/);
+      if (!streetAddress) return [];
+      const city = grab(/"addressLocality":"([^"]+)"/);
+      const state = grab(/"addressRegion":"([^"]+)"/);
+      const zip = grab(/"postalCode":"([^"]+)"/);
+      const price = grab(/"price":(\d+)/);
+      const beds = grab(/"bedrooms":(\d+)/);
+      const bathsFull = grab(/"bathroomsFull":(\d+)/);
+      const bathsHalf = grab(/"bathroomsHalf":(\d+)/);
+      const livingArea = grab(/"livingAreaValue":(\d+)/) || grab(/"livingArea":(\d+)/);
+      const yearBuilt = grab(/"yearBuilt":(\d+)/);
+      const lat = grab(/"latitude":(-?[0-9.]+)/);
+      const lng = grab(/"longitude":(-?[0-9.]+)/);
+      const zpidMatch = pageUrl.match(/(\d+)_zpid/);
+      const zpid = zpidMatch ? zpidMatch[1] : null;
+
+      // Photo fingerprints, in gallery order, from the responsivePhotos
+      // block — then matched against whatever base64 image bytes the HAR
+      // actually captured (usually just the first several photos, since
+      // the rest lazy-load on scroll/click).
+      const photoIdx = text.indexOf('responsivePhotos');
+      const photoBlock = photoIdx >= 0 ? text.slice(photoIdx, photoIdx + 200000) : '';
+      const fpOrder = [];
+      const fpRe = /photos\.zillowstatic\.com\/fp\/([a-f0-9]+)-/g;
+      let fm;
+      while ((fm = fpRe.exec(photoBlock))) {
+        if (!fpOrder.includes(fm[1])) fpOrder.push(fm[1]);
+      }
+
+      const byFp = {};
+      entries.forEach(e => {
+        const url = e.request && e.request.url;
+        if (!url) return;
+        const m = url.match(/photos\.zillowstatic\.com\/fp\/([a-f0-9]+)-/);
+        if (!m) return;
+        const content = e.response && e.response.content;
+        if (!content || content.encoding !== 'base64' || !content.text) return;
+        const size = content.size || 0;
+        const fid = m[1];
+        if (!byFp[fid] || size > byFp[fid].size) {
+          byFp[fid] = { size, mime: content.mimeType, data: content.text };
+        }
+      });
+
+      const photos = fpOrder.map(fid => byFp[fid])
+        .filter(Boolean)
+        .map(hit => `data:${hit.mime};base64,${hit.data}`);
+
+      const propertyLike = {
+        StreetNumber: '', StreetDirPrefix: '', StreetName: streetAddress, StreetSuffix: '', StreetDirSuffix: '',
+        City: city || '', StateOrProvince: state || '', PostalCode: zip || '',
+        ListPrice: price ? parseInt(price, 10) : 0,
+        BedroomsTotal: beds ? parseInt(beds, 10) : 0,
+        BathroomsTotalInteger: (bathsFull ? parseInt(bathsFull, 10) : 0) + (bathsHalf ? parseInt(bathsHalf, 10) * 0.5 : 0),
+        LivingArea: livingArea ? parseInt(livingArea, 10) : 0,
+        Latitude: lat ? parseFloat(lat) : null,
+        Longitude: lng ? parseFloat(lng) : null,
+        OriginatingSystemKey: zpid ? `zillow-${zpid}` : null,
+        ListingId: zpid
+      };
+
+      return [{
+        onehomeId: null,
+        property: propertyLike,
+        detailProperty: { YearBuilt: yearBuilt ? parseInt(yearBuilt, 10) : null, ArchitecturalStyle: null, PublicRemarks: '' },
+        thumbnail: photos[0] || null,
+        photoDataUrl: null,
+        harPhotoDataUrls: photos,
+        openHouse: null,
+        zillowUrl: pageUrl,
+        existing: findExistingPropertyForOneHomeListing(propertyLike)
+      }];
+    }
+
+    async function runZillowHarImport() {
+      const status = document.getElementById('oneHomeStatus');
+      const fileInput = document.getElementById('zillowHarInput');
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        status.innerText = 'Choose a .har file first.';
+        return;
+      }
+
+      status.innerText = 'Reading HAR file…';
+      try {
+        const text = await readFileAsText(file);
+        oneHomeResults = parseZillowHarText(text);
+        activeImportSourceType = 'zillowHar';
+        if (!oneHomeResults.length) {
+          status.innerText = "Couldn't find listing data in that file — make sure the HAR was saved with response content included while the Zillow listing page was loaded.";
+          return;
+        }
+        status.innerText = `Found the listing at ${oneHomeResults[0].property.StreetName}${oneHomeResults[0].harPhotoDataUrls.length ? ` with ${oneHomeResults[0].harPhotoDataUrls.length} photo${oneHomeResults[0].harPhotoDataUrls.length === 1 ? '' : 's'}` : ' (no photos captured)'}.`;
+        renderOneHomeResults();
+        document.getElementById('oneHomeResultsWrap').classList.remove('hidden');
+        document.getElementById('oneHomeImportBtn').classList.remove('hidden');
+      } catch (err) {
+        console.warn('Zillow HAR import failed', err);
+        status.innerText = `Couldn't read that file: ${err.message}`;
+      }
     }
 
     async function runOneHomeHarImport() {
@@ -4421,11 +4884,13 @@
           return;
         }
         oneHomeSession = { sourceUrl: document.getElementById('oneHomeSourceUrlInput').value.trim() || DEFAULT_ONEHOME_URL };
+        activeImportSourceType = 'onehome';
 
         status.innerText = `Found ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'} in that file.`;
         renderOneHomeResults();
         document.getElementById('oneHomeResultsWrap').classList.remove('hidden');
         document.getElementById('oneHomeImportBtn').classList.remove('hidden');
+        refreshLocationScheduleAndPriceForExistingMatches();
         backfillPhotosForExistingMatches();
       } catch (err) {
         console.warn('HAR import failed', err);
@@ -4504,9 +4969,10 @@
       }).join('');
     }
 
-    async function importOneHomeListing(result, selectedWeekends, addToWatchlist) {
+    async function importOneHomeListing(result, selectedWeekends, addToWatchlist, sourceType = 'onehome') {
       const p = result.property;
       const mlsKey = p.OriginatingSystemKey || p.ListingId;
+      const sourceLabel = sourceType === 'zillowHar' ? 'Zillow' : 'OneHome';
 
       // Full detail (year built, style, description) either came embedded in
       // the HAR (a ListingById response captured while the user had the
@@ -4550,14 +5016,19 @@
         baths: baths || 0,
         sqft: rawSqft.toLocaleString(), rawSqft,
         style, isBungalow: /bungalow/i.test(style),
-        notes: `Imported from OneHome on ${new Date().toLocaleDateString()}.`,
+        notes: `Imported from ${sourceLabel} on ${new Date().toLocaleDateString()}.`,
         yearBuilt: dp.YearBuilt || null,
         description: dp.PublicRemarks || '',
-        oneHomeUrl: oneHomeSession.sourceUrl,
         mlsListingId: mlsKey,
         weekends: selectedWeekends.slice(),
         hidden: false,
+        source: sourceType === 'zillowHar' ? 'zillow' : 'onehome',
       };
+      if (sourceType === 'zillowHar') {
+        record.url = result.zillowUrl;
+      } else {
+        record.oneHomeUrl = oneHomeSession.sourceUrl;
+      }
       // Only set the key when checked — leaving it out (rather than false)
       // means re-importing an already-watchlisted home without the chip
       // checked doesn't clobber that existing flag via Object.assign below.
@@ -4566,10 +5037,15 @@
       let property = result.existing;
       if (property) {
         const keepId = property.id;
+        const keepDateAdded = property.dateAdded;
         Object.assign(property, record);
         property.id = keepId;
+        // dateAdded tracks when it first entered the app, not the most
+        // recent re-import/sync — never let a later import overwrite it.
+        property.dateAdded = keepDateAdded || property.dateAdded || new Date().toISOString().slice(0, 10);
       } else {
         record.id = `custom-${mlsKey}`;
+        record.dateAdded = new Date().toISOString().slice(0, 10);
         property = record;
         properties.push(property);
         registerNewCustomProperty(property);
@@ -4600,7 +5076,7 @@
       if (photos.length) {
         await GalleryStore.savePhotos(property.id, photos);
         const fullAddress = `${property.address}, ${property.city} ${property.zip}`;
-        HousePhotoService.setCachedPhoto(fullAddress, 'onehome', photos[0]);
+        HousePhotoService.setCachedPhoto(fullAddress, sourceType === 'zillowHar' ? 'zillow' : 'onehome', photos[0]);
       }
     }
 
@@ -4632,7 +5108,7 @@
       for (let n = 0; n < checked.length; n++) {
         const result = oneHomeResults[checked[n]];
         try {
-          await importOneHomeListing(result, selectedWeekends, addToWatchlist);
+          await importOneHomeListing(result, selectedWeekends, addToWatchlist, activeImportSourceType);
         } catch (err) {
           console.warn('Failed to import listing', result, err);
           failed++;
@@ -4662,9 +5138,24 @@
     let galleryIndex = 0;
     let galleryViewMode = 'carousel';
 
+    // Combines every known photo source for a property, in priority order:
+    // OneHome (local IndexedDB gallery) first, then Zillow, then
+    // Cornerstone (both from the static HAR bundle) — so the primary photo
+    // shown first always matches HousePhotoService's own priority.
+    async function getFullGalleryPhotos(property) {
+      const fullAddress = `${property.address}, ${property.city} ${property.zip}`;
+      const [oneHomePhotos, harPhotos] = await Promise.all([
+        GalleryStore.getPhotos(property.id),
+        HarPhotoBundle.getAllForAddress(fullAddress)
+      ]);
+      return [...(oneHomePhotos || []), ...harPhotos.zillow, ...harPhotos.cornerstone];
+    }
+
     async function openPhotoGallery() {
       if (!activeEvalId) return;
-      const photos = await GalleryStore.getPhotos(activeEvalId);
+      const property = properties.find(p => p.id === activeEvalId);
+      if (!property) return;
+      const photos = await getFullGalleryPhotos(property);
       if (!photos || !photos.length) return;
 
       galleryPhotos = photos;
@@ -4821,6 +5312,35 @@
       }
     }
 
+    // Resolves both "View on" links for a property. Every home is
+    // presumed to be on Zillow, so that link always has something to
+    // point at — either the saved URL (if it's genuinely a Zillow link;
+    // some got a OneHome link pasted into the wrong field by mistake) or
+    // a Zillow address-search fallback. OneHome only shows a working link
+    // when the property actually has one — otherwise the button is
+    // present but grayed out rather than hidden.
+    function resolveViewLinks(property) {
+      const isZillow = url => !!url && /zillow\.com/i.test(url);
+      const isOneHome = url => !!url && /onehome/i.test(url);
+
+      let zillowUrl = isZillow(property.url) ? property.url : null;
+      let oneHomeUrl = isOneHome(property.oneHomeUrl) ? property.oneHomeUrl : null;
+
+      // A Zillow-field value that's actually a OneHome link — recover it
+      // as the OneHome link instead of losing it.
+      if (!oneHomeUrl && isOneHome(property.url)) {
+        oneHomeUrl = property.url;
+      }
+
+      if (!zillowUrl) {
+        const slug = `${property.address} ${property.city} ${property.zip}`
+          .replace(/,/g, '').trim().replace(/\s+/g, '-');
+        zillowUrl = `https://www.zillow.com/homes/${slug}_rb/`;
+      }
+
+      return { zillowUrl, oneHomeUrl };
+    }
+
     function openModal(id) {
       activeEvalId = id;
       const property = properties.find(p => p.id === id);
@@ -4829,6 +5349,7 @@
       document.getElementById('panelAddress').innerText = property.address;
       document.getElementById('panelCity').innerText = `${property.city} ${property.zip}`;
       document.getElementById('panelPrice').innerText = property.price;
+      refreshTouredView(property);
       document.getElementById('panelBeds').innerText = property.beds;
       document.getElementById('panelBaths').innerText = property.baths;
       document.getElementById('panelSqft').innerText = property.sqft;
@@ -4865,27 +5386,26 @@
       });
       refreshRatingViews(property);
 
+      const { zillowUrl, oneHomeUrl } = resolveViewLinks(property);
       const zillowBtn = document.getElementById('panelZillowBtn');
-      if (property.url) {
-        zillowBtn.href = property.url;
-        zillowBtn.classList.remove('hidden');
-      } else {
-        zillowBtn.classList.add('hidden');
-      }
+      zillowBtn.href = zillowUrl;
+      zillowBtn.classList.remove('hidden', 'disabled-link');
 
       const oneHomeBtn = document.getElementById('panelOneHomeBtn');
-      if (property.oneHomeUrl) {
-        oneHomeBtn.href = property.oneHomeUrl;
-        oneHomeBtn.classList.remove('hidden');
+      oneHomeBtn.classList.remove('hidden');
+      if (oneHomeUrl) {
+        oneHomeBtn.href = oneHomeUrl;
+        oneHomeBtn.classList.remove('disabled-link');
       } else {
-        oneHomeBtn.classList.add('hidden');
+        oneHomeBtn.removeAttribute('href');
+        oneHomeBtn.classList.add('disabled-link');
       }
 
       loadPanelPhoto(property);
 
       const galleryBtn = document.getElementById('galleryTriggerBtn');
       galleryBtn.classList.add('hidden');
-      GalleryStore.getPhotos(id).then(photos => {
+      getFullGalleryPhotos(property).then(photos => {
         if (activeEvalId !== id) return; // panel moved on before this resolved
         if (photos && photos.length) {
           document.getElementById('galleryTriggerCount').innerText = `${photos.length} Photo${photos.length === 1 ? '' : 's'}`;

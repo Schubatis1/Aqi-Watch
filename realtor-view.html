@@ -208,7 +208,7 @@
   /* ---- Fly-in detail panel ---- */
   .panel-backdrop {
     position: fixed; inset: 0; background: rgba(34,49,63,0.45);
-    opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 50;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 800;
   }
   .panel-backdrop.open { opacity: 1; pointer-events: auto; }
   .panel {
@@ -219,7 +219,7 @@
     transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
     overflow-y: auto;
-    z-index: 51;
+    z-index: 801;
   }
   @media (min-width: 900px) { .panel { max-width: 50%; } }
   .panel.open { transform: translateX(0); }
@@ -268,7 +268,7 @@
   .gallery-backdrop {
     position: fixed; inset: 0; background: rgba(20,20,20,0.9);
     display: flex; flex-direction: column; opacity: 0; pointer-events: none;
-    transition: opacity 0.25s ease; z-index: 60;
+    transition: opacity 0.25s ease; z-index: 900;
   }
   .gallery-backdrop.open { opacity: 1; pointer-events: auto; }
   .gallery-modal { display: flex; flex-direction: column; height: 100%; padding: 16px; }
@@ -481,6 +481,44 @@
     }, err => console.warn('Firestore listener error', err));
   }
 
+  // ---- HAR-sourced photo bundle (Zillow / Cornerstone captures) — same
+  // static assets/har-photos.json as the main app, so photos here work
+  // for anyone opening this link, not just this browser. ----
+  const HarPhotoBundle = (function () {
+    let dataPromise = null;
+    function normalizeAddress(addr) { return addr.trim().toLowerCase().replace(/\s+/g, ' '); }
+    function load() {
+      if (!dataPromise) {
+        dataPromise = fetch('assets/har-photos.json')
+          .then(res => res.ok ? res.json() : { zillow: {}, cornerstone: {} })
+          .catch(() => ({ zillow: {}, cornerstone: {} }));
+      }
+      return dataPromise;
+    }
+    function findKey(dict, fullAddress) {
+      const target = normalizeAddress(fullAddress);
+      return Object.keys(dict || {}).find(k => normalizeAddress(k) === target);
+    }
+    async function getBestMatch(fullAddress) {
+      const data = await load();
+      const zillowKey = findKey(data.zillow, fullAddress);
+      if (zillowKey && data.zillow[zillowKey].length) return { provider: 'zillow', images: data.zillow[zillowKey] };
+      const csKey = findKey(data.cornerstone, fullAddress);
+      if (csKey && data.cornerstone[csKey].length) return { provider: 'cornerstone', images: data.cornerstone[csKey] };
+      return null;
+    }
+    async function getAllForAddress(fullAddress) {
+      const data = await load();
+      const zillowKey = findKey(data.zillow, fullAddress);
+      const csKey = findKey(data.cornerstone, fullAddress);
+      return {
+        zillow: (zillowKey && data.zillow[zillowKey]) || [],
+        cornerstone: (csKey && data.cornerstone[csKey]) || []
+      };
+    }
+    return { getBestMatch, getAllForAddress };
+  })();
+
   // ---- Photo service (same provider chain as the main app: Street View
   // fallback, seeded by whatever the main app already cached locally) ----
   const HousePhotoService = (function () {
@@ -511,8 +549,20 @@
       }
     };
     const providers = [StreetViewProvider];
+    // Priority: OneHome (cached locally, if this browser did an import) >
+    // Zillow > Cornerstone (static HAR bundle, works everywhere) > Street
+    // View.
     async function get(fullAddress) {
       const cached = getCached(fullAddress);
+      if (cached && cached.provider === 'onehome') return cached;
+
+      const harMatch = await HarPhotoBundle.getBestMatch(fullAddress);
+      if (harMatch) {
+        const result = { provider: harMatch.provider, image: harMatch.images[0] };
+        setCached(fullAddress, result.provider, result.image);
+        return result;
+      }
+
       if (cached) return cached;
       for (const provider of providers) {
         try {
@@ -863,7 +913,12 @@
     hint.classList.add('hidden');
     activeGalleryPhotos = [];
 
+    const fullAddressForPhotos = `${item.address}, ${item.city} ${item.zip}`;
     let photos = await getOneHomePhotos(item);
+    if (!photos || !photos.length) {
+      const harMatches = await HarPhotoBundle.getAllForAddress(fullAddressForPhotos);
+      photos = [...harMatches.zillow, ...harMatches.cornerstone];
+    }
     if (!photos || !photos.length) photos = await GalleryStore.getPhotos(item.id);
 
     if (photos && photos.length) {
