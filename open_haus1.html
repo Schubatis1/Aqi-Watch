@@ -3864,13 +3864,37 @@
     // "Load Listings" is clicked without re-fetching redundantly.
     async function backfillPhotosForExistingMatches() {
       const status = document.getElementById('oneHomeStatus');
+      const matches = oneHomeResults.filter(r => r.existing);
+      if (!matches.length) return;
+
+      // Location correction: OneHome's own Latitude/Longitude is
+      // authoritative and free here (already in the loaded summary data),
+      // so any matched home's map pin gets fixed on the spot — this is
+      // what stops homes drifting to the wrong spot on the map the way
+      // hand-guessed coordinates did.
+      let locationsFixed = 0;
+      matches.forEach(r => {
+        const existing = r.existing;
+        const lat = r.property.Latitude;
+        const lng = r.property.Longitude;
+        if (lat == null || lng == null) return;
+        if (existing.lat === lat && existing.lng === lng) return;
+        existing.lat = lat;
+        existing.lng = lng;
+        persistPropertyState(existing);
+        locationsFixed++;
+      });
+      if (locationsFixed > 0) applyFilters();
+
       const candidates = [];
-      for (const r of oneHomeResults) {
-        if (!r.existing) continue;
+      for (const r of matches) {
         const already = await GalleryStore.getPhotos(r.existing.id);
         if (!already || !already.length) candidates.push(r);
       }
-      if (!candidates.length) return;
+      if (!candidates.length) {
+        if (locationsFixed > 0) status.innerText = `Fixed the map location for ${locationsFixed} existing home${locationsFixed === 1 ? '' : 's'}.`;
+        return;
+      }
 
       let backfilled = 0;
       let done = 0;
@@ -3906,9 +3930,12 @@
         }
       });
 
-      status.innerText = backfilled > 0
-        ? `Backfilled photos for ${backfilled} existing home${backfilled === 1 ? '' : 's'}.`
-        : `Loaded ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'} — no missing photos to backfill.`;
+      const parts = [];
+      if (locationsFixed > 0) parts.push(`fixed the map location for ${locationsFixed}`);
+      if (backfilled > 0) parts.push(`backfilled photos for ${backfilled}`);
+      status.innerText = parts.length
+        ? `Done — ${parts.join(', ')} existing home${(locationsFixed + backfilled) === 1 ? '' : 's'}.`
+        : `Loaded ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'} — nothing to backfill.`;
     }
 
     function setOneHomeImportMode(mode) {

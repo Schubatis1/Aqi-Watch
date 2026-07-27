@@ -8,7 +8,7 @@ let properties = [
 
   {
     id: "1", address: "915 E 6th St", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4862, lng: -83.1362,
+    lat: 42.4859548, lng: -83.1336454,
     priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
     day: "Sun", openHouse: "1:00–3:00 PM",
     price: "$475,000", rawPrice: 475000,
@@ -26,7 +26,7 @@ Homes like this don't come along often—a classic Royal Oak home that seamlessl
   },
   {
     id: "2", address: "1029 Longfellow Ave", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4932, lng: -83.1345,
+    lat: 42.4808258, lng: -83.1342948,
     priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
     day: "Sun", openHouse: "2:00–4:00 PM",
     price: "$529,900", rawPrice: 529900,
@@ -40,7 +40,7 @@ Homes like this don't come along often—a classic Royal Oak home that seamlessl
   },
   {
     id: "12", address: "116 S Kenwood Ave", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4868, lng: -83.1412,
+    lat: 42.4897798, lng: -83.1214001,
     priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
     day: "Sun", openHouse: "1:00–3:00 PM",
     price: "$489,000", rawPrice: 489000,
@@ -54,7 +54,7 @@ Homes like this don't come along often—a classic Royal Oak home that seamlessl
   },
   {
     id: "19", address: "1102 N Lafayette Ave", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4926, lng: -83.1462,
+    lat: 42.4989454, lng: -83.1480093,
     priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
     day: "Sun", openHouse: "1:00–3:00 PM",
     price: "$498,000", rawPrice: 498000,
@@ -68,7 +68,7 @@ Homes like this don't come along often—a classic Royal Oak home that seamlessl
   },
   {
     id: "13", address: "827 Gardenia Ave", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4842, lng: -83.1365,
+    lat: 42.4981495, lng: -83.1348984,
     priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
     day: "Sun", openHouse: "12:00–2:00 PM",
     price: "$415,000", rawPrice: 415000,
@@ -82,7 +82,7 @@ Homes like this don't come along often—a classic Royal Oak home that seamlessl
   },
   {
     id: "15", address: "1207 Irving Ave", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4818, lng: -83.1332,
+    lat: 42.4795034, lng: -83.135392,
     priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
     day: "Sun", openHouse: "1:00–3:00 PM",
     price: "$450,000", rawPrice: 450000,
@@ -96,7 +96,7 @@ Homes like this don't come along often—a classic Royal Oak home that seamlessl
   },
   {
     id: "18", address: "2436 N Vermont Ave", city: "Royal Oak, MI", zip: "48073",
-    lat: 42.5082, lng: -83.1368,
+    lat: 42.5114021, lng: -83.1291263,
     priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
     day: "Sun", openHouse: "2:00–4:00 PM",
     price: "$439,000", rawPrice: 439000,
@@ -110,7 +110,7 @@ Homes like this don't come along often—a classic Royal Oak home that seamlessl
   },
   {
     id: "17", address: "3210 Harvard Rd", city: "Royal Oak, MI", zip: "48073",
-    lat: 42.5182, lng: -83.1724,
+    lat: 42.513071, lng: -83.1968004,
     priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
     day: "Sun", openHouse: "1:00–4:00 PM",
     price: "$520,000", rawPrice: 520000,
@@ -124,7 +124,7 @@ Homes like this don't come along often—a classic Royal Oak home that seamlessl
   },
   {
     id: "14", address: "2925 Bembridge Rd", city: "Royal Oak, MI", zip: "48073",
-    lat: 42.5165, lng: -83.1702,
+    lat: 42.5136336, lng: -83.1799036,
     priority: "⭐ Top", priorityGroup: "Top", priorityClass: "badge-top",
     day: "Sun", openHouse: "2:00–4:00 PM",
     price: "$545,000", rawPrice: 545000,
@@ -146,7 +146,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "3", address: "3803 Linwood Ave", city: "Royal Oak, MI", zip: "48073",
-    lat: 42.5186, lng: -83.1818,
+    lat: 42.522238, lng: -83.1712361,
     priority: "⭐ Good", priorityGroup: "Good", priorityClass: "badge-good",
     day: "Sat", openHouse: "12:00–2:00 PM",
     price: "$598,900", rawPrice: 598900,
@@ -160,7 +160,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "4", address: "4518 Woodland Ave", city: "Royal Oak, MI", zip: "48073",
-    lat: 42.5252, lng: -83.1764,
+    lat: 42.5302046, lng: -83.1702831,
     priority: "Good", priorityGroup: "Good", priorityClass: "badge-good",
     day: "Sat", openHouse: "1:00–4:00 PM",
     price: "$400,000", rawPrice: 400000,
@@ -174,7 +174,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "5", address: "305 Devillen Ave", city: "Royal Oak, MI", zip: "48073",
-    lat: 42.5098, lng: -83.1533,
+    lat: 42.5156591, lng: -83.1419875,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "Sat/Sun", openHouse: "Sat 12–2 / Sun 1–3",
     price: "$319,900", rawPrice: 319900,
@@ -188,7 +188,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "6", address: "1616 N Vermont Ave", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4998, lng: -83.1368,
+    lat: 42.5037065, lng: -83.129134,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "Sun", openHouse: "2:00–4:00 PM",
     price: "$360,000", rawPrice: 360000,
@@ -202,7 +202,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "7", address: "1815 Massoit Rd", city: "Royal Oak, MI", zip: "48073",
-    lat: 42.5225, lng: -83.1702,
+    lat: 42.5285831, lng: -83.1665443,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "Sat", openHouse: "12:00–2:00 PM",
     price: "$345,000", rawPrice: 345000,
@@ -230,7 +230,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "16", address: "223 N Alexander Ave", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4886, lng: -83.1552,
+    lat: 42.491766, lng: -83.1342585,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "Sun", openHouse: "12:00–2:00 PM",
     price: "$350,000", rawPrice: 350000,
@@ -244,7 +244,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "w0710-1", address: "707 S Laurel St", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4715, lng: -83.1428,
+    lat: 42.4843144, lng: -83.1497468,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "—", openHouse: "Not yet scheduled",
     price: "$525,000", rawPrice: 525000,
@@ -259,7 +259,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "w0710-2", address: "10504 Borgman Ave", city: "Huntington Woods, MI", zip: "48070",
-    lat: 42.4732, lng: -83.1522,
+    lat: 42.4867943, lng: -83.1687318,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "—", openHouse: "Visited 7/10–7/12 weekend",
     price: "$539,000", rawPrice: 539000,
@@ -273,7 +273,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "w0710-3", address: "13154 Lasalle Blvd", city: "Huntington Woods, MI", zip: "48070",
-    lat: 42.4726, lng: -83.1478,
+    lat: 42.4872399, lng: -83.1803817,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "—", openHouse: "Visited 7/10–7/12 weekend",
     price: "$449,000", rawPrice: 449000,
@@ -287,7 +287,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "w0710-4", address: "908 Marywood Dr", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4748, lng: -83.1452,
+    lat: 42.4966928, lng: -83.1490077,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "—", openHouse: "Not yet scheduled",
     price: "$495,000", rawPrice: 495000,
@@ -302,7 +302,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
   },
   {
     id: "w0710-5", address: "1036 Irving Ave", city: "Royal Oak, MI", zip: "48067",
-    lat: 42.4822, lng: -83.1330,
+    lat: 42.4805839, lng: -83.1359686,
     priority: "Verify", priorityGroup: "Verify", priorityClass: "badge-verify",
     day: "—", openHouse: "Not yet scheduled",
     price: "$479,900", rawPrice: 479900,
