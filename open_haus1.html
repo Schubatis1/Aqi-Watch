@@ -504,6 +504,18 @@
     .onehome-result-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; background: var(--bg); flex-shrink: 0; }
     .onehome-result-address { font-weight: 700; font-size: 0.88rem; color: var(--text); }
     .onehome-result-meta { font-size: 0.78rem; color: var(--muted); }
+    .onehome-oh-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--coral-light);
+      color: var(--coral-dark);
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
 
     /* Photo Gallery modal */
     .gallery-backdrop {
@@ -834,6 +846,36 @@
     .toggle-pill input { display: none; }
     .toggle-pill input:checked + .toggle-switch { background-color: var(--coral); }
     .toggle-pill input:checked + .toggle-switch::after { transform: translateX(16px); }
+
+    .card-density-toggle {
+      display: inline-flex;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+    }
+    .density-btn {
+      border: none;
+      background: none;
+      padding: 6px 14px;
+      border-radius: 24px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .density-btn.active { background: #ffffff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+
+    /* Compact cards: photo shrinks way down, stats (beds/baths/sqft/built) hidden entirely */
+    .cards-grid.compact .card-photo-wrap { height: 64px; margin-bottom: 10px; }
+    .cards-grid.compact .property-card { padding: 14px; }
+    .cards-grid.compact .card-stats { display: none; }
+    .cards-grid.compact .card-price-row { margin-bottom: 8px; padding-bottom: 8px; }
+    .cards-grid.compact .card-open-house { margin-bottom: 10px; padding: 6px 10px; font-size: 0.76rem; }
+    .cards-grid.compact .card-address { font-size: 1.05rem; margin-bottom: 2px; }
+    .cards-grid.compact .card-city { margin-bottom: 8px; }
 
     .filter-meta {
       display: flex;
@@ -1795,6 +1837,11 @@
             Hide Bungalows
           </label>
 
+          <div class="card-density-toggle" id="cardDensityToggle">
+            <button type="button" class="density-btn" id="densityFullBtn" onclick="setCardDensity('full')" title="Full cards">Full</button>
+            <button type="button" class="density-btn" id="densityCompactBtn" onclick="setCardDensity('compact')" title="Compact cards">Compact</button>
+          </div>
+
           <div class="filter-meta mobile-visible">
             <span class="result-count" id="resultCountMobile">19 properties</span>
           </div>
@@ -1993,6 +2040,10 @@
         <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Ratings &amp; Notes</label>
         <p style="margin-top:4px;">Clears every overall rating, feature rating, and note for both Adam and Lauren across all listings, and resets the easter egg so it can appear again. This can't be undone.</p>
         <button class="btn-secondary" style="width:100%;" onclick="resetAllRatingsAndNotes()">Reset All Ratings &amp; Notes</button>
+
+        <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Open House Schedule</label>
+        <p style="margin-top:4px;">Open house day/time goes stale every week. Clears it back to "Not yet scheduled" for every home at once — everything else (price, notes, ratings, photos) is untouched.</p>
+        <button class="btn-secondary" style="width:100%;" onclick="clearAllOpenHouseTimes()">Clear All Open House Times</button>
       </div>
       <div class="settings-modal-footer">
         <button class="btn-secondary" style="flex:1;" onclick="clearApiKey()">Clear Key</button>
@@ -2354,6 +2405,14 @@
       select.value = validIds.includes(savedWeekendId) ? savedWeekendId : WEEKENDS[0].id;
     }
     initWeekendFilter();
+
+    function setCardDensity(mode) {
+      localStorage.setItem('cardDensity', mode);
+      document.getElementById('cardsGrid').classList.toggle('compact', mode === 'compact');
+      document.getElementById('densityFullBtn').classList.toggle('active', mode === 'full');
+      document.getElementById('densityCompactBtn').classList.toggle('active', mode === 'compact');
+    }
+    setCardDensity(localStorage.getItem('cardDensity') || 'full');
 
     function selectWeekend(weekendId) {
       localStorage.setItem('selectedWeekendId', weekendId);
@@ -2837,6 +2896,25 @@
 
       const status = document.getElementById('settingsStatus');
       status.innerText = 'All ratings, notes, and the easter egg have been reset.';
+      status.classList.add('saved');
+    }
+
+    // Open house day/time is only good for one weekend — rather than
+    // manually editing each home after it passes, clear it in bulk. Price,
+    // notes, ratings, and photos are untouched; just the schedule fields.
+    function clearAllOpenHouseTimes() {
+      if (!confirm('Clear the open house day/time for every home back to "Not yet scheduled"? Price, notes, ratings, and photos are untouched. This cannot be undone.')) return;
+
+      properties.forEach(p => {
+        p.day = '—';
+        p.openHouse = 'Not yet scheduled';
+        persistPropertyState(p);
+      });
+
+      applyFilters();
+
+      const status = document.getElementById('settingsStatus');
+      status.innerText = `Cleared open house times for ${properties.length} home${properties.length === 1 ? '' : 's'}.`;
       status.classList.add('saved');
     }
 
@@ -3872,19 +3950,43 @@
       // so any matched home's map pin gets fixed on the spot — this is
       // what stops homes drifting to the wrong spot on the map the way
       // hand-guessed coordinates did.
+      // Same idea for the open house day/time: it goes stale every week
+      // (there's a dedicated "Clear All Open House Times" button in
+      // Settings for that), and re-loading here is the natural moment to
+      // refresh it with whatever OneHome currently reports for a matched
+      // home, rather than it just sitting on "Not yet scheduled".
       let locationsFixed = 0;
+      let schedulesFixed = 0;
       matches.forEach(r => {
         const existing = r.existing;
+        let changed = false;
+
         const lat = r.property.Latitude;
         const lng = r.property.Longitude;
-        if (lat == null || lng == null) return;
-        if (existing.lat === lat && existing.lng === lng) return;
-        existing.lat = lat;
-        existing.lng = lng;
-        persistPropertyState(existing);
-        locationsFixed++;
+        if (lat != null && lng != null && (existing.lat !== lat || existing.lng !== lng)) {
+          existing.lat = lat;
+          existing.lng = lng;
+          locationsFixed++;
+          changed = true;
+        }
+
+        const oh = r.openHouse;
+        if (oh && oh.OpenHouseDate) {
+          const day = oneHomeDateToDayLabel(oh.OpenHouseDate);
+          const time = (oh.OpenHouseStartTime && oh.OpenHouseEndTime)
+            ? `${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
+            : existing.openHouse;
+          if (existing.day !== day || existing.openHouse !== time) {
+            existing.day = day;
+            existing.openHouse = time;
+            schedulesFixed++;
+            changed = true;
+          }
+        }
+
+        if (changed) persistPropertyState(existing);
       });
-      if (locationsFixed > 0) applyFilters();
+      if (locationsFixed > 0 || schedulesFixed > 0) applyFilters();
 
       const candidates = [];
       for (const r of matches) {
@@ -3892,7 +3994,10 @@
         if (!already || !already.length) candidates.push(r);
       }
       if (!candidates.length) {
-        if (locationsFixed > 0) status.innerText = `Fixed the map location for ${locationsFixed} existing home${locationsFixed === 1 ? '' : 's'}.`;
+        const fixParts = [];
+        if (locationsFixed > 0) fixParts.push(`map location for ${locationsFixed}`);
+        if (schedulesFixed > 0) fixParts.push(`open house time for ${schedulesFixed}`);
+        if (fixParts.length) status.innerText = `Fixed ${fixParts.join(' and ')} existing home${(locationsFixed + schedulesFixed) === 1 ? '' : 's'}.`;
         return;
       }
 
@@ -3932,9 +4037,10 @@
 
       const parts = [];
       if (locationsFixed > 0) parts.push(`fixed the map location for ${locationsFixed}`);
+      if (schedulesFixed > 0) parts.push(`fixed the open house time for ${schedulesFixed}`);
       if (backfilled > 0) parts.push(`backfilled photos for ${backfilled}`);
       status.innerText = parts.length
-        ? `Done — ${parts.join(', ')} existing home${(locationsFixed + backfilled) === 1 ? '' : 's'}.`
+        ? `Done — ${parts.join(', ')} existing home${(locationsFixed + schedulesFixed + backfilled) === 1 ? '' : 's'}.`
         : `Loaded ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'} — nothing to backfill.`;
     }
 
@@ -3991,6 +4097,37 @@
 
     function formatOneHomeTime(isoStr) {
       return new Date(isoStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    function isOpenHouseWithinNextWeek(dateStr) {
+      if (!dateStr) return false;
+      const ohDate = new Date(`${dateStr}T00:00:00`);
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const diffDays = (ohDate - startOfToday) / 86400000;
+      return diffDays >= 0 && diffDays <= 7;
+    }
+
+    function formatOneHomeDateShort(dateStr) {
+      return new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+    }
+
+    // A quick "open house this week" indicator for the import results list,
+    // shown before anything is imported so it's obvious at a glance which
+    // listings are actually worth going to see soon.
+    function renderOpenHouseBadge(oh) {
+      if (!oh || !oh.OpenHouseDate || !isOpenHouseWithinNextWeek(oh.OpenHouseDate)) return '';
+      const day = oneHomeDateToDayLabel(oh.OpenHouseDate);
+      const dateShort = formatOneHomeDateShort(oh.OpenHouseDate);
+      const time = (oh.OpenHouseStartTime && oh.OpenHouseEndTime)
+        ? `, ${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
+        : '';
+      return `
+        <div class="onehome-oh-badge" title="Open house this week">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          ${day} ${dateShort}${time}
+        </div>
+      `;
     }
 
     function openOneHomeImportModal() {
@@ -4068,6 +4205,7 @@
             <div style="flex:1; min-width:0;">
               <div class="onehome-result-address">${address}</div>
               <div class="onehome-result-meta">${price} • ${beds} bd • ${baths} ba • ${p.City}, ${p.StateOrProvince}</div>
+              ${renderOpenHouseBadge(r.openHouse)}
             </div>
             ${badge}
           </label>
