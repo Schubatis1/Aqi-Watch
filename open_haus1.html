@@ -485,6 +485,28 @@
     }
 
     /* Manage Homes panel (reuses the compare panel's bottom-sheet chrome) */
+    .match-tier-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      background: var(--gray-light);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+    }
+    .match-tier-controls label { display: flex; align-items: center; gap: 6px; font-weight: 700; color: var(--text); }
+    .match-tier-controls input[type="number"] {
+      width: 56px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+    }
+    .match-tier-controls-hint { color: var(--muted); font-size: 0.78rem; }
+
     .manage-table { width: 100%; border-collapse: collapse; min-width: 900px; }
     .manage-table th, .manage-table td {
       padding: 12px 14px;
@@ -2130,7 +2152,7 @@
           </select>
 
           <select id="sortSelect" class="select-pill" onchange="handleSortChange(this.value)">
-            <option value="default">Sort by: Default</option>
+            <option value="default">Sort by: Best Match</option>
             <option value="price-asc">Price: Low to High</option>
             <option value="price-desc">Price: High to Low</option>
             <option value="sqft-desc">Size: Largest First</option>
@@ -2424,6 +2446,13 @@
         </div>
       </div>
       <div class="compare-body">
+        <div class="match-tier-controls">
+          <label>Top Match ≥ <input type="number" id="matchTierTopInput" min="0" max="15" step="1"></label>
+          <label>Good Match ≥ <input type="number" id="matchTierGoodInput" min="0" max="15" step="1"></label>
+          <button class="btn-secondary" onclick="saveMatchTierCutoffs()">Save Cutoffs</button>
+          <button class="btn-secondary" onclick="resetMatchTierCutoffsToDefault()">Reset to Default Split (~20/40/40)</button>
+          <span class="match-tier-controls-hint">Score range: 0–15. Homes with a manually-set Match Tier aren't affected.</span>
+        </div>
         <table class="manage-table">
           <thead>
             <tr>
@@ -3531,21 +3560,37 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
+    // Percentile helper: value at the given fraction (0-1) of a sorted-
+    // ascending numeric array.
+    function percentileOf(sortedAsc, fraction) {
+      if (!sortedAsc.length) return null;
+      const idx = Math.min(sortedAsc.length - 1, Math.floor(sortedAsc.length * fraction));
+      return sortedAsc[idx];
+    }
+
+    // Max possible score, given the current point weights below — used to
+    // size the cutoff inputs and the Manage Homes tooltip.
+    const MAX_MATCH_SCORE = 3 + 3 + 2 + 1 + 3 + 3; // 15
+
     // Full breakdown (used by Manage Homes to explain the score) — a plain
     // total-only score is just the sum of gate.points below.
     function computeMatchScoreBreakdown(property, allProperties) {
       const gates = [];
 
-      // 1. Price between $380k and $525k.
-      const inPriceBand = property.rawPrice >= 380000 && property.rawPrice <= 525000;
-      gates.push({ label: 'Price $380k–$525k', detail: property.rawPrice ? `$${property.rawPrice.toLocaleString()}` : 'unknown', points: inPriceBand ? 1 : 0 });
+      // 1. Price, tiered — closer to the sweet spot scores higher.
+      const price = property.rawPrice;
+      let pricePoints = 0;
+      if (price >= 375000 && price < 425000) pricePoints = 3;
+      else if (price >= 425000 && price < 475000) pricePoints = 2;
+      else if (price >= 475000 && price <= 525000) pricePoints = 1;
+      gates.push({ label: 'Price tier ($375k–$525k)', detail: price ? `$${price.toLocaleString()}` : 'unknown', points: pricePoints });
 
-      // 2. Not a bungalow.
-      gates.push({ label: 'Not a bungalow', detail: property.isBungalow ? 'is a bungalow' : 'not a bungalow', points: property.isBungalow ? 0 : 1 });
+      // 2. Not a bungalow — heavily weighted, a hard preference.
+      gates.push({ label: 'Not a bungalow', detail: property.isBungalow ? 'is a bungalow' : 'not a bungalow', points: property.isBungalow ? 0 : 3 });
 
-      // 3. At least 3 beds and 1.5 baths.
-      const meetsBedsBaths = (property.beds || 0) >= 3 && (property.baths || 0) >= 1.5;
-      gates.push({ label: '3+ beds, 1.5+ baths', detail: `${property.beds || 0} bd / ${property.baths || 0} ba`, points: meetsBedsBaths ? 1 : 0 });
+      // 3. 2+ full baths.
+      const hasTwoFullBaths = (property.baths || 0) >= 2;
+      gates.push({ label: '2+ full baths', detail: `${property.baths || 0} ba`, points: hasTwoFullBaths ? 2 : 0 });
 
       // 4. On the market less than 3 weeks (needs a real listing date —
       // OneHome's ListingContractDate, or Zillow's daysOnZillow backed
@@ -3569,24 +3614,28 @@
       }
       gates.push({ label: 'Distance from downtown', detail: miles == null ? 'unknown' : `${miles.toFixed(2)} mi`, points: distPoints });
 
-      // 6. Price per square foot at or below the median of everything
-      // currently tracked — a relative value signal that adapts as homes
-      // are added/removed instead of a hardcoded dollar figure.
+      // 6. Price per square foot, tiered by quartile against everything
+      // currently tracked — cheapest quarter scores highest. Adapts as
+      // homes are added/removed instead of using a hardcoded dollar figure.
       const validPpsf = (allProperties || [])
         .map(p => p.pricePerSqFt)
         .filter(v => v != null && isFinite(v) && v > 0)
         .sort((a, b) => a - b);
-      let median = null;
-      let belowMedian = false;
-      if (validPpsf.length) {
-        const mid = Math.floor(validPpsf.length / 2);
-        median = validPpsf.length % 2 ? validPpsf[mid] : (validPpsf[mid - 1] + validPpsf[mid]) / 2;
-        belowMedian = property.pricePerSqFt != null && property.pricePerSqFt <= median;
+      let ppsfPoints = 0;
+      let q1 = null, q2 = null, q3 = null;
+      if (validPpsf.length && property.pricePerSqFt != null) {
+        q1 = percentileOf(validPpsf, 0.25);
+        q2 = percentileOf(validPpsf, 0.5);
+        q3 = percentileOf(validPpsf, 0.75);
+        if (property.pricePerSqFt <= q1) ppsfPoints = 3;
+        else if (property.pricePerSqFt <= q2) ppsfPoints = 2;
+        else if (property.pricePerSqFt <= q3) ppsfPoints = 1;
+        else ppsfPoints = 0;
       }
       gates.push({
-        label: 'Price/sqft ≤ median',
-        detail: property.pricePerSqFt == null ? 'unknown' : `$${property.pricePerSqFt}/sqft vs. $${median != null ? Math.round(median) : '?'} median`,
-        points: belowMedian ? 1 : 0
+        label: 'Price/sqft quartile',
+        detail: property.pricePerSqFt == null ? 'unknown' : `$${property.pricePerSqFt}/sqft (25th pct $${q1 != null ? Math.round(q1) : '?'})`,
+        points: ppsfPoints
       });
 
       const score = gates.reduce((sum, g) => sum + g.points, 0);
@@ -3597,9 +3646,64 @@
       return computeMatchScoreBreakdown(property, allProperties).score;
     }
 
+    // Configurable Top/Good cutoffs (Manage Homes), persisted in
+    // localStorage. Default: whatever score values put ~20% of currently-
+    // tracked homes in Top and the next ~40% in Good, recomputed from the
+    // live score distribution the first time this runs (or whenever reset).
+    let matchTierCutoffs = null;
+
+    function computeDefaultMatchTierCutoffs(allProperties) {
+      const scores = (allProperties || []).map(p => computeMatchScore(p, allProperties));
+      if (!scores.length) return { top: Math.round(MAX_MATCH_SCORE * 0.8), good: Math.round(MAX_MATCH_SCORE * 0.4) };
+
+      // Scores are small integers (0-MAX_MATCH_SCORE) with lots of ties,
+      // so a plain sorted-array percentile index can land on a value
+      // shared by way more or fewer homes than intended. Instead, try
+      // every distinct observed score as a candidate cutoff and pick
+      // whichever gets the resulting "at or above" count closest to the
+      // target — a much better fit for a tied, discrete distribution.
+      const distinctDesc = Array.from(new Set(scores)).sort((a, b) => b - a);
+      function bestCutoffForCount(targetCount) {
+        let best = distinctDesc[0];
+        let bestDiff = Infinity;
+        for (const candidate of distinctDesc) {
+          const count = scores.filter(s => s >= candidate).length;
+          const diff = Math.abs(count - targetCount);
+          if (diff < bestDiff) { bestDiff = diff; best = candidate; }
+        }
+        return best;
+      }
+
+      const n = scores.length;
+      const top = bestCutoffForCount(Math.round(n * 0.2));
+      const good = Math.min(bestCutoffForCount(Math.round(n * 0.6)), top);
+      return { top, good };
+    }
+
+    function ensureMatchTierCutoffs(allProperties) {
+      if (matchTierCutoffs) return matchTierCutoffs;
+      const savedTop = parseFloat(localStorage.getItem('matchTierTopCutoff'));
+      const savedGood = parseFloat(localStorage.getItem('matchTierGoodCutoff'));
+      if (!isNaN(savedTop) && !isNaN(savedGood)) {
+        matchTierCutoffs = { top: savedTop, good: savedGood };
+      } else {
+        matchTierCutoffs = computeDefaultMatchTierCutoffs(allProperties);
+        localStorage.setItem('matchTierTopCutoff', String(matchTierCutoffs.top));
+        localStorage.setItem('matchTierGoodCutoff', String(matchTierCutoffs.good));
+      }
+      return matchTierCutoffs;
+    }
+
+    function setMatchTierCutoffs(top, good) {
+      matchTierCutoffs = { top, good };
+      localStorage.setItem('matchTierTopCutoff', String(top));
+      localStorage.setItem('matchTierGoodCutoff', String(good));
+    }
+
     function matchScoreToTier(score) {
-      if (score >= 4) return { priority: 'Top', priorityGroup: 'Top', priorityClass: 'badge-top' };
-      if (score >= 2) return { priority: 'Good', priorityGroup: 'Good', priorityClass: 'badge-good' };
+      const cutoffs = ensureMatchTierCutoffs(properties);
+      if (score >= cutoffs.top) return { priority: 'Top', priorityGroup: 'Top', priorityClass: 'badge-top' };
+      if (score >= cutoffs.good) return { priority: 'Good', priorityGroup: 'Good', priorityClass: 'badge-good' };
       return { priority: '', priorityGroup: '', priorityClass: '' };
     }
 
@@ -3615,6 +3719,19 @@
       property.priorityClass = tier.priorityClass;
       property.priorityAuto = true;
       return changed;
+    }
+
+    // Re-tiers everything from already-computed scores against the current
+    // cutoffs, without recomputing the scores themselves — used right after
+    // the user changes the Top/Good cutoffs so the effect is immediate.
+    function retierAllFromCurrentCutoffs(forceOverrides) {
+      let changedCount = 0;
+      properties.forEach(p => {
+        if (applyAutoMatchTier(p, properties, forceOverrides)) changedCount++;
+        persistPropertyState(p);
+      });
+      applyFilters();
+      return changedCount;
     }
 
     function buildGoogleMapsUrl(item) {
@@ -3994,6 +4111,9 @@
         properties.sort((a, b) => b.rawSqft - a.rawSqft);
       } else if (value === 'rating-desc') {
         properties.sort((a, b) => avgRating(b) - avgRating(a));
+      } else {
+        // Default: best Match Tier score first.
+        properties.sort((a, b) => computeMatchScore(b, properties) - computeMatchScore(a, properties));
       }
       applyFilters();
     }
@@ -4152,11 +4272,35 @@
 
     function openManageHomes() {
       renderManageHomesList();
+      const cutoffs = ensureMatchTierCutoffs(properties);
+      document.getElementById('matchTierTopInput').value = cutoffs.top;
+      document.getElementById('matchTierGoodInput').value = cutoffs.good;
       document.getElementById('manageBackdrop').classList.add('open');
     }
 
     function closeManageHomes() {
       document.getElementById('manageBackdrop').classList.remove('open');
+    }
+
+    function saveMatchTierCutoffs() {
+      const top = parseFloat(document.getElementById('matchTierTopInput').value);
+      const good = parseFloat(document.getElementById('matchTierGoodInput').value);
+      if (isNaN(top) || isNaN(good) || good > top) {
+        alert('Good Match cutoff must be a number, and no higher than the Top Match cutoff.');
+        return;
+      }
+      setMatchTierCutoffs(top, good);
+      const changedCount = retierAllFromCurrentCutoffs();
+      renderManageHomesList();
+      document.getElementById('manageSubtitle').innerText =
+        `${properties.length} home${properties.length === 1 ? '' : 's'} total — ${changedCount} Match Tier${changedCount === 1 ? '' : 's'} updated`;
+    }
+
+    function resetMatchTierCutoffsToDefault() {
+      const defaults = computeDefaultMatchTierCutoffs(properties);
+      document.getElementById('matchTierTopInput').value = defaults.top;
+      document.getElementById('matchTierGoodInput').value = defaults.good;
+      saveMatchTierCutoffs();
     }
 
     function renderManageHomesList() {
@@ -4173,7 +4317,7 @@
         const breakdown = computeMatchScoreBreakdown(p, properties);
         const breakdownTooltip = breakdown.gates
           .map(g => `${g.points > 0 ? '✓' : '✗'} ${g.label} (+${g.points}) — ${g.detail}`)
-          .concat([`Total: ${breakdown.score}/8 → ${getCleanPriorityLabel(p.priorityGroup) || 'Unclassified'}`])
+          .concat([`Total: ${breakdown.score}/${MAX_MATCH_SCORE} → ${getCleanPriorityLabel(p.priorityGroup) || 'Unclassified'}`])
           .join('\n');
 
         return `
@@ -4198,7 +4342,7 @@
             <td>${p.yearBuilt || '—'}</td>
             <td title="${breakdownTooltip.replace(/"/g, '&quot;')}" style="cursor:help; white-space:nowrap;">
               ${p.priorityGroup ? `<span class="badge ${p.priorityClass}" style="padding:3px 8px; font-size:0.65rem;">${getCleanPriorityLabel(p.priorityGroup)}</span>` : '<span style="color:var(--muted);">—</span>'}
-              <div style="font-size:0.72rem; color:var(--muted); margin-top:2px;">${breakdown.score}/8</div>
+              <div style="font-size:0.72rem; color:var(--muted); margin-top:2px;">${breakdown.score}/${MAX_MATCH_SCORE}</div>
             </td>
             <td><div class="manage-weekend-chips">${weekendChips}${unassignedTag}</div></td>
             <td style="font-size:0.78rem; color:var(--muted);">
@@ -5992,7 +6136,7 @@
 
     // Initial Dashboard Load
     applyTheme(localStorage.getItem('appTheme') || 'royal-oak');
-    applyFilters();
+    handleSortChange('default'); // best Match Tier score first
     updateTourButtonBadge();
     openSharedPropertyFromUrl();
     initFirebaseSync();
