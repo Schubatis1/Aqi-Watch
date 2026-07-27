@@ -2249,6 +2249,20 @@
             <label>Assign selected homes to</label>
             <div class="manage-weekend-chips" id="oneHomeWeekendPicker"></div>
           </div>
+          <div class="form-group">
+            <label>Also flag as</label>
+            <div class="manage-weekend-chips">
+              <button type="button" class="manage-weekend-chip" id="oneHomeWatchlistChip" onclick="this.classList.toggle('active')">🔭 Watchlist</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Show</label>
+            <div class="manage-weekend-chips" id="oneHomeStatusFilterPicker">
+              <button type="button" class="manage-weekend-chip active" data-status="all" onclick="setOneHomeStatusFilter('all')">All</button>
+              <button type="button" class="manage-weekend-chip" data-status="new" onclick="setOneHomeStatusFilter('new')">New</button>
+              <button type="button" class="manage-weekend-chip" data-status="existing" onclick="setOneHomeStatusFilter('existing')">Already in App</button>
+            </div>
+          </div>
           <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; margin-bottom:6px;">
             <input type="checkbox" id="oneHomeOpenHouseFilterInput" onchange="toggleOneHomeOpenHouseFilter(this.checked)">
             Only show homes with an open house in the next 7 days
@@ -4208,6 +4222,11 @@
       oneHomeResults = [];
       oneHomeFilterOpenHouseOnly = false;
       document.getElementById('oneHomeOpenHouseFilterInput').checked = false;
+      oneHomeStatusFilterValue = 'all';
+      document.querySelectorAll('#oneHomeStatusFilterPicker .manage-weekend-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.status === 'all');
+      });
+      document.getElementById('oneHomeWatchlistChip').classList.remove('active');
       document.getElementById('oneHomeBackdrop').classList.add('open');
     }
 
@@ -4246,14 +4265,29 @@
     }
 
     let oneHomeFilterOpenHouseOnly = false;
+    let oneHomeStatusFilterValue = 'all';
 
     function toggleOneHomeOpenHouseFilter(checked) {
       oneHomeFilterOpenHouseOnly = checked;
       renderOneHomeResults();
     }
 
+    function setOneHomeStatusFilter(value) {
+      oneHomeStatusFilterValue = value;
+      document.querySelectorAll('#oneHomeStatusFilterPicker .manage-weekend-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.status === value);
+      });
+      renderOneHomeResults();
+    }
+
     function resultHasUpcomingOpenHouse(r) {
       return !!(r.openHouse && r.openHouse.OpenHouseDate && isOpenHouseWithinNextWeek(r.openHouse.OpenHouseDate));
+    }
+
+    function resultMatchesStatusFilter(r) {
+      if (oneHomeStatusFilterValue === 'new') return !r.existing;
+      if (oneHomeStatusFilterValue === 'existing') return !!r.existing;
+      return true;
     }
 
     function renderOneHomeResults() {
@@ -4265,10 +4299,10 @@
       const list = document.getElementById('oneHomeResultsList');
       const rows = oneHomeResults
         .map((r, i) => ({ r, i }))
-        .filter(({ r }) => !oneHomeFilterOpenHouseOnly || resultHasUpcomingOpenHouse(r));
+        .filter(({ r }) => (!oneHomeFilterOpenHouseOnly || resultHasUpcomingOpenHouse(r)) && resultMatchesStatusFilter(r));
 
       if (!rows.length) {
-        list.innerHTML = `<p style="font-size:0.85rem; color:var(--muted); padding:8px 0;">No listings ${oneHomeFilterOpenHouseOnly ? 'with an open house in the next 7 days' : ''}.</p>`;
+        list.innerHTML = `<p style="font-size:0.85rem; color:var(--muted); padding:8px 0;">No listings match the current filters.</p>`;
         return;
       }
 
@@ -4301,7 +4335,7 @@
       }).join('');
     }
 
-    async function importOneHomeListing(result, selectedWeekends) {
+    async function importOneHomeListing(result, selectedWeekends, addToWatchlist) {
       const p = result.property;
       const mlsKey = p.OriginatingSystemKey || p.ListingId;
 
@@ -4355,6 +4389,10 @@
         weekends: selectedWeekends.slice(),
         hidden: false,
       };
+      // Only set the key when checked — leaving it out (rather than false)
+      // means re-importing an already-watchlisted home without the chip
+      // checked doesn't clobber that existing flag via Object.assign below.
+      if (addToWatchlist) record.watchlist = true;
 
       let property = result.existing;
       if (property) {
@@ -4407,6 +4445,7 @@
       }
       const selectedWeekends = Array.from(document.querySelectorAll('#oneHomeWeekendPicker .manage-weekend-chip.active'))
         .map(btn => btn.dataset.weekend);
+      const addToWatchlist = document.getElementById('oneHomeWatchlistChip').classList.contains('active');
 
       const importBtn = document.getElementById('oneHomeImportBtn');
       importBtn.disabled = true;
@@ -4415,7 +4454,7 @@
         const result = oneHomeResults[checked[n]];
         status.innerText = `Importing ${n + 1} of ${checked.length} (fetching photos)…`;
         try {
-          await importOneHomeListing(result, selectedWeekends);
+          await importOneHomeListing(result, selectedWeekends, addToWatchlist);
         } catch (err) {
           console.warn('Failed to import listing', result, err);
         }

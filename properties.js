@@ -319,6 +319,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
 
 // List of available weekends for the dropdown, most recent first.
 const WEEKENDS = [
+  { id: "jul31", label: "July 31–Aug 2" },
   { id: "jul24", label: "July 24–26" },
   { id: "jul10", label: "July 10–12" },
 ];
