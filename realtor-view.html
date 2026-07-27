@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homes We're Watching — Royal Oak</title>
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --navy: #2c3e50;
+    --navy-dark: #22313f;
+    --navy-light: #3d5166;
+    --coral: #e0603f;
+    --coral-dark: #c94b2c;
+    --coral-light: #fbe8e2;
+    --bg: #f5f3ef;
+    --card: #ffffff;
+    --text: #22313f;
+    --muted: #6b7684;
+    --border: #e5e1d8;
+    --gray-light: #f0eee9;
+    --gold: #c9942f;
+    --font-display: 'Baloo 2', 'Nunito Sans', sans-serif;
+    --font-sans: 'Nunito Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --shadow-soft: 0 10px 30px rgba(34,49,63,0.08);
+    --shadow-hover: 0 20px 40px rgba(34,49,63,0.14);
+    --radius: 18px;
+    --radius-sm: 10px;
+    --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+  }
+  .header {
+    background: var(--navy);
+    color: #fff;
+    padding: 22px 24px;
+  }
+  .header h1 {
+    font-family: var(--font-display);
+    margin: 0 0 4px;
+    font-size: 1.6rem;
+  }
+  .header p { margin: 0; color: #cbd3da; font-size: 0.9rem; }
+
+  .disclaimer {
+    max-width: 1100px;
+    margin: 16px auto 0;
+    padding: 12px 16px;
+    background: var(--coral-light);
+    border: 1px solid rgba(224,96,63,0.25);
+    border-radius: var(--radius-sm);
+    color: var(--coral-dark);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .toolbar {
+    max-width: 1100px;
+    margin: 18px auto 0;
+    padding: 0 16px;
+    display: flex;
+    gap: 8px;
+  }
+  .scope-pill {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .scope-pill.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+  }
+
+  .cards-grid {
+    max-width: 1100px;
+    margin: 16px auto 60px;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .empty-state {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-state h3 { font-family: var(--font-display); color: var(--text); margin-bottom: 6px; }
+
+  .property-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .property-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+
+  .card-photo-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/10;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--gray-light);
+    margin-bottom: 12px;
+  }
+  .card-photo-wrap img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
+  .card-photo-wrap img.loaded { opacity: 1; }
+
+  .card-flags { position: absolute; top: 8px; left: 8px; display: flex; gap: 6px; }
+  .flag-pill {
+    background: rgba(34,49,63,0.75);
+    color: #fff;
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-address-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .card-address { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--text); margin: 0 0 2px; }
+  .card-city { color: var(--muted); font-size: 0.85rem; margin: 0 0 10px; }
+
+  .card-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+  .card-price { font-size: 1.4rem; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; }
+  .card-stats { display: flex; gap: 12px; font-size: 0.85rem; color: var(--muted); }
+
+  .oh-banner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gray-light);
+    color: var(--navy-light);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 10px;
+  }
+
+  .dual-rating { display: flex; gap: 10px; margin-top: 10px; }
+  .rating-person { display: flex; align-items: center; gap: 4px; }
+  .rating-person-label {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--navy); color: #fff;
+    font-size: 0.7rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rating-stars { display: inline-flex; gap: 2px; user-select: none; }
+  .rating-stars .star-wrap { position: relative; display: inline-block; font-size: 1rem; line-height: 1; cursor: default; }
+  .rating-stars .star-bg, .rating-stars .star-fill { display: block; }
+  .rating-stars .star-bg { color: #cbd5e1; }
+  .rating-stars .star-fill { position: absolute; top: 0; left: 0; overflow: hidden; white-space: nowrap; color: var(--gold); pointer-events: none; }
+  .rating-stars.large .star-wrap { font-size: 1.7rem; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .badge-loved { background: var(--coral-light); color: var(--coral-dark); }
+  .badge-watch { background: #eef1f4; color: var(--navy-light); }
+
+  /* ---- Fly-in detail panel ---- */
+  .panel-backdrop {
+    position: fixed; inset: 0; background: rgba(34,49,63,0.45);
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 50;
+  }
+  .panel-backdrop.open { opacity: 1; pointer-events: auto; }
+  .panel {
+    position: fixed; top: 0; right: 0; height: 100%;
+    width: 100%; max-width: 640px;
+    background: var(--card);
+    box-shadow: -20px 0 50px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    overflow-y: auto;
+    z-index: 51;
+  }
+  @media (min-width: 900px) { .panel { max-width: 50%; } }
+  .panel.open { transform: translateX(0); }
+  .panel-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--card); z-index: 2;
+  }
+  .panel-header h2 { font-family: var(--font-display); margin: 0; font-size: 1.2rem; }
+  .panel-close {
+    background: none; border: none; font-size: 1.6rem; line-height: 1;
+    cursor: pointer; color: var(--muted);
+  }
+  .panel-body { padding: 20px; }
+  .panel-photo-wrap {
+    position: relative; width: 100%; aspect-ratio: 16/10;
+    border-radius: var(--radius-sm); overflow: hidden; background: var(--gray-light);
+    margin-bottom: 16px; cursor: pointer;
+  }
+  .panel-photo-wrap img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s ease; }
+  .panel-photo-wrap img.loaded { opacity: 1; }
+  .gallery-hint {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(34,49,63,0.75); color: #fff;
+    border-radius: 999px; padding: 4px 10px; font-size: 0.78rem;
+  }
+
+  .panel-section-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin: 20px 0 10px; color: var(--text); }
+  .panel-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .link-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px; text-decoration: none;
+    font-size: 0.85rem; font-weight: 700;
+    border: 1px solid var(--border); color: var(--navy);
+  }
+  .link-btn:hover { background: var(--gray-light); }
+
+  .notes-block { background: var(--gray-light); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 10px; }
+  .notes-block .who { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; color: var(--navy); }
+  .notes-block .text { font-size: 0.9rem; color: var(--text); white-space: pre-wrap; }
+  .notes-block .text.empty { color: var(--muted); font-style: italic; }
+
+  .description-text { font-size: 0.92rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
+
+  /* ---- Gallery modal ---- */
+  .gallery-backdrop {
+    position: fixed; inset: 0; background: rgba(20,20,20,0.9);
+    display: flex; flex-direction: column; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease; z-index: 60;
+  }
+  .gallery-backdrop.open { opacity: 1; pointer-events: auto; }
+  .gallery-modal { display: flex; flex-direction: column; height: 100%; padding: 16px; }
+  .gallery-header { display: flex; justify-content: space-between; align-items: center; color: #fff; margin-bottom: 10px; }
+  .btn-secondary {
+    background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 999px; padding: 6px 14px; font-size: 0.85rem; cursor: pointer;
+  }
+  .gallery-carousel { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+  .gallery-carousel img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+  .gallery-nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.12); border: none; color: #fff;
+    width: 42px; height: 42px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .gallery-nav-prev { left: 8px; }
+  .gallery-nav-next { right: 8px; }
+  .gallery-thumb-strip { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; }
+  .gallery-thumb-strip img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; opacity: 0.5; cursor: pointer; flex-shrink: 0; }
+  .gallery-thumb-strip img.active { opacity: 1; outline: 2px solid var(--coral); }
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; overflow-y: auto; flex: 1; }
+  .gallery-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; cursor: pointer; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Homes We're Watching</h1>
+    <p>A shared view of the Royal Oak homes Adam &amp; Lauren have loved or are keeping an eye on.</p>
+  </div>
+
+  <div class="disclaimer" id="photoDisclaimer">
+    Listing photos here come from our own browser's local cache, so if you're opening this
+    link from a different device or browser, photos may not load. Use the
+    "View on OneHome"/"View on Zillow" links on each home for the real listing photos.
+  </div>
+
+  <div class="toolbar" id="scopeToolbar">
+    <button class="scope-pill active" data-scope="all" onclick="setScope('all')">All</button>
+    <button class="scope-pill" data-scope="loved" onclick="setScope('loved')">Loved ♥</button>
+    <button class="scope-pill" data-scope="watchlist" onclick="setScope('watchlist')">Watchlist 🔭</button>
+  </div>
+
+  <div id="cardsGrid" class="cards-grid"></div>
+  <div id="emptyState" class="empty-state hidden">
+    <h3>Nothing here yet</h3>
+    <p>No homes are flagged for this view.</p>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="panel-backdrop" id="panelBackdrop" onclick="closePanel()"></div>
+  <div class="panel" id="panel">
+    <div class="panel-header">
+      <h2 id="panelAddress"></h2>
+      <button class="panel-close" onclick="closePanel()">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="panel-photo-wrap" id="panelPhotoWrap" onclick="openPhotoGallery()">
+        <img id="panelPhotoImg" alt="">
+        <span class="gallery-hint hidden" id="galleryHint">View gallery</span>
+      </div>
+
+      <div class="card-stats" id="panelStats"></div>
+
+      <div class="panel-links" id="panelLinks"></div>
+
+      <div class="panel-section-title">Ratings</div>
+      <div id="panelRatings"></div>
+
+      <div class="panel-section-title">Notes</div>
+      <div id="panelNotes"></div>
+
+      <div class="panel-section-title" id="descTitle"></div>
+      <div class="description-text" id="panelDescription"></div>
+    </div>
+  </div>
+
+  <!-- Photo gallery modal -->
+  <div class="gallery-backdrop" id="galleryBackdrop" onclick="closePhotoGallery()">
+    <div class="gallery-modal" onclick="event.stopPropagation()">
+      <div class="gallery-header">
+        <span id="galleryCounter">1 / 1</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button type="button" class="btn-secondary" id="galleryViewToggleBtn" onclick="toggleGalleryView()">Grid View</button>
+          <button class="panel-close" style="color:#fff;" onclick="closePhotoGallery()">&times;</button>
+        </div>
+      </div>
+      <div class="gallery-carousel" id="galleryCarouselView">
+        <button type="button" class="gallery-nav-btn gallery-nav-prev" onclick="prevPhoto()" aria-label="Previous photo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <img id="galleryMainImg" alt="">
+        <button type="button" class="gallery-nav-btn gallery-nav-next" onclick="nextPhoto()" aria-label="Next photo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="gallery-thumb-strip" id="galleryThumbStrip"></div>
+      <div class="gallery-grid hidden" id="galleryGridView"></div>
+    </div>
+  </div>
+
+<script src="properties.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+  // =====================================================================
+  // Realtor View — read-only page showing Loved / Watchlist homes.
+  // Reuses the same data-loading + override-merge logic as open_haus1.html
+  // so this reflects the same live data (ratings, notes, loved/watchlist
+  // flags) as the main app. Nothing here ever writes to localStorage or
+  // Firestore — this page has no edit paths at all.
+  // =====================================================================
+
+  const PEOPLE = [
+    { key: 'adam', label: 'Adam' },
+    { key: 'lauren', label: 'Lauren' }
+  ];
+
+  function initPropertyDerivedData(list) {
+    list.forEach(p => {
+      p.pricePerSqFt = Math.round(p.rawPrice / p.rawSqft);
+      p.ratings = {};
+      p.evalNotes = {};
+      PEOPLE.forEach(({ key: person }) => {
+        const savedRating = localStorage.getItem(`rating_${person}_${p.id}`);
+        p.ratings[person] = savedRating !== null ? parseFloat(savedRating) : 0;
+        p.evalNotes[person] = localStorage.getItem(`notes_${person}_${p.id}`) || '';
+      });
+    });
+  }
+
+  function loadCustomProperties() {
+    let ids = [];
+    try { ids = JSON.parse(localStorage.getItem('customPropertyIds') || '[]'); } catch (e) { ids = []; }
+    const customProps = [];
+    ids.forEach(id => {
+      try {
+        const raw = localStorage.getItem(`customProperty_${id}`);
+        if (raw) customProps.push(JSON.parse(raw));
+      } catch (e) { /* skip corrupt entry */ }
+    });
+    return customProps;
+  }
+
+  function applyPropertyOverrides(list) {
+    list.forEach(p => {
+      try {
+        const rawCore = localStorage.getItem(`override_${p.id}`);
+        if (rawCore) Object.assign(p, JSON.parse(rawCore));
+      } catch (e) { /* skip corrupt override */ }
+      const hiddenFlag = localStorage.getItem(`hidden_${p.id}`);
+      p.hidden = hiddenFlag !== null ? hiddenFlag === '1' : !!p.hidden;
+      const lovedFlag = localStorage.getItem(`loved_${p.id}`);
+      p.loved = lovedFlag !== null ? lovedFlag === '1' : !!p.loved;
+      const watchlistFlag = localStorage.getItem(`watchlist_${p.id}`);
+      p.watchlist = watchlistFlag !== null ? watchlistFlag === '1' : !!p.watchlist;
+    });
+  }
+
+  properties = properties.concat(loadCustomProperties());
+  applyPropertyOverrides(properties);
+  initPropertyDerivedData(properties);
+
+  // ---- Firebase (read-only listener; this page never writes) ----
+  let db = null;
+  let firebaseReady = false;
+  try {
+    if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      firebaseReady = true;
+    }
+  } catch (err) {
+    console.warn('Firebase init failed - falling back to localStorage only.', err);
+  }
+
+  function applyRemotePropertyData(id, data) {
+    if (!data) return;
+    let property = properties.find(p => p.id === id);
+
+    if (!property && data.core) {
+      property = Object.assign({ id, weekends: [], hidden: false }, data.core);
+      properties.push(property);
+      initPropertyDerivedData([property]);
+    }
+    if (!property) return;
+
+    if (data.core) Object.assign(property, data.core);
+    if (data.hidden !== undefined) property.hidden = data.hidden;
+    if (data.loved !== undefined) property.loved = data.loved;
+    if (data.watchlist !== undefined) property.watchlist = data.watchlist;
+
+    PEOPLE.forEach(({ key: person }) => {
+      if (data.ratings && data.ratings[person] !== undefined) property.ratings[person] = data.ratings[person];
+      if (data.notes && data.notes[person] !== undefined) property.evalNotes[person] = data.notes[person];
+    });
+
+    if (activeId === id) renderPanel(property);
+  }
+
+  function initFirebaseSync() {
+    if (!firebaseReady) return;
+    db.collection('openHaus').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type !== 'removed') applyRemotePropertyData(change.doc.id, change.doc.data());
+      });
+      render();
+    }, err => console.warn('Firestore listener error', err));
+  }
+
+  // ---- Photo service (same provider chain as the main app: Street View
+  // fallback, seeded by whatever the main app already cached locally) ----
+  const HousePhotoService = (function () {
+    const CACHE_PREFIX = 'housephoto_';
+    const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    function cacheKey(address) { return CACHE_PREFIX + address.trim().toLowerCase(); }
+    function getCached(address) {
+      try {
+        const raw = localStorage.getItem(cacheKey(address));
+        if (!raw) return null;
+        const entry = JSON.parse(raw);
+        if (Date.now() - entry.timestamp > CACHE_TTL_MS) { localStorage.removeItem(cacheKey(address)); return null; }
+        return entry;
+      } catch (e) { return null; }
+    }
+    function setCached(address, provider, image) {
+      try { localStorage.setItem(cacheKey(address), JSON.stringify({ provider, image, timestamp: Date.now() })); } catch (e) {}
+    }
+    const DEFAULT_GOOGLE_MAPS_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
+    function getApiKey() { return localStorage.getItem('googleMapsKey') || DEFAULT_GOOGLE_MAPS_KEY; }
+    const StreetViewProvider = {
+      name: 'streetview',
+      async resolve(fullAddress) {
+        const key = getApiKey();
+        if (!key) return null;
+        const url = `https://maps.googleapis.com/maps/api/streetview?size=640x420&location=${encodeURIComponent(fullAddress)}&fov=85&pitch=5&source=outdoor&key=${key}`;
+        return { provider: 'streetview', image: url };
+      }
+    };
+    const providers = [StreetViewProvider];
+    async function get(fullAddress) {
+      const cached = getCached(fullAddress);
+      if (cached) return cached;
+      for (const provider of providers) {
+        try {
+          const result = await provider.resolve(fullAddress);
+          if (result && result.image) { setCached(fullAddress, result.provider, result.image); return result; }
+        } catch (e) {}
+      }
+      return null;
+    }
+    return { get };
+  })();
+
+  const GalleryStore = (function () {
+    const DB_NAME = 'openHausGallery';
+    const STORE_NAME = 'photos';
+    let dbPromise = null;
+    function openDb() {
+      if (dbPromise) return dbPromise;
+      dbPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => { req.result.createObjectStore(STORE_NAME); };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      return dbPromise;
+    }
+    async function getPhotos(propertyId) {
+      try {
+        const db = await openDb();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const req = tx.objectStore(STORE_NAME).get(propertyId);
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (e) { return []; }
+    }
+    return { getPhotos };
+  })();
+
+  // ---- Star rendering (strictly read-only; no click handlers at all) ----
+  function starFillPercent(rating, i) {
+    if (rating >= i) return 100;
+    if (rating >= i - 0.5) return 50;
+    return 0;
+  }
+  function renderStarsHtml(rating, extraClass = '') {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+      const pct = starFillPercent(rating, i);
+      stars += `<span class="star-wrap"><span class="star-bg">★</span><span class="star-fill" style="width:${pct}%">★</span></span>`;
+    }
+    return `<div class="rating-stars readonly ${extraClass}">${stars}</div>`;
+  }
+
+  // ---- Scope filter ----
+  let scope = 'all';
+  function setScope(next) {
+    scope = next;
+    document.querySelectorAll('.scope-pill').forEach(btn => btn.classList.toggle('active', btn.dataset.scope === scope));
+    render();
+  }
+
+  function visibleProperties() {
+    return properties.filter(p => {
+      if (p.hidden) return false;
+      if (scope === 'loved') return !!p.loved;
+      if (scope === 'watchlist') return !!p.watchlist;
+      return !!p.loved || !!p.watchlist;
+    });
+  }
+
+  function render() {
+    const list = visibleProperties();
+    const grid = document.getElementById('cardsGrid');
+    const empty = document.getElementById('emptyState');
+    if (!list.length) {
+      grid.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    grid.innerHTML = list.map(item => {
+      const flags = `
+        <div class="card-flags">
+          ${item.loved ? `<span class="flag-pill">♥ Loved</span>` : ''}
+          ${item.watchlist ? `<span class="flag-pill">🔭 Watching</span>` : ''}
+        </div>`;
+      const ohBanner = (item.day && item.day !== '—' && item.openHouse)
+        ? `<div class="oh-banner">${item.day} · ${item.openHouse}</div>`
+        : '';
+      return `
+        <div class="property-card" onclick="openPanel('${item.id}')">
+          <div class="card-photo-wrap" id="photo-wrap-${item.id}">
+            <img id="photo-img-${item.id}" alt="">
+            ${flags}
+          </div>
+          <div class="card-address-row">
+            <div>
+              <p class="card-address">${item.address}</p>
+              <p class="card-city">${item.city} ${item.zip}</p>
+            </div>
+          </div>
+          <div class="card-price-row">
+            <span class="card-price">${item.price || ''}</span>
+            <span class="card-stats">${item.beds} bd &bull; ${item.baths} ba &bull; ${item.sqft} sqft</span>
+          </div>
+          ${ohBanner}
+          <div class="dual-rating">
+            ${PEOPLE.map(({ key, label }) => `
+              <div class="rating-person">
+                <span class="rating-person-label">${label[0]}</span>
+                ${renderStarsHtml(item.ratings[key])}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    list.forEach(item => loadCardPhoto(item));
+  }
+
+  async function loadCardPhoto(item) {
+    const img = document.getElementById(`photo-img-${item.id}`);
+    if (!img) return;
+    const fullAddress = `${item.address}, ${item.city} ${item.zip}`;
+    const result = await HousePhotoService.get(fullAddress);
+    if (result && result.image) {
+      img.onload = () => img.classList.add('loaded');
+      img.src = result.image;
+    }
+  }
+
+  // ---- Detail panel ----
+  let activeId = null;
+
+  function openPanel(id) {
+    const item = properties.find(p => p.id === id);
+    if (!item) return;
+    activeId = id;
+    renderPanel(item);
+    document.getElementById('panel').classList.add('open');
+    document.getElementById('panelBackdrop').classList.add('open');
+  }
+
+  function closePanel() {
+    document.getElementById('panel').classList.remove('open');
+    document.getElementById('panelBackdrop').classList.remove('open');
+    activeId = null;
+  }
+
+  async function renderPanel(item) {
+    document.getElementById('panelAddress').innerText = `${item.address}`;
+    document.getElementById('panelStats').innerText =
+      `${item.price || ''} • ${item.beds} bd • ${item.baths} ba • ${item.sqft} sqft${item.yearBuilt ? ' • built ' + item.yearBuilt : ''}`;
+
+    const links = [];
+    if (item.url) links.push(`<a class="link-btn" href="${item.url}" target="_blank" rel="noopener">View on Zillow</a>`);
+    if (item.oneHomeUrl) links.push(`<a class="link-btn" href="${item.oneHomeUrl}" target="_blank" rel="noopener">View on OneHome</a>`);
+    document.getElementById('panelLinks').innerHTML = links.join('');
+
+    document.getElementById('panelRatings').innerHTML = PEOPLE.map(({ key, label }) => `
+      <div class="rating-person" style="margin-bottom:8px;">
+        <span class="rating-person-label">${label[0]}</span>
+        ${renderStarsHtml(item.ratings[key], 'large')}
+      </div>
+    `).join('');
+
+    document.getElementById('panelNotes').innerHTML = PEOPLE.map(({ key, label }) => {
+      const note = (item.evalNotes[key] || '').trim();
+      return `
+        <div class="notes-block">
+          <div class="who">${label}</div>
+          <div class="text ${note ? '' : 'empty'}">${note || 'No notes yet.'}</div>
+        </div>
+      `;
+    }).join('');
+
+    const descTitle = document.getElementById('descTitle');
+    const descBody = document.getElementById('panelDescription');
+    if (item.description) {
+      descTitle.innerText = 'Description';
+      descBody.innerText = item.description;
+    } else {
+      descTitle.innerText = '';
+      descBody.innerText = '';
+    }
+
+    // Photo: prefer a full OneHome gallery if this browser has one cached
+    // locally (see the disclaimer banner — it won't for most realtors).
+    const img = document.getElementById('panelPhotoImg');
+    const hint = document.getElementById('galleryHint');
+    img.classList.remove('loaded');
+    img.removeAttribute('src');
+    hint.classList.add('hidden');
+
+    const photos = await GalleryStore.getPhotos(item.id);
+    if (photos && photos.length) {
+      img.onload = () => img.classList.add('loaded');
+      img.src = photos[0];
+      hint.classList.remove('hidden');
+    } else {
+      const fullAddress = `${item.address}, ${item.city} ${item.zip}`;
+      const result = await HousePhotoService.get(fullAddress);
+      if (result && result.image) {
+        img.onload = () => img.classList.add('loaded');
+        img.src = result.image;
+      }
+    }
+  }
+
+  // ---- Photo gallery viewer ----
+  let galleryPhotos = [];
+  let galleryIndex = 0;
+  let galleryViewMode = 'carousel';
+
+  async function openPhotoGallery() {
+    if (!activeId) return;
+    const photos = await GalleryStore.getPhotos(activeId);
+    if (!photos || !photos.length) return;
+    galleryPhotos = photos;
+    galleryIndex = 0;
+    galleryViewMode = 'carousel';
+    document.getElementById('galleryCarouselView').classList.remove('hidden');
+    document.getElementById('galleryThumbStrip').classList.remove('hidden');
+    document.getElementById('galleryGridView').classList.add('hidden');
+    document.getElementById('galleryViewToggleBtn').innerText = 'Grid View';
+    renderGalleryCarousel();
+    renderGalleryThumbStrip();
+    document.getElementById('galleryBackdrop').classList.add('open');
+  }
+
+  function closePhotoGallery() {
+    document.getElementById('galleryBackdrop').classList.remove('open');
+  }
+
+  function renderGalleryCarousel() {
+    document.getElementById('galleryMainImg').src = galleryPhotos[galleryIndex];
+    document.getElementById('galleryCounter').innerText = `${galleryIndex + 1} / ${galleryPhotos.length}`;
+    document.querySelectorAll('#galleryThumbStrip img').forEach((img, i) => img.classList.toggle('active', i === galleryIndex));
+  }
+
+  function renderGalleryThumbStrip() {
+    const strip = document.getElementById('galleryThumbStrip');
+    strip.innerHTML = galleryPhotos.map((src, i) =>
+      `<img src="${src}" alt="" class="${i === galleryIndex ? 'active' : ''}" onclick="jumpToPhoto(${i})">`
+    ).join('');
+  }
+
+  function renderGalleryGrid() {
+    const grid = document.getElementById('galleryGridView');
+    grid.innerHTML = galleryPhotos.map((src, i) => `<img src="${src}" alt="" onclick="jumpToPhoto(${i}, true)">`).join('');
+  }
+
+  function jumpToPhoto(index, returnToCarousel) {
+    galleryIndex = index;
+    if (returnToCarousel && galleryViewMode === 'grid') toggleGalleryView();
+    else renderGalleryCarousel();
+  }
+
+  function nextPhoto() { galleryIndex = (galleryIndex + 1) % galleryPhotos.length; renderGalleryCarousel(); }
+  function prevPhoto() { galleryIndex = (galleryIndex - 1 + galleryPhotos.length) % galleryPhotos.length; renderGalleryCarousel(); }
+
+  function toggleGalleryView() {
+    galleryViewMode = galleryViewMode === 'carousel' ? 'grid' : 'carousel';
+    const isGrid = galleryViewMode === 'grid';
+    document.getElementById('galleryCarouselView').classList.toggle('hidden', isGrid);
+    document.getElementById('galleryThumbStrip').classList.toggle('hidden', isGrid);
+    document.getElementById('galleryGridView').classList.toggle('hidden', !isGrid);
+    document.getElementById('galleryViewToggleBtn').innerText = isGrid ? 'Carousel View' : 'Grid View';
+    if (isGrid) renderGalleryGrid(); else { renderGalleryCarousel(); renderGalleryThumbStrip(); }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (document.getElementById('galleryBackdrop').classList.contains('open')) {
+      if (e.key === 'Escape') closePhotoGallery();
+      if (e.key === 'ArrowRight') nextPhoto();
+      if (e.key === 'ArrowLeft') prevPhoto();
+    } else if (document.getElementById('panel').classList.contains('open')) {
+      if (e.key === 'Escape') closePanel();
+    }
+  });
+
+  render();
+  initFirebaseSync();
+</script>
+</body>
+</html>

@@ -491,17 +491,27 @@
       border-radius: 6px;
     }
 
-    /* OneHome import result rows */
+    /* OneHome import result cards (grid layout) */
     .onehome-result-row {
       display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       cursor: pointer;
+      position: relative;
     }
-    .onehome-result-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; background: var(--bg); flex-shrink: 0; }
+    .onehome-result-row img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 8px; background: var(--bg); flex-shrink: 0; }
+    .onehome-result-row input[type="checkbox"] {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 20px;
+      height: 20px;
+      z-index: 1;
+    }
+    .onehome-result-row .onehome-result-badge-wrap { position: absolute; top: 16px; right: 16px; }
     .onehome-result-address { font-weight: 700; font-size: 0.88rem; color: var(--text); }
     .onehome-result-meta { font-size: 0.78rem; color: var(--muted); }
     .onehome-oh-badge {
@@ -2195,12 +2205,12 @@
 
   <!-- OneHome Import Modal -->
   <div class="settings-backdrop" id="oneHomeBackdrop" onclick="closeOneHomeImport()">
-    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:640px;">
+    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:1440px; width:95vw;">
       <div class="settings-modal-header">
         <h2>Import from OneHome</h2>
         <button class="panel-close" onclick="closeOneHomeImport()">&times;</button>
       </div>
-      <div class="settings-modal-body" style="max-height:70vh; overflow:auto;">
+      <div class="settings-modal-body" style="max-height:88vh; overflow:auto;">
         <div class="manage-weekend-chips" style="margin-bottom:2px;">
           <button type="button" class="manage-weekend-chip active" id="oneHomeModeHarBtn" onclick="setOneHomeImportMode('har')">HAR File</button>
           <button type="button" class="manage-weekend-chip" id="oneHomeModeDirectBtn" onclick="setOneHomeImportMode('direct')">Direct API</button>
@@ -2239,7 +2249,11 @@
             <label>Assign selected homes to</label>
             <div class="manage-weekend-chips" id="oneHomeWeekendPicker"></div>
           </div>
-          <div id="oneHomeResultsList" style="display:flex; flex-direction:column; gap:8px; max-height:320px; overflow:auto;"></div>
+          <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; margin-bottom:6px;">
+            <input type="checkbox" id="oneHomeOpenHouseFilterInput" onchange="toggleOneHomeOpenHouseFilter(this.checked)">
+            Only show homes with an open house in the next 7 days
+          </label>
+          <div id="oneHomeResultsList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:14px; max-height:60vh; overflow:auto;"></div>
         </div>
       </div>
       <div class="settings-modal-footer">
@@ -4192,6 +4206,8 @@
       setOneHomeImportMode('direct');
       oneHomeSession = null;
       oneHomeResults = [];
+      oneHomeFilterOpenHouseOnly = false;
+      document.getElementById('oneHomeOpenHouseFilterInput').checked = false;
       document.getElementById('oneHomeBackdrop').classList.add('open');
     }
 
@@ -4229,6 +4245,17 @@
       }
     }
 
+    let oneHomeFilterOpenHouseOnly = false;
+
+    function toggleOneHomeOpenHouseFilter(checked) {
+      oneHomeFilterOpenHouseOnly = checked;
+      renderOneHomeResults();
+    }
+
+    function resultHasUpcomingOpenHouse(r) {
+      return !!(r.openHouse && r.openHouse.OpenHouseDate && isOpenHouseWithinNextWeek(r.openHouse.OpenHouseDate));
+    }
+
     function renderOneHomeResults() {
       const weekendPicker = document.getElementById('oneHomeWeekendPicker');
       weekendPicker.innerHTML = WEEKENDS.map(w =>
@@ -4236,7 +4263,16 @@
       ).join('');
 
       const list = document.getElementById('oneHomeResultsList');
-      list.innerHTML = oneHomeResults.map((r, i) => {
+      const rows = oneHomeResults
+        .map((r, i) => ({ r, i }))
+        .filter(({ r }) => !oneHomeFilterOpenHouseOnly || resultHasUpcomingOpenHouse(r));
+
+      if (!rows.length) {
+        list.innerHTML = `<p style="font-size:0.85rem; color:var(--muted); padding:8px 0;">No listings ${oneHomeFilterOpenHouseOnly ? 'with an open house in the next 7 days' : ''}.</p>`;
+        return;
+      }
+
+      list.innerHTML = rows.map(({ r, i }) => {
         const p = r.property;
         const address = buildAddressFromOneHome(p);
         const price = p.ListPrice ? `$${Math.round(p.ListPrice).toLocaleString()}` : 'Price N/A';
@@ -4248,18 +4284,18 @@
         const imgSrc = r.photoDataUrl || r.thumbnail;
         const thumb = imgSrc
           ? `<img src="${imgSrc}" alt="">`
-          : `<div style="width:56px;height:56px;border-radius:8px;background:var(--bg);flex-shrink:0;"></div>`;
+          : `<div style="width:100%; aspect-ratio:4/3; border-radius:8px; background:var(--bg);"></div>`;
 
         return `
           <label class="onehome-result-row">
             <input type="checkbox" data-onehome-index="${i}">
+            <span class="onehome-result-badge-wrap">${badge}</span>
             ${thumb}
-            <div style="flex:1; min-width:0;">
+            <div style="min-width:0;">
               <div class="onehome-result-address">${address}</div>
               <div class="onehome-result-meta">${price} • ${beds} bd • ${baths} ba • ${p.City}, ${p.StateOrProvince}</div>
               ${renderOpenHouseBadge(r.openHouse)}
             </div>
-            ${badge}
           </label>
         `;
       }).join('');
