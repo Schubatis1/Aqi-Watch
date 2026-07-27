@@ -3301,6 +3301,7 @@
       properties.forEach(p => {
         p.day = '—';
         p.openHouse = 'Not yet scheduled';
+        p.openHouses = [];
         persistPropertyState(p);
       });
 
@@ -3381,7 +3382,7 @@
     function renderOpenHouseBanner(item) {
       const svg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/></svg>`;
       if (item.openHouses && item.openHouses.length) {
-        const lines = item.openHouses.map((e, i) => `${i === 0 ? 'Open ' : ''}${e.day}: ${e.time}`).join('<br>');
+        const lines = item.openHouses.map((e, i) => `${i === 0 ? 'Open ' : ''}${e.day} (${formatOneHomeDateShort(e.date)}): ${e.time}`).join('<br>');
         return `<div class="card-open-house">${svg}<span>${lines}</span></div>`;
       }
       if (item.day === '—') return '';
@@ -3819,7 +3820,7 @@
         { label: 'Sq Ft', render: p => p.sqft },
         { label: 'Style', render: p => p.style },
         { label: 'Open House', render: p => (p.openHouses && p.openHouses.length)
-            ? p.openHouses.map(e => `${e.day}: ${e.time}`).join('<br>')
+            ? p.openHouses.map(e => `${e.day} (${formatOneHomeDateShort(e.date)}): ${e.time}`).join('<br>')
             : (p.day === '—' ? 'None scheduled' : `${p.day}: ${p.openHouse}`) },
         { label: "Adam's Rating", render: p => renderStarsHtml(p.id, 'adam', p.ratings.adam, 'small') },
         { label: "Lauren's Rating", render: p => renderStarsHtml(p.id, 'lauren', p.ratings.lauren, 'small') },
@@ -4536,8 +4537,12 @@
           changed = true;
         }
 
+        // Syncs in both directions: picks up new/changed open house dates,
+        // and just as importantly clears them out once OneHome no longer
+        // reports any — otherwise a home whose open house passed (or got
+        // cancelled) keeps showing stale dates forever.
         const ohDisplay = buildOpenHouseDisplay(r.openHouse);
-        if (ohDisplay.day !== '—') {
+        {
           const entriesChanged = JSON.stringify(existing.openHouses || []) !== JSON.stringify(ohDisplay.entries);
           if (existing.day !== ohDisplay.day || existing.openHouse !== ohDisplay.openHouse || entriesChanged) {
             existing.day = ohDisplay.day;
@@ -5424,7 +5429,7 @@
       document.getElementById('panelPpsq').innerText = `$${property.pricePerSqFt}`;
 
       document.getElementById('panelOpenHouse').innerHTML = (property.openHouses && property.openHouses.length)
-        ? `<strong>Open House:</strong><br>${property.openHouses.map(e => `${e.day}: ${e.time}`).join('<br>')}`
+        ? `<strong>Open House:</strong><br>${property.openHouses.map(e => `${e.day} (${formatOneHomeDateShort(e.date)}): ${e.time}`).join('<br>')}`
         : `<strong>Open House:</strong> ${property.day === '—' ? 'None scheduled' : `${property.day} ${property.openHouse}`}`;
       document.getElementById('panelStyle').innerHTML = `<strong>Style:</strong> ${property.style}`;
 
