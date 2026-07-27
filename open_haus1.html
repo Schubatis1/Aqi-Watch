@@ -1620,7 +1620,7 @@
 
     .card-open-house {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 8px;
       font-size: 0.82rem;
       color: var(--coral-dark);
@@ -3374,6 +3374,20 @@
       return 'Verify';
     }
 
+    // Each open house slot gets its own line ("Open Wed: 5–7:30 PM" /
+    // "Open Sat: 10 AM–12 PM") rather than cramming multiple days into one
+    // combined line — falls back to the single day/openHouse strings for
+    // homes without structured per-date entries (e.g. manually added).
+    function renderOpenHouseBanner(item) {
+      const svg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/></svg>`;
+      if (item.openHouses && item.openHouses.length) {
+        const lines = item.openHouses.map((e, i) => `${i === 0 ? 'Open ' : ''}${e.day}: ${e.time}`).join('<br>');
+        return `<div class="card-open-house">${svg}<span>${lines}</span></div>`;
+      }
+      if (item.day === '—') return '';
+      return `<div class="card-open-house">${svg}Open ${item.day}: ${item.openHouse}</div>`;
+    }
+
     function starFillPercent(rating, i) {
       if (rating >= i) return 100;
       if (rating >= i - 0.5) return 50;
@@ -3581,11 +3595,7 @@
               </div>
             </div>
 
-            ${item.day === '—' ? '' : `
-            <div class="card-open-house">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/></svg>
-              Open ${item.day}: ${item.openHouse}
-            </div>`}
+            ${renderOpenHouseBanner(item)}
           </div>
 
           <div class="card-footer">
@@ -3637,13 +3647,18 @@
     // The soonest WEEKENDS entry that hasn't ended yet, relative to today —
     // used by the "Open House Next Weekend" filter. Returns null if every
     // known weekend is already in the past.
-    function getNextWeekendId() {
+    function getNextWeekendRange() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const upcoming = WEEKENDS
         .filter(w => w.end && new Date(`${w.end}T00:00:00`) >= today)
         .sort((a, b) => new Date(a.start) - new Date(b.start));
-      return upcoming.length ? upcoming[0].id : null;
+      return upcoming.length ? upcoming[0] : null;
+    }
+
+    function getNextWeekendId() {
+      const range = getNextWeekendRange();
+      return range ? range.id : null;
     }
 
     function applyFilters() {
@@ -3653,7 +3668,7 @@
       const hideBungalows = document.getElementById('hideBungalows').checked;
       const weekendId = document.getElementById('weekendFilter').value;
       const nextWeekendOnly = document.getElementById('openHouseNextWeekendOnly').checked;
-      const nextWeekendId = nextWeekendOnly ? getNextWeekendId() : null;
+      const nextWeekendRange = nextWeekendOnly ? getNextWeekendRange() : null;
 
       updateFilterToggleState();
 
@@ -3669,9 +3684,15 @@
         const matchesDay = day === 'ALL' || item.day.includes(day);
         const matchesPriority = priority === 'ALL' || item.priorityGroup === priority;
         const matchesBungalow = !hideBungalows || !item.isBungalow;
-        const matchesNextWeekend = !nextWeekendOnly || (
-          item.day !== '—' && !!nextWeekendId && (item.weekends || []).includes(nextWeekendId)
-        );
+        // Prefer real open-house dates (from OneHome/Zillow imports) over
+        // the manual weekend-tag assignment — a home can genuinely have an
+        // open house within the upcoming weekend without ever having been
+        // tagged to that named weekend.
+        const matchesNextWeekend = !nextWeekendOnly || !!(nextWeekendRange && (
+          (item.openHouses && item.openHouses.length)
+            ? item.openHouses.some(e => e.date >= nextWeekendRange.start && e.date <= nextWeekendRange.end)
+            : (item.day !== '—' && (item.weekends || []).includes(nextWeekendRange.id))
+        ));
 
         return matchesWeekend && matchesSearch && matchesDay && matchesPriority && matchesBungalow && matchesNextWeekend;
       });
@@ -3797,7 +3818,9 @@
         { label: 'Baths', render: p => p.baths },
         { label: 'Sq Ft', render: p => p.sqft },
         { label: 'Style', render: p => p.style },
-        { label: 'Open House', render: p => p.day === '—' ? 'None scheduled' : `${p.day}: ${p.openHouse}` },
+        { label: 'Open House', render: p => (p.openHouses && p.openHouses.length)
+            ? p.openHouses.map(e => `${e.day}: ${e.time}`).join('<br>')
+            : (p.day === '—' ? 'None scheduled' : `${p.day}: ${p.openHouse}`) },
         { label: "Adam's Rating", render: p => renderStarsHtml(p.id, 'adam', p.ratings.adam, 'small') },
         { label: "Lauren's Rating", render: p => renderStarsHtml(p.id, 'lauren', p.ratings.lauren, 'small') },
         { label: "Adam's Notes", render: p => p.evalNotes.adam ? p.evalNotes.adam : '<span style="color:var(--muted);">—</span>' },
@@ -4515,9 +4538,11 @@
 
         const ohDisplay = buildOpenHouseDisplay(r.openHouse);
         if (ohDisplay.day !== '—') {
-          if (existing.day !== ohDisplay.day || existing.openHouse !== ohDisplay.openHouse) {
+          const entriesChanged = JSON.stringify(existing.openHouses || []) !== JSON.stringify(ohDisplay.entries);
+          if (existing.day !== ohDisplay.day || existing.openHouse !== ohDisplay.openHouse || entriesChanged) {
             existing.day = ohDisplay.day;
             existing.openHouse = ohDisplay.openHouse;
+            existing.openHouses = ohDisplay.entries;
             schedulesFixed++;
             changed = true;
           }
@@ -4694,12 +4719,19 @@
         .filter(oh => oh && oh.OpenHouseDate)
         .slice()
         .sort((a, b) => new Date(a.OpenHouseDate) - new Date(b.OpenHouseDate));
-      if (!valid.length) return { day: '—', openHouse: 'Not yet scheduled' };
-      const days = valid.map(oh => oneHomeDateToDayLabel(oh.OpenHouseDate));
-      const times = valid.map(oh => (oh.OpenHouseStartTime && oh.OpenHouseEndTime)
-        ? `${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
-        : 'Time TBD');
-      return { day: days.join(', '), openHouse: times.join(', ') };
+      if (!valid.length) return { day: '—', openHouse: 'Not yet scheduled', entries: [] };
+      const entries = valid.map(oh => ({
+        date: oh.OpenHouseDate,
+        day: oneHomeDateToDayLabel(oh.OpenHouseDate),
+        time: (oh.OpenHouseStartTime && oh.OpenHouseEndTime)
+          ? `${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
+          : 'Time TBD'
+      }));
+      return {
+        day: entries.map(e => e.day).join(', '),
+        openHouse: entries.map(e => e.time).join(', '),
+        entries
+      };
     }
 
     // A quick "open house this week" indicator for the import results list,
@@ -5040,6 +5072,7 @@
         priority: 'Verify', priorityGroup: 'Verify', priorityClass: 'badge-verify',
         day: ohDisplay.day,
         openHouse: ohDisplay.openHouse,
+        openHouses: ohDisplay.entries,
         price: `$${rawPrice.toLocaleString()}`, rawPrice,
         beds: p.BedroomsTotal != null ? p.BedroomsTotal : 0,
         baths: baths || 0,
@@ -5390,7 +5423,9 @@
       document.getElementById('panelSqft').innerText = property.sqft;
       document.getElementById('panelPpsq').innerText = `$${property.pricePerSqFt}`;
 
-      document.getElementById('panelOpenHouse').innerHTML = `<strong>Open House:</strong> ${property.day === '—' ? 'None scheduled' : `${property.day} ${property.openHouse}`}`;
+      document.getElementById('panelOpenHouse').innerHTML = (property.openHouses && property.openHouses.length)
+        ? `<strong>Open House:</strong><br>${property.openHouses.map(e => `${e.day}: ${e.time}`).join('<br>')}`
+        : `<strong>Open House:</strong> ${property.day === '—' ? 'None scheduled' : `${property.day} ${property.openHouse}`}`;
       document.getElementById('panelStyle').innerHTML = `<strong>Style:</strong> ${property.style}`;
 
       const descriptionEl = document.getElementById('panelDescription');
