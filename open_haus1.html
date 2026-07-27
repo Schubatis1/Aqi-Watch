@@ -1230,10 +1230,6 @@
 
     @media (min-width: 1025px) {
       body { padding-left: 264px; }
-      /* Center these against the visible content area, not the full
-         viewport — otherwise they render partially hidden behind the
-         always-visible sidebar. */
-      .settings-backdrop, .compare-backdrop { left: 240px; }
     }
 
     @media (max-width: 1024px) {
@@ -1551,7 +1547,7 @@
       .feature-ratings-columns { flex-direction: row; gap: 32px; align-items: flex-start; }
       .feature-ratings-column { flex: 1; min-width: 0; }
       .feature-ratings-column:first-child { margin-bottom: 0; }
-      .feature-ratings-header, .feature-rating-row { grid-template-columns: 1fr 80px 80px; }
+      .feature-ratings-header, .feature-rating-row { grid-template-columns: 1fr 112px 112px; gap: 20px; }
       .feature-rating-row .rating-stars .star-wrap { font-size: 1.3rem; }
     }
 
@@ -1928,6 +1924,15 @@
     @media (max-width: 767px) {
       .slide-panel { width: 100vw; }
     }
+
+    /* Center these modals against the visible content area, not the full
+       viewport — otherwise they render partially hidden behind the
+       always-visible sidebar. Placed last so it wins over the base
+       .settings-backdrop/.compare-backdrop `inset: 0` rule (same
+       specificity, later source order). */
+    @media (min-width: 1025px) {
+      .settings-backdrop, .compare-backdrop { left: 240px; }
+    }
   </style>
 </head>
 <body>
@@ -1961,7 +1966,7 @@
       </button>
       <button class="sidebar-nav-btn" onclick="closeSidebar(); openOneHomeImportModal();">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Import from OneHome
+        Import
       </button>
     </div>
 
@@ -2441,7 +2446,7 @@
 
   <!-- OneHome Import Modal -->
   <div class="settings-backdrop" id="oneHomeBackdrop" onclick="closeOneHomeImport()">
-    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:1440px; width:95vw;">
+    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:1440px;">
       <div class="settings-modal-header">
         <h2>Import from OneHome</h2>
         <button class="panel-close" onclick="closeOneHomeImport()">&times;</button>
@@ -4262,7 +4267,7 @@
           thumbnail: mediaUrl,
           photoDataUrl: mediaUrl ? (imageDataByUrl.get(mediaUrl) || null) : null,
           harPhotoDataUrls,
-          openHouse: (l.openHouse && l.openHouse[0]) || null,
+          openHouse: l.openHouse || [],
           existing: findExistingPropertyForOneHomeListing(l.property)
         };
       });
@@ -4390,24 +4395,30 @@
       if (!listingIds.length) throw new Error('That saved search has no listings.');
 
       const listings = await fetchOneHomeSavedListings(groupId, savedSearchId, listingIds, sessionToken);
-      oneHomeSession = { groupId, savedSearchId, sessionToken, sourceUrl: urlInput };
+      oneHomeSession = { groupId, savedSearchId, sessionToken, sourceUrl: urlInput, token };
 
       // The paginated listings query doesn't preserve any particular
       // order, but `listingIds` (from the saved search itself) reflects
       // the order homes were added to it — reorder results to match so
       // new homes show up in the order they first appeared on OneHome.
+      // `listingIds` are OSKs (MLS keys), which may or may not be the
+      // same id space as each listing's own `id` — only trust the
+      // reorder if it accounts for every listing; otherwise something
+      // didn't match and falling back to the unordered list (still
+      // complete) beats silently losing every result.
       const byId = {};
       listings.forEach(l => { byId[l.id] = l; });
       const orderedListings = listingIds.map(id => byId[id]).filter(Boolean);
+      const finalListings = orderedListings.length === listings.length ? orderedListings : listings;
 
-      oneHomeResults = orderedListings.map(l => ({
+      oneHomeResults = finalListings.map(l => ({
         onehomeId: l.id,
         property: l.property,
         detailProperty: null,
         thumbnail: pickOneHomeMediaUrl(l.media && l.media[0] && l.media[0].Image),
         photoDataUrl: null,
         harPhotoDataUrls: [],
-        openHouse: (l.openHouse && l.openHouse[0]) || null,
+        openHouse: l.openHouse || [],
         existing: findExistingPropertyForOneHomeListing(l.property)
       }));
     }
@@ -4502,15 +4513,11 @@
           changed = true;
         }
 
-        const oh = r.openHouse;
-        if (oh && oh.OpenHouseDate) {
-          const day = oneHomeDateToDayLabel(oh.OpenHouseDate);
-          const time = (oh.OpenHouseStartTime && oh.OpenHouseEndTime)
-            ? `${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
-            : existing.openHouse;
-          if (existing.day !== day || existing.openHouse !== time) {
-            existing.day = day;
-            existing.openHouse = time;
+        const ohDisplay = buildOpenHouseDisplay(r.openHouse);
+        if (ohDisplay.day !== '—') {
+          if (existing.day !== ohDisplay.day || existing.openHouse !== ohDisplay.openHouse) {
+            existing.day = ohDisplay.day;
+            existing.openHouse = ohDisplay.openHouse;
             schedulesFixed++;
             changed = true;
           }
@@ -4650,12 +4657,14 @@
       );
     }
 
+    // Every weekday gets a real label now — this used to collapse anything
+    // that wasn't Sat/Sun to '—', which silently hid weekday open houses
+    // (e.g. a Wednesday evening broker open) even though a real time was
+    // stored right alongside it.
+    const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     function oneHomeDateToDayLabel(dateStr) {
       const d = new Date(`${dateStr}T00:00:00`);
-      const day = d.getDay();
-      if (day === 6) return 'Sat';
-      if (day === 0) return 'Sun';
-      return '—';
+      return DAY_LABELS[d.getDay()];
     }
 
     function formatOneHomeTime(isoStr) {
@@ -4675,20 +4684,42 @@
       return new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
     }
 
+    // Combines every upcoming open house slot for a listing into single
+    // day/time display strings. A home can have more than one (e.g. a
+    // Wednesday evening broker open plus a Saturday public one) — this
+    // used to only ever look at the first array entry, silently dropping
+    // any others.
+    function buildOpenHouseDisplay(ohList) {
+      const valid = (ohList || [])
+        .filter(oh => oh && oh.OpenHouseDate)
+        .slice()
+        .sort((a, b) => new Date(a.OpenHouseDate) - new Date(b.OpenHouseDate));
+      if (!valid.length) return { day: '—', openHouse: 'Not yet scheduled' };
+      const days = valid.map(oh => oneHomeDateToDayLabel(oh.OpenHouseDate));
+      const times = valid.map(oh => (oh.OpenHouseStartTime && oh.OpenHouseEndTime)
+        ? `${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
+        : 'Time TBD');
+      return { day: days.join(', '), openHouse: times.join(', ') };
+    }
+
     // A quick "open house this week" indicator for the import results list,
     // shown before anything is imported so it's obvious at a glance which
     // listings are actually worth going to see soon.
-    function renderOpenHouseBadge(oh) {
-      if (!oh || !oh.OpenHouseDate || !isOpenHouseWithinNextWeek(oh.OpenHouseDate)) return '';
-      const day = oneHomeDateToDayLabel(oh.OpenHouseDate);
-      const dateShort = formatOneHomeDateShort(oh.OpenHouseDate);
-      const time = (oh.OpenHouseStartTime && oh.OpenHouseEndTime)
-        ? `, ${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
-        : '';
+    function renderOpenHouseBadge(ohList) {
+      const upcoming = (ohList || []).filter(oh => oh && oh.OpenHouseDate && isOpenHouseWithinNextWeek(oh.OpenHouseDate));
+      if (!upcoming.length) return '';
+      const parts = upcoming.map(oh => {
+        const day = oneHomeDateToDayLabel(oh.OpenHouseDate);
+        const dateShort = formatOneHomeDateShort(oh.OpenHouseDate);
+        const time = (oh.OpenHouseStartTime && oh.OpenHouseEndTime)
+          ? `, ${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
+          : '';
+        return `${day} ${dateShort}${time}`;
+      });
       return `
         <div class="onehome-oh-badge" title="Open house this week">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          ${day} ${dateShort}${time}
+          ${parts.join(' & ')}
         </div>
       `;
     }
@@ -4915,7 +4946,7 @@
     }
 
     function resultHasUpcomingOpenHouse(r) {
-      return !!(r.openHouse && r.openHouse.OpenHouseDate && isOpenHouseWithinNextWeek(r.openHouse.OpenHouseDate));
+      return (r.openHouse || []).some(oh => oh && oh.OpenHouseDate && isOpenHouseWithinNextWeek(oh.OpenHouseDate));
     }
 
     function resultMatchesStatusFilter(r) {
@@ -4998,7 +5029,7 @@
         ? dp.BathroomsFull + (dp.BathroomsHalf ? dp.BathroomsHalf * 0.5 : 0)
         : (p.BathroomsTotalInteger != null ? p.BathroomsTotalInteger : 0);
       const style = (dp.ArchitecturalStyle && dp.ArchitecturalStyle[0]) || 'N/A';
-      const oh = result.openHouse;
+      const ohDisplay = buildOpenHouseDisplay(result.openHouse);
 
       const record = {
         address: buildAddressFromOneHome(p),
@@ -5007,10 +5038,8 @@
         lat: p.Latitude != null ? p.Latitude : null,
         lng: p.Longitude != null ? p.Longitude : null,
         priority: 'Verify', priorityGroup: 'Verify', priorityClass: 'badge-verify',
-        day: oh && oh.OpenHouseDate ? oneHomeDateToDayLabel(oh.OpenHouseDate) : '—',
-        openHouse: (oh && oh.OpenHouseStartTime && oh.OpenHouseEndTime)
-          ? `${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
-          : 'Not yet scheduled',
+        day: ohDisplay.day,
+        openHouse: ohDisplay.openHouse,
         price: `$${rawPrice.toLocaleString()}`, rawPrice,
         beds: p.BedroomsTotal != null ? p.BedroomsTotal : 0,
         baths: baths || 0,
@@ -5026,7 +5055,13 @@
       };
       if (sourceType === 'zillowHar') {
         record.url = result.zillowUrl;
+      } else if (oneHomeSession.token && oneHomeSession.savedSearchId && result.onehomeId) {
+        // Deep link straight to this listing's own page, not the generic
+        // saved-search results page.
+        record.oneHomeUrl = `https://portal.onehome.com/en-US/property/${result.onehomeId}?token=${encodeURIComponent(oneHomeSession.token)}&searchId=${oneHomeSession.savedSearchId}`;
       } else {
+        // HAR mode has no live session (no searchId available) — fall
+        // back to whatever source link was saved.
         record.oneHomeUrl = oneHomeSession.sourceUrl;
       }
       // Only set the key when checked — leaving it out (rather than false)
