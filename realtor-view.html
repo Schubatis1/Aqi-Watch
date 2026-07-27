@@ -10,6 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <style>
   :root {
     --navy: #2c3e50;
@@ -52,16 +54,23 @@
   }
   .header p { margin: 0; color: #cbd3da; font-size: 0.9rem; }
 
-  .disclaimer {
+  .map-section {
     max-width: 1100px;
-    margin: 16px auto 0;
-    padding: 12px 16px;
-    background: var(--coral-light);
-    border: 1px solid rgba(224,96,63,0.25);
-    border-radius: var(--radius-sm);
-    color: var(--coral-dark);
-    font-size: 0.85rem;
-    line-height: 1.4;
+    margin: 18px auto 0;
+    padding: 0 16px;
+  }
+  #realtorMap {
+    width: 100%;
+    height: 380px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--border);
+  }
+  .custom-leaflet-pin { display: flex; align-items: center; justify-content: center; }
+  .pin-inner {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 3px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    cursor: pointer;
   }
 
   .toolbar {
@@ -289,14 +298,12 @@
 
   <div class="header">
     <h1>Homes We're Watching</h1>
-    <p>A shared view of the Royal Oak homes Adam &amp; Lauren have loved or are keeping an eye on.</p>
+    <p>A shared view of the homes Adam &amp; Lauren have loved or are keeping an eye on.</p>
   </div>
 
-  <div class="disclaimer" id="photoDisclaimer">
-    Listing photos here come from our own browser's local cache, so if you're opening this
-    link from a different device or browser, photos may not load. Use the
-    "View on OneHome"/"View on Zillow" links on each home for the real listing photos.
-  </div>
+  <section class="map-section">
+    <div id="realtorMap"></div>
+  </section>
 
   <div class="toolbar" id="scopeToolbar">
     <button class="scope-pill active" data-scope="all" onclick="setScope('all')">All</button>
@@ -363,6 +370,7 @@
   </div>
 
 <script src="properties.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
@@ -516,6 +524,111 @@
     return { get };
   })();
 
+  // ---- OneHome direct fetch (photos only, read-only) ----
+  // Same reverse-engineered API as the main app: a saved-search "share"
+  // link carries a token that exchanges for a short-lived session, which
+  // is enough to pull that saved search's listings (address + photo media)
+  // with no login required. Hardcoded here per the site owner's own
+  // saved-search link, the same one already hardcoded in open_haus1.html.
+  const ONEHOME_API = 'https://services.onehome.com';
+  const DEFAULT_ONEHOME_URL = 'https://portal.onehome.com/en-US/properties?token=eyJPU04iOiJSRUFMQ09NUCIsInR5cGUiOiIxIiwiY29udGFjdGlkIjo0MjIzNzU0LCJzZXRpZCI6IjMzOTk2NzAiLCJzZXRrZXkiOiI1MzkiLCJlbWFpbCI6ImFzY2h1YmF0aXNAZ21haWwuY29tIiwicmVzb3VyY2VpZCI6MCwiYWdlbnRpZCI6MjU3NzIzLCJpc2RlbHRhIjpmYWxzZSwiVmlld01vZGUiOiIxIn0=&SMS=0';
+
+  function extractOneHomeToken(url) {
+    try { return new URL(url.trim()).searchParams.get('token'); } catch (e) { return null; }
+  }
+
+  async function oneHomeFetchJson(path, body, sessionToken) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
+    const res = await fetch(`${ONEHOME_API}${path}`, { method: 'POST', headers, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`OneHome request failed (HTTP ${res.status}).`);
+    return res.json();
+  }
+
+  async function oneHomeGraphQL(operationName, query, variables, sessionToken) {
+    const json = await oneHomeFetchJson(`/graphql?${operationName}`, { operationName, query, variables }, sessionToken);
+    if (json.errors && json.errors.length) throw new Error(json.errors[0].message || `OneHome error in ${operationName}.`);
+    return json.data;
+  }
+
+  async function fetchOneHomeToken(token) {
+    const json = await oneHomeFetchJson('/api/authentication/checkToken', { emailToken: token });
+    if (!json.groupID || !json.savedSearchID || !json.sessionToken) throw new Error('OneHome token did not resolve to a saved search.');
+    return { groupId: json.groupID, savedSearchId: json.savedSearchID, sessionToken: json.sessionToken };
+  }
+
+  async function fetchOneHomeListingIds(savedSearchId, sessionToken) {
+    const query = `query GetSavedSearchBySearchId($searchId: String!) { savedSearch(id: $searchId) { id listingIds } }`;
+    const data = await oneHomeGraphQL('GetSavedSearchBySearchId', query, { searchId: savedSearchId }, sessionToken);
+    return (data.savedSearch && data.savedSearch.listingIds) || [];
+  }
+
+  async function fetchOneHomeSavedListings(groupId, savedSearchId, listingIds, sessionToken) {
+    const query = `query GetSavedListings($groupId: String!, $listingIds: [String!]!, $pageInput: PageInput, $savedSearchId: String!) {
+      listingsBySavedSearchId(groupId: $groupId, osks: $listingIds, pageInput: $pageInput, savedSearchId: $savedSearchId, includeDislikes: false, suppressEvent: true) {
+        pageInfo { totalElements totalPages pageNumber pageSize }
+        listings {
+          id
+          property { OriginatingSystemKey ListingId }
+          media { Image { Thumbnail { mediaUrl } Medium { mediaUrl } Large { mediaUrl } } }
+        }
+      }
+    }`;
+    let all = [];
+    let pageNum = 0;
+    let totalPages = 1;
+    do {
+      const data = await oneHomeGraphQL('GetSavedListings', query, { groupId, savedSearchId, listingIds, pageInput: { pageNum, size: 25 } }, sessionToken);
+      const block = data.listingsBySavedSearchId || {};
+      all = all.concat(block.listings || []);
+      totalPages = block.pageInfo ? block.pageInfo.totalPages : 1;
+      pageNum += 1;
+    } while (pageNum < totalPages);
+    return all;
+  }
+
+  function pickOneHomeMediaUrl(image) {
+    if (!image) return null;
+    const size = image.Large || image.Medium || image.Thumbnail;
+    return (size && size.mediaUrl) || null;
+  }
+
+  function extractOneHomeMediaUrls(media) {
+    return (media || []).map(m => pickOneHomeMediaUrl(m.Image)).filter(Boolean);
+  }
+
+  // Builds an index (mlsKey -> photo URLs) from the saved search, once per
+  // page load. Properties that were never imported from OneHome (or that
+  // predate this field) simply have no entry and fall through to Street View.
+  const oneHomePhotoIndexPromise = (async () => {
+    try {
+      const token = extractOneHomeToken(DEFAULT_ONEHOME_URL);
+      if (!token) return {};
+      const { groupId, savedSearchId, sessionToken } = await fetchOneHomeToken(token);
+      const listingIds = await fetchOneHomeListingIds(savedSearchId, sessionToken);
+      if (!listingIds.length) return {};
+      const listings = await fetchOneHomeSavedListings(groupId, savedSearchId, listingIds, sessionToken);
+      const index = {};
+      listings.forEach(l => {
+        const p = l.property || {};
+        const mlsKey = p.OriginatingSystemKey || p.ListingId;
+        if (!mlsKey) return;
+        const urls = extractOneHomeMediaUrls(l.media);
+        if (urls.length) index[mlsKey] = urls;
+      });
+      return index;
+    } catch (err) {
+      console.warn('OneHome photo fetch failed — falling back to Street View for all cards.', err);
+      return {};
+    }
+  })();
+
+  async function getOneHomePhotos(item) {
+    if (!item.mlsListingId) return null;
+    const index = await oneHomePhotoIndexPromise;
+    return index[item.mlsListingId] || null;
+  }
+
   const GalleryStore = (function () {
     const DB_NAME = 'openHausGallery';
     const STORE_NAME = 'photos';
@@ -559,6 +672,42 @@
     return `<div class="rating-stars readonly ${extraClass}">${stars}</div>`;
   }
 
+  // ---- Map ----
+  const map = L.map('realtorMap', { zoomControl: false }).setView([42.505, -83.15], 13);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap © CARTO'
+  }).addTo(map);
+  let mapMarkers = {};
+
+  function renderMapMarkers(list) {
+    Object.values(mapMarkers).forEach(m => map.removeLayer(m));
+    mapMarkers = {};
+    const bounds = [];
+    list.forEach(item => {
+      if (item.lat == null || item.lng == null) return;
+      const color = item.loved ? '#e0603f' : '#2c3e50';
+      const icon = L.divIcon({
+        className: 'custom-leaflet-pin',
+        html: `<div class="pin-inner" style="background-color:${color};"></div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      });
+      const marker = L.marker([item.lat, item.lng], { icon }).addTo(map);
+      marker.bindPopup(`
+        <div style="font-family:var(--font-sans); padding:4px;">
+          <strong style="font-family:var(--font-display); font-size:1rem; color:var(--text);">${item.address}</strong><br/>
+          <span style="color:var(--coral-dark); font-weight:700;">${item.price || ''}</span>
+        </div>
+      `);
+      marker.on('click', () => openPanel(item.id));
+      mapMarkers[item.id] = marker;
+      bounds.push([item.lat, item.lng]);
+    });
+    if (bounds.length) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+  }
+
   // ---- Scope filter ----
   let scope = 'all';
   function setScope(next) {
@@ -580,6 +729,7 @@
     const list = visibleProperties();
     const grid = document.getElementById('cardsGrid');
     const empty = document.getElementById('emptyState');
+    renderMapMarkers(list);
     if (!list.length) {
       grid.innerHTML = '';
       empty.classList.remove('hidden');
@@ -630,6 +780,14 @@
   async function loadCardPhoto(item) {
     const img = document.getElementById(`photo-img-${item.id}`);
     if (!img) return;
+
+    const oneHomePhotos = await getOneHomePhotos(item);
+    if (oneHomePhotos && oneHomePhotos.length) {
+      img.onload = () => img.classList.add('loaded');
+      img.src = oneHomePhotos[0];
+      return;
+    }
+
     const fullAddress = `${item.address}, ${item.city} ${item.zip}`;
     const result = await HousePhotoService.get(fullAddress);
     if (result && result.image) {
@@ -661,9 +819,10 @@
     document.getElementById('panelStats').innerText =
       `${item.price || ''} • ${item.beds} bd • ${item.baths} ba • ${item.sqft} sqft${item.yearBuilt ? ' • built ' + item.yearBuilt : ''}`;
 
+    // Zillow only — the OneHome link is intentionally left out of this
+    // realtor-facing view (Adam & Lauren's own view keeps it).
     const links = [];
     if (item.url) links.push(`<a class="link-btn" href="${item.url}" target="_blank" rel="noopener">View on Zillow</a>`);
-    if (item.oneHomeUrl) links.push(`<a class="link-btn" href="${item.oneHomeUrl}" target="_blank" rel="noopener">View on OneHome</a>`);
     document.getElementById('panelLinks').innerHTML = links.join('');
 
     document.getElementById('panelRatings').innerHTML = PEOPLE.map(({ key, label }) => `
@@ -693,19 +852,24 @@
       descBody.innerText = '';
     }
 
-    // Photo: prefer a full OneHome gallery if this browser has one cached
-    // locally (see the disclaimer banner — it won't for most realtors).
+    // Photo: prefer live OneHome media (works on any device, no import
+    // required locally), then whatever gallery this browser happens to
+    // have cached from an import, then Street View as the last resort.
     const img = document.getElementById('panelPhotoImg');
     const hint = document.getElementById('galleryHint');
     img.classList.remove('loaded');
     img.removeAttribute('src');
     hint.classList.add('hidden');
+    activeGalleryPhotos = [];
 
-    const photos = await GalleryStore.getPhotos(item.id);
+    let photos = await getOneHomePhotos(item);
+    if (!photos || !photos.length) photos = await GalleryStore.getPhotos(item.id);
+
     if (photos && photos.length) {
+      activeGalleryPhotos = photos;
       img.onload = () => img.classList.add('loaded');
       img.src = photos[0];
-      hint.classList.remove('hidden');
+      if (photos.length > 1) hint.classList.remove('hidden');
     } else {
       const fullAddress = `${item.address}, ${item.city} ${item.zip}`;
       const result = await HousePhotoService.get(fullAddress);
@@ -717,13 +881,14 @@
   }
 
   // ---- Photo gallery viewer ----
+  let activeGalleryPhotos = [];
   let galleryPhotos = [];
   let galleryIndex = 0;
   let galleryViewMode = 'carousel';
 
   async function openPhotoGallery() {
     if (!activeId) return;
-    const photos = await GalleryStore.getPhotos(activeId);
+    const photos = activeGalleryPhotos;
     if (!photos || !photos.length) return;
     galleryPhotos = photos;
     galleryIndex = 0;
