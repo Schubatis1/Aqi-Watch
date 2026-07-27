@@ -505,6 +505,124 @@
     .onehome-result-address { font-weight: 700; font-size: 0.88rem; color: var(--text); }
     .onehome-result-meta { font-size: 0.78rem; color: var(--muted); }
 
+    /* Photo Gallery modal */
+    .gallery-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 14, 18, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 1200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      padding: 24px;
+    }
+    .gallery-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    .gallery-modal {
+      width: 100%;
+      max-width: 920px;
+      max-height: 92vh;
+      background: #ffffff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 800;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .gallery-carousel {
+      position: relative;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      max-height: 60vh;
+    }
+    .gallery-carousel img {
+      max-width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    .gallery-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      color: #ffffff;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 2;
+    }
+    .gallery-nav-btn:hover { background: rgba(0,0,0,0.75); }
+    .gallery-nav-prev { left: 12px; }
+    .gallery-nav-next { right: 12px; }
+
+    .gallery-thumb-strip {
+      display: flex;
+      gap: 8px;
+      padding: 12px 18px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .gallery-thumb-strip img {
+      width: 64px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      opacity: 0.55;
+      border: 2px solid transparent;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    .gallery-thumb-strip img:hover { opacity: 0.85; }
+    .gallery-thumb-strip img.active { opacity: 1; border-color: var(--coral); }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      padding: 18px;
+      overflow-y: auto;
+    }
+    .gallery-grid img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .gallery-grid img:hover { transform: scale(1.03); }
+
+    .gallery-carousel.hidden, .gallery-thumb-strip.hidden, .gallery-grid.hidden { display: none; }
+
     /* Easter Egg Runner */
     .easter-egg-runner {
       position: fixed;
@@ -915,6 +1033,29 @@
     }
 
     .panel-photo-wrap img.loaded { opacity: 1; }
+
+    .gallery-trigger-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      background: rgba(34, 49, 63, 0.72);
+      backdrop-filter: blur(4px);
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .gallery-trigger-btn:hover { background: rgba(34, 49, 63, 0.9); }
+    .gallery-trigger-btn.hidden { display: none; }
 
     /* Settings Gear */
     .settings-btn {
@@ -1706,6 +1847,10 @@
             <span>No Photo Available</span>
           </div>
           <img id="panelPhotoImg" alt="">
+          <button type="button" class="gallery-trigger-btn hidden" id="galleryTriggerBtn" onclick="event.stopPropagation(); openPhotoGallery()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            <span id="galleryTriggerCount">Photos</span>
+          </button>
         </div>
 
         <div>
@@ -2045,6 +2190,32 @@
         <button class="btn-secondary" style="flex:1;" onclick="closeOneHomeImport()">Close</button>
         <button class="btn-primary hidden" id="oneHomeImportBtn" style="flex:1; justify-content:center;" onclick="finalizeImportSelection()">Import Selected</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Photo Gallery Modal -->
+  <div class="gallery-backdrop" id="galleryBackdrop" onclick="closePhotoGallery()">
+    <div class="gallery-modal" onclick="event.stopPropagation()">
+      <div class="gallery-header">
+        <span id="galleryCounter">1 / 1</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button type="button" class="btn-secondary" id="galleryViewToggleBtn" onclick="toggleGalleryView()">Grid View</button>
+          <button class="panel-close" onclick="closePhotoGallery()">&times;</button>
+        </div>
+      </div>
+
+      <div class="gallery-carousel" id="galleryCarouselView">
+        <button type="button" class="gallery-nav-btn gallery-nav-prev" onclick="prevPhoto()" aria-label="Previous photo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <img id="galleryMainImg" alt="">
+        <button type="button" class="gallery-nav-btn gallery-nav-next" onclick="nextPhoto()" aria-label="Next photo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="gallery-thumb-strip" id="galleryThumbStrip"></div>
+
+      <div class="gallery-grid hidden" id="galleryGridView"></div>
     </div>
   </div>
 
@@ -2403,6 +2574,97 @@
 
       return { get, clearCacheForAddress, getApiKey, setCachedPhoto };
     })();
+
+    // =====================================================================
+    // GalleryStore — full photo galleries for OneHome-imported homes.
+    // IndexedDB, not localStorage: a gallery can be 10-30 photos per home,
+    // which would blow past localStorage's ~5-10MB quota fast on top of
+    // everything else already stored there. Not synced to Firestore either
+    // (its ~1MiB per-doc cap) — galleries are local to whichever browser
+    // did the import.
+    // =====================================================================
+
+    const GalleryStore = (function () {
+      const DB_NAME = 'openHausGallery';
+      const STORE_NAME = 'photos';
+      let dbPromise = null;
+
+      function openDb() {
+        if (dbPromise) return dbPromise;
+        dbPromise = new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, 1);
+          req.onupgradeneeded = () => {
+            req.result.createObjectStore(STORE_NAME);
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+        return dbPromise;
+      }
+
+      async function savePhotos(propertyId, dataUriArray) {
+        try {
+          const db = await openDb();
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).put(dataUriArray, propertyId);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+          });
+        } catch (e) {
+          console.warn('GalleryStore.savePhotos failed', e);
+        }
+      }
+
+      async function getPhotos(propertyId) {
+        try {
+          const db = await openDb();
+          return await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).get(propertyId);
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => reject(req.error);
+          });
+        } catch (e) {
+          console.warn('GalleryStore.getPhotos failed', e);
+          return [];
+        }
+      }
+
+      async function deletePhotos(propertyId) {
+        try {
+          const db = await openDb();
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).delete(propertyId);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+          });
+        } catch (e) {
+          console.warn('GalleryStore.deletePhotos failed', e);
+        }
+      }
+
+      return { savePhotos, getPhotos, deletePhotos };
+    })();
+
+    // OneHome's media host sends no CORS headers, so a direct fetch() to
+    // read the bytes fails. Routing through images.weserv.nl (a free,
+    // no-key public image proxy that adds permissive CORS headers) lets us
+    // capture the actual image data instead of just a display-only <img src>
+    // that would go stale once the signed URL expires (~30 min).
+    async function fetchImageAsDataUrl(sourceUrl) {
+      const proxied = `https://images.weserv.nl/?url=${encodeURIComponent(sourceUrl)}`;
+      const res = await fetch(proxied);
+      if (!res.ok) throw new Error(`Image proxy failed (HTTP ${res.status}).`);
+      const blob = await res.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('Could not read image data.'));
+        reader.readAsDataURL(blob);
+      });
+    }
 
     // ---- Lazy loading via IntersectionObserver ----
 
@@ -2792,7 +3054,7 @@
                   <svg viewBox="0 0 24 24" fill="${item.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
                 </button>
                 <button type="button" class="binoculars-btn ${item.watchlist ? 'watching' : ''}" onclick="event.stopPropagation(); toggleWatchlistForProperty('${item.id}')" title="${item.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
-                  <svg viewBox="0 0 24 24" fill="${item.watchlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10h4"/><path d="M19 7v2a1 1 0 0 1-1 1a2 2 0 0 0-2 2v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-4l-.4-2"/><path d="M5 7v2a1 1 0 0 0 1 1a2 2 0 0 1 2 2v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-4l.4-2"/><path d="M6 7a1 1 0 0 1-1-1v-1a2 2 0 0 1 4 0v3"/><path d="M18 7a1 1 0 0 0 1-1v-1a2 2 0 0 0-4 0v3"/></svg>
+                  <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
                 </button>
                 <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
                   <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
@@ -3139,7 +3401,7 @@
                   <svg viewBox="0 0 24 24" fill="${p.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
                 </button>
                 <button type="button" class="binoculars-btn ${p.watchlist ? 'watching' : ''}" onclick="toggleWatchlistForProperty('${p.id}')" title="${p.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
-                  <svg viewBox="0 0 24 24" fill="${p.watchlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10h4"/><path d="M19 7v2a1 1 0 0 1-1 1a2 2 0 0 0-2 2v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-4l-.4-2"/><path d="M5 7v2a1 1 0 0 0 1 1a2 2 0 0 1 2 2v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-4l.4-2"/><path d="M6 7a1 1 0 0 1-1-1v-1a2 2 0 0 1 4 0v3"/><path d="M18 7a1 1 0 0 0 1-1v-1a2 2 0 0 0-4 0v3"/></svg>
+                  <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
                 </button>
                 <div>
                   <div class="manage-address">${p.address}</div>
@@ -3387,12 +3649,24 @@
 
       return Array.from(listingsById.values()).map(l => {
         const mediaUrl = pickOneHomeMediaUrl(l.media && l.media[0] && l.media[0].Image);
+        // Whatever photo bytes the HAR happened to capture for this listing
+        // (the user may have opened the full gallery while browsing, or
+        // only ever seen the list-view thumbnail) — collected regardless of
+        // order so a partial capture still yields a partial gallery.
+        const allMediaUrls = (l.media || [])
+          .map(m => pickOneHomeMediaUrl(m.Image))
+          .filter(Boolean);
+        const harPhotoDataUrls = allMediaUrls
+          .map(u => imageDataByUrl.get(u))
+          .filter(Boolean);
+
         return {
           onehomeId: l.id,
           property: l.property,
           detailProperty: (detailById.get(l.id) || {}).property || null,
           thumbnail: mediaUrl,
           photoDataUrl: mediaUrl ? (imageDataByUrl.get(mediaUrl) || null) : null,
+          harPhotoDataUrls,
           openHouse: (l.openHouse && l.openHouse[0]) || null,
           existing: findExistingPropertyForOneHomeListing(l.property)
         };
@@ -3411,6 +3685,7 @@
     // way around this worth revisiting.
 
     const ONEHOME_API = 'https://services.onehome.com';
+    const DEFAULT_ONEHOME_URL = 'https://portal.onehome.com/en-US/properties?token=eyJPU04iOiJSRUFMQ09NUCIsInR5cGUiOiIxIiwiY29udGFjdGlkIjo0MjIzNzU0LCJzZXRpZCI6IjMzOTk2NzAiLCJzZXRrZXkiOiI1MzkiLCJlbWFpbCI6ImFzY2h1YmF0aXNAZ21haWwuY29tIiwicmVzb3VyY2VpZCI6MCwiYWdlbnRpZCI6MjU3NzIzLCJpc2RlbHRhIjpmYWxzZSwiVmlld01vZGUiOiIxIn0=&SMS=0';
 
     function extractOneHomeToken(url) {
       try {
@@ -3500,6 +3775,7 @@
         listingDetail(listingId: $listingId, groupId: $groupId, savedSearchId: $savedSearchId, suppressEvent: true) {
           id
           property { YearBuilt ArchitecturalStyle PublicRemarks BathroomsFull BathroomsHalf }
+          media { Image { Medium { mediaUrl } Large { mediaUrl } Thumbnail { mediaUrl } } }
         }
       }`;
       const data = await oneHomeGraphQL('ListingById', query, { listingId: onehomeId, groupId, savedSearchId }, sessionToken);
@@ -3531,6 +3807,7 @@
           detailProperty: null,
           thumbnail: pickOneHomeMediaUrl(l.media && l.media[0] && l.media[0].Image),
           photoDataUrl: null,
+          harPhotoDataUrls: [],
           openHouse: (l.openHouse && l.openHouse[0]) || null,
           existing: findExistingPropertyForOneHomeListing(l.property)
         }));
@@ -3602,12 +3879,12 @@
 
     function openOneHomeImportModal() {
       document.getElementById('oneHomeHarInput').value = '';
-      document.getElementById('oneHomeSourceUrlInput').value = '';
-      document.getElementById('oneHomeUrlInput').value = '';
+      document.getElementById('oneHomeSourceUrlInput').value = DEFAULT_ONEHOME_URL;
+      document.getElementById('oneHomeUrlInput').value = DEFAULT_ONEHOME_URL;
       document.getElementById('oneHomeStatus').innerText = '';
       document.getElementById('oneHomeResultsWrap').classList.add('hidden');
       document.getElementById('oneHomeImportBtn').classList.add('hidden');
-      setOneHomeImportMode('har');
+      setOneHomeImportMode('direct');
       oneHomeSession = null;
       oneHomeResults = [];
       document.getElementById('oneHomeBackdrop').classList.add('open');
@@ -3688,12 +3965,16 @@
       // Full detail (year built, style, description) either came embedded in
       // the HAR (a ListingById response captured while the user had the
       // listing open), or — once the direct API path works — from a live
-      // fetch using the session established when results were loaded.
+      // fetch using the session established when results were loaded. The
+      // same live detail call also carries the full media list, used below
+      // to build the photo gallery for direct-mode imports.
       let dp = result.detailProperty || {};
+      let liveDetailMedia = null;
       if (!result.detailProperty && oneHomeSession && oneHomeSession.groupId) {
         try {
           const detail = await fetchOneHomeListingDetail(oneHomeSession.groupId, oneHomeSession.savedSearchId, result.onehomeId, oneHomeSession.sessionToken);
           dp = (detail && detail.property) || {};
+          liveDetailMedia = (detail && detail.media) || null;
         } catch (err) {
           console.warn('Could not load full listing detail, importing with summary data only.', err);
         }
@@ -3747,12 +4028,36 @@
       initPropertyDerivedData([property]);
       persistPropertyState(property);
 
-      // Seed the existing photo cache with the image captured in the HAR
-      // (actual bytes, not the short-lived signed URL) so the card/panel
-      // photo pipeline picks it up immediately, same as any other provider.
-      if (result.photoDataUrl) {
+      // Build the full photo gallery: HAR mode already has real bytes for
+      // whatever the file happened to capture; direct mode fetches each
+      // photo through the CORS-workaround proxy while the signed media
+      // URLs are still fresh (they expire ~30 min after the session token
+      // was issued). Either way, photo #1 also becomes the card/panel
+      // photo, so "OneHome if available" applies to both import paths —
+      // Street View only kicks in when nothing could be captured at all.
+      let photos = result.harPhotoDataUrls && result.harPhotoDataUrls.length
+        ? result.harPhotoDataUrls
+        : [];
+
+      if (!photos.length && liveDetailMedia) {
+        const mediaUrls = liveDetailMedia.map(m => pickOneHomeMediaUrl(m.Image)).filter(Boolean);
+        for (const mediaUrl of mediaUrls) {
+          try {
+            photos.push(await fetchImageAsDataUrl(mediaUrl));
+          } catch (err) {
+            console.warn('Could not fetch gallery photo', mediaUrl, err);
+          }
+        }
+      }
+
+      if (!photos.length && result.photoDataUrl) {
+        photos = [result.photoDataUrl];
+      }
+
+      if (photos.length) {
+        await GalleryStore.savePhotos(property.id, photos);
         const fullAddress = `${property.address}, ${property.city} ${property.zip}`;
-        HousePhotoService.setCachedPhoto(fullAddress, 'onehome', result.photoDataUrl);
+        HousePhotoService.setCachedPhoto(fullAddress, 'onehome', photos[0]);
       }
     }
 
@@ -3772,7 +4077,7 @@
 
       for (let n = 0; n < checked.length; n++) {
         const result = oneHomeResults[checked[n]];
-        status.innerText = `Importing ${n + 1} of ${checked.length}…`;
+        status.innerText = `Importing ${n + 1} of ${checked.length} (fetching photos)…`;
         try {
           await importOneHomeListing(result, selectedWeekends);
         } catch (err) {
@@ -3785,6 +4090,90 @@
       applyFilters();
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
         renderManageHomesList();
+      }
+    }
+
+    // ===== Photo Gallery (carousel + thumbnail-grid modes) =====
+
+    let galleryPhotos = [];
+    let galleryIndex = 0;
+    let galleryViewMode = 'carousel';
+
+    async function openPhotoGallery() {
+      if (!activeEvalId) return;
+      const photos = await GalleryStore.getPhotos(activeEvalId);
+      if (!photos || !photos.length) return;
+
+      galleryPhotos = photos;
+      galleryIndex = 0;
+      galleryViewMode = 'carousel';
+      document.getElementById('galleryCarouselView').classList.remove('hidden');
+      document.getElementById('galleryThumbStrip').classList.remove('hidden');
+      document.getElementById('galleryGridView').classList.add('hidden');
+      document.getElementById('galleryViewToggleBtn').innerText = 'Grid View';
+
+      renderGalleryCarousel();
+      renderGalleryThumbStrip();
+      document.getElementById('galleryBackdrop').classList.add('open');
+    }
+
+    function closePhotoGallery() {
+      document.getElementById('galleryBackdrop').classList.remove('open');
+    }
+
+    function renderGalleryCarousel() {
+      document.getElementById('galleryMainImg').src = galleryPhotos[galleryIndex];
+      document.getElementById('galleryCounter').innerText = `${galleryIndex + 1} / ${galleryPhotos.length}`;
+      document.querySelectorAll('#galleryThumbStrip img').forEach((img, i) => {
+        img.classList.toggle('active', i === galleryIndex);
+      });
+    }
+
+    function renderGalleryThumbStrip() {
+      const strip = document.getElementById('galleryThumbStrip');
+      strip.innerHTML = galleryPhotos.map((src, i) =>
+        `<img src="${src}" alt="" class="${i === galleryIndex ? 'active' : ''}" onclick="jumpToPhoto(${i})">`
+      ).join('');
+    }
+
+    function renderGalleryGrid() {
+      const grid = document.getElementById('galleryGridView');
+      grid.innerHTML = galleryPhotos.map((src, i) =>
+        `<img src="${src}" alt="" onclick="jumpToPhoto(${i}, true)">`
+      ).join('');
+    }
+
+    function jumpToPhoto(index, returnToCarousel) {
+      galleryIndex = index;
+      if (returnToCarousel && galleryViewMode === 'grid') {
+        toggleGalleryView();
+      } else {
+        renderGalleryCarousel();
+      }
+    }
+
+    function nextPhoto() {
+      galleryIndex = (galleryIndex + 1) % galleryPhotos.length;
+      renderGalleryCarousel();
+    }
+
+    function prevPhoto() {
+      galleryIndex = (galleryIndex - 1 + galleryPhotos.length) % galleryPhotos.length;
+      renderGalleryCarousel();
+    }
+
+    function toggleGalleryView() {
+      galleryViewMode = galleryViewMode === 'carousel' ? 'grid' : 'carousel';
+      const isGrid = galleryViewMode === 'grid';
+      document.getElementById('galleryCarouselView').classList.toggle('hidden', isGrid);
+      document.getElementById('galleryThumbStrip').classList.toggle('hidden', isGrid);
+      document.getElementById('galleryGridView').classList.toggle('hidden', !isGrid);
+      document.getElementById('galleryViewToggleBtn').innerText = isGrid ? 'Carousel View' : 'Grid View';
+      if (isGrid) {
+        renderGalleryGrid();
+      } else {
+        renderGalleryCarousel();
+        renderGalleryThumbStrip();
       }
     }
 
@@ -3917,6 +4306,16 @@
 
       loadPanelPhoto(property);
 
+      const galleryBtn = document.getElementById('galleryTriggerBtn');
+      galleryBtn.classList.add('hidden');
+      GalleryStore.getPhotos(id).then(photos => {
+        if (activeEvalId !== id) return; // panel moved on before this resolved
+        if (photos && photos.length) {
+          document.getElementById('galleryTriggerCount').innerText = `${photos.length} Photo${photos.length === 1 ? '' : 's'}`;
+          galleryBtn.classList.remove('hidden');
+        }
+      });
+
       document.getElementById('panelBackdrop').classList.add('open');
     }
 
@@ -3972,6 +4371,13 @@
     }
 
     document.addEventListener('keydown', (e) => {
+      const galleryOpen = document.getElementById('galleryBackdrop').classList.contains('open');
+      if (galleryOpen) {
+        if (e.key === 'Escape') closePhotoGallery();
+        else if (e.key === 'ArrowLeft' && galleryViewMode === 'carousel') prevPhoto();
+        else if (e.key === 'ArrowRight' && galleryViewMode === 'carousel') nextPhoto();
+        return;
+      }
       if (e.key === 'Escape') {
         closeModal();
       }
