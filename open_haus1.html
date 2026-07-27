@@ -444,6 +444,67 @@
       margin-bottom: 8px;
     }
 
+    /* Manage Homes panel (reuses the compare panel's bottom-sheet chrome) */
+    .manage-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    .manage-table th, .manage-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      font-size: 0.85rem;
+    }
+    .manage-table thead th {
+      position: sticky;
+      top: 0;
+      background: #ffffff;
+      z-index: 2;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .manage-table tbody tr.hidden-row { opacity: 0.5; }
+    .manage-address { font-family: var(--font-display); font-weight: 700; color: var(--text); }
+    .manage-weekend-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .manage-weekend-chip {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .manage-weekend-chip.active { background: var(--coral); border-color: var(--coral); color: #ffffff; }
+    .manage-unassigned-tag { font-size: 0.72rem; color: var(--muted); font-style: italic; }
+    .manage-row-actions { display: flex; gap: 8px; }
+    .manage-hidden-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--gray-light);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    /* OneHome import result rows */
+    .onehome-result-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+    .onehome-result-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; background: var(--bg); flex-shrink: 0; }
+    .onehome-result-address { font-weight: 700; font-size: 0.88rem; color: var(--text); }
+    .onehome-result-meta { font-size: 0.78rem; color: var(--muted); }
+
     /* Easter Egg Runner */
     .easter-egg-runner {
       position: fixed;
@@ -923,7 +984,7 @@
 
     .settings-modal-body p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
 
-    .settings-modal-body input[type="text"], .settings-modal-body input[type="password"] {
+    .settings-modal-body input[type="text"], .settings-modal-body input[type="password"], .settings-modal-body select {
       width: 100%;
       padding: 12px 14px;
       border: 1px solid var(--border);
@@ -1030,6 +1091,21 @@
       transform: scale(1);
     }
 
+    .heart-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: var(--transition);
+    }
+    .heart-btn svg { width: 20px; height: 20px; }
+    .heart-btn:hover { transform: scale(1.15); }
+    .heart-btn.loved { color: var(--coral); }
+
     .tour-count-badge {
       display: inline-flex;
       align-items: center;
@@ -1110,6 +1186,20 @@
     .feature-rating-row:not(:last-child) { border-bottom: 1px dashed var(--border); }
     .feature-rating-label { font-size: 0.82rem; color: var(--text); }
     .feature-rating-row .rating-stars { justify-self: center; }
+
+    /* Feature ratings, single-person edit view */
+    .feature-ratings-grid-single { display: flex; flex-direction: column; gap: 2px; }
+    .feature-rating-row-single {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 6px 0;
+    }
+    .feature-rating-row-single:not(:last-child) { border-bottom: 1px dashed var(--border); }
+    .feature-rating-row-single .feature-rating-label { font-size: 0.85rem; }
+
+    .hidden { display: none; }
 
     .feature-group-header {
       font-size: 0.7rem;
@@ -1483,6 +1573,10 @@
         <button class="settings-btn" onclick="openSettings()" title="Photo settings">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
+        <button class="btn-outline-primary" onclick="openManageHomes()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Manage Homes
+        </button>
         <button class="btn-outline-primary" onclick="openCompare()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
           Compare
@@ -1688,12 +1782,19 @@
 
         <div>
           <div class="panel-section-title">Feature Ratings</div>
-          <div class="feature-ratings-header">
-            <span></span>
-            <span>Adam</span>
-            <span>Lauren</span>
+
+          <div id="featureRatingsReadonlyView">
+            <div class="feature-ratings-header">
+              <span></span>
+              <span>Adam</span>
+              <span>Lauren</span>
+            </div>
+            <div class="feature-ratings-grid" id="featureRatingsGridReadonly"></div>
           </div>
-          <div class="feature-ratings-grid" id="featureRatingsGrid"></div>
+
+          <div id="featureRatingsEditView" class="hidden">
+            <div class="feature-ratings-grid-single" id="featureRatingsGridEdit"></div>
+          </div>
         </div>
 
         <div class="panel-actions">
@@ -1752,6 +1853,182 @@
       </div>
       <div class="compare-body" id="compareBody">
         <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Homes Panel -->
+  <div class="compare-backdrop" id="manageBackdrop" onclick="closeManageHomes()">
+    <div class="compare-panel" onclick="event.stopPropagation()" style="max-width:1500px;">
+      <div class="compare-header">
+        <div>
+          <h2>Manage Homes</h2>
+          <p id="manageSubtitle">Every home in the app, across every weekend</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn-secondary" onclick="openOneHomeImportModal()">Import from OneHome</button>
+          <button class="btn-primary" onclick="openEditPropertyForm(null)">+ Add Home Manually</button>
+          <button class="panel-close" onclick="closeManageHomes()">&times;</button>
+        </div>
+      </div>
+      <div class="compare-body">
+        <table class="manage-table">
+          <thead>
+            <tr>
+              <th>Address</th>
+              <th>Price</th>
+              <th>Beds / Baths</th>
+              <th>Sq Ft</th>
+              <th>Built</th>
+              <th>Weekends</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="manageHomesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit / Add Home Modal -->
+  <div class="settings-backdrop" id="editPropertyBackdrop" onclick="closeEditPropertyForm()">
+    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:560px;">
+      <div class="settings-modal-header">
+        <h2 id="editPropertyTitle">Edit Home</h2>
+        <button class="panel-close" onclick="closeEditPropertyForm()">&times;</button>
+      </div>
+      <div class="settings-modal-body" style="max-height:65vh; overflow:auto;">
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="editAddress" placeholder="123 Main St">
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>City, State</label>
+            <input type="text" id="editCity" placeholder="Royal Oak, MI">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Zip</label>
+            <input type="text" id="editZip" placeholder="48067">
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>List Price ($)</label>
+            <input type="text" id="editPrice" placeholder="475000">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Beds</label>
+            <input type="text" id="editBeds" placeholder="3">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Baths</label>
+            <input type="text" id="editBaths" placeholder="2">
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>Sq Ft</label>
+            <input type="text" id="editSqft" placeholder="1800">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Year Built</label>
+            <input type="text" id="editYearBuilt" placeholder="1950">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Style</label>
+            <input type="text" id="editStyle" placeholder="Colonial">
+          </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>Open House Day</label>
+            <select id="editDay">
+              <option value="—">None scheduled</option>
+              <option value="Sat">Saturday</option>
+              <option value="Sun">Sunday</option>
+              <option value="Sat/Sun">Sat &amp; Sun</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label>Open House Time</label>
+            <input type="text" id="editOpenHouseTime" placeholder="1:00–3:00 PM">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="editDescription" rows="4" placeholder="Listing description..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="editNotes" rows="2" placeholder="Notes about this home..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Listing URL</label>
+          <input type="text" id="editUrl" placeholder="https://www.zillow.com/...">
+        </div>
+        <span class="settings-status" id="editPropertyStatus"></span>
+      </div>
+      <div class="settings-modal-footer">
+        <button class="btn-secondary" style="flex:1;" onclick="closeEditPropertyForm()">Cancel</button>
+        <button class="btn-primary" style="flex:1; justify-content:center;" onclick="savePropertyEdits()">Save Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OneHome Import Modal -->
+  <div class="settings-backdrop" id="oneHomeBackdrop" onclick="closeOneHomeImport()">
+    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:640px;">
+      <div class="settings-modal-header">
+        <h2>Import from OneHome</h2>
+        <button class="panel-close" onclick="closeOneHomeImport()">&times;</button>
+      </div>
+      <div class="settings-modal-body" style="max-height:70vh; overflow:auto;">
+        <div class="manage-weekend-chips" style="margin-bottom:2px;">
+          <button type="button" class="manage-weekend-chip active" id="oneHomeModeHarBtn" onclick="setOneHomeImportMode('har')">HAR File</button>
+          <button type="button" class="manage-weekend-chip" id="oneHomeModeDirectBtn" onclick="setOneHomeImportMode('direct')">Direct API</button>
+        </div>
+
+        <div id="oneHomeHarSection">
+          <div class="form-group">
+            <label>OneHome HAR File</label>
+            <input type="file" id="oneHomeHarInput" accept=".har,application/json">
+            <p style="font-size:0.78rem; color:var(--muted); margin-top:2px;">
+              Open Chrome DevTools → Network while browsing your OneHome saved search, then right-click → "Save all as HAR with content" and upload that file here.
+            </p>
+          </div>
+          <div class="form-group">
+            <label>Source Link (optional)</label>
+            <input type="text" id="oneHomeSourceUrlInput" placeholder="Paste the OneHome link here to save as the source">
+          </div>
+          <button class="btn-primary" style="align-self:flex-start;" onclick="runOneHomeHarImport()">Parse HAR File</button>
+        </div>
+
+        <div id="oneHomeDirectSection" class="hidden" style="opacity:0.5; pointer-events:none;">
+          <div class="form-group">
+            <label>OneHome Link</label>
+            <input type="text" id="oneHomeUrlInput" placeholder="Paste a OneHome portal link (with ?token=...)" disabled>
+          </div>
+          <p style="font-size:0.78rem; color:var(--muted);">
+            Disabled for now — the GraphQL calls behind the token exchange reject requests from outside the portal (likely needs a session cookie this page can't create). The code is still here to troubleshoot later.
+          </p>
+          <button class="btn-primary" style="align-self:flex-start;" onclick="runOneHomeImport()" disabled>Load Listings</button>
+        </div>
+
+        <span class="settings-status" id="oneHomeStatus"></span>
+
+        <div id="oneHomeResultsWrap" class="hidden">
+          <div class="form-group">
+            <label>Assign selected homes to</label>
+            <div class="manage-weekend-chips" id="oneHomeWeekendPicker"></div>
+          </div>
+          <div id="oneHomeResultsList" style="display:flex; flex-direction:column; gap:8px; max-height:320px; overflow:auto;"></div>
+        </div>
+      </div>
+      <div class="settings-modal-footer">
+        <button class="btn-secondary" style="flex:1;" onclick="closeOneHomeImport()">Close</button>
+        <button class="btn-primary hidden" id="oneHomeImportBtn" style="flex:1; justify-content:center;" onclick="finalizeImportSelection()">Import Selected</button>
       </div>
     </div>
   </div>
@@ -1825,31 +2102,72 @@
           p.features[person] = {};
           FEATURES.forEach(({ key: featureKey }) => {
             const savedFeature = localStorage.getItem(`feat_${person}_${featureKey}_${p.id}`);
-            p.features[person][featureKey] = savedFeature !== null ? parseInt(savedFeature, 10) : 0;
+            p.features[person][featureKey] = savedFeature !== null ? parseFloat(savedFeature) : 0;
           });
         });
       });
     }
 
-    WEEKENDS.forEach(w => initPropertyDerivedData(w.data));
+    // --- Custom properties (manually added / imported from OneHome) and
+    // per-property overrides (edits, weekend reassignment, hide/unhide).
+    // properties.js is a static, committed file the browser can't write to,
+    // so anything added or edited at runtime lives in localStorage (and,
+    // when Firebase is configured, syncs cross-device the same way ratings
+    // do) and is layered onto the seed data at load time.
+    function loadCustomProperties() {
+      let ids = [];
+      try { ids = JSON.parse(localStorage.getItem('customPropertyIds') || '[]'); } catch (e) { ids = []; }
+      const customProps = [];
+      ids.forEach(id => {
+        try {
+          const raw = localStorage.getItem(`customProperty_${id}`);
+          if (raw) customProps.push(JSON.parse(raw));
+        } catch (e) { /* skip corrupt entry */ }
+      });
+      return customProps;
+    }
 
-    // Populate the weekend dropdown and restore the last-selected weekend (if any)
+    function applyPropertyOverrides(list) {
+      list.forEach(p => {
+        try {
+          const rawCore = localStorage.getItem(`override_${p.id}`);
+          if (rawCore) Object.assign(p, JSON.parse(rawCore));
+        } catch (e) { /* skip corrupt override */ }
+        try {
+          const rawWeekends = localStorage.getItem(`weekends_${p.id}`);
+          if (rawWeekends) p.weekends = JSON.parse(rawWeekends);
+        } catch (e) { /* skip corrupt override */ }
+        const hiddenFlag = localStorage.getItem(`hidden_${p.id}`);
+        p.hidden = hiddenFlag !== null ? hiddenFlag === '1' : !!p.hidden;
+        const lovedFlag = localStorage.getItem(`loved_${p.id}`);
+        p.loved = lovedFlag !== null ? lovedFlag === '1' : !!p.loved;
+      });
+    }
+
+    properties = properties.concat(loadCustomProperties());
+    applyPropertyOverrides(properties);
+    initPropertyDerivedData(properties);
+
+    // Populate the weekend dropdown and restore the last-selected weekend (if any).
+    // `properties` is always the one full list — weekend is just a filter now,
+    // applied inside applyFilters(), so homes can belong to 0, 1, or many weekends.
     function initWeekendFilter() {
       const select = document.getElementById('weekendFilter');
-      select.innerHTML = WEEKENDS.map(w => `<option value="${w.id}">${w.label}</option>`).join('');
+      const weekendOptions = WEEKENDS.map(w => `<option value="${w.id}">${w.label}</option>`).join('');
+      select.innerHTML = `
+        <option value="all">View All</option>
+        <option value="loved">View Loved ♥</option>
+        ${weekendOptions}
+      `;
 
       const savedWeekendId = localStorage.getItem('selectedWeekendId');
-      const activeWeekend = WEEKENDS.find(w => w.id === savedWeekendId) || WEEKENDS[0];
-      select.value = activeWeekend.id;
-      properties = activeWeekend.data;
+      const validIds = ['all', 'loved', ...WEEKENDS.map(w => w.id)];
+      select.value = validIds.includes(savedWeekendId) ? savedWeekendId : WEEKENDS[0].id;
     }
     initWeekendFilter();
 
     function selectWeekend(weekendId) {
-      const weekend = WEEKENDS.find(w => w.id === weekendId);
-      if (!weekend) return;
-      properties = weekend.data;
-      localStorage.setItem('selectedWeekendId', weekend.id);
+      localStorage.setItem('selectedWeekendId', weekendId);
       applyFilters();
     }
 
@@ -1869,8 +2187,50 @@
     }
 
     function applyRemotePropertyData(id, data) {
-      const property = properties.find(p => p.id === id);
-      if (!property || !data) return;
+      if (!data) return;
+      let property = properties.find(p => p.id === id);
+
+      // A doc for an id we don't know about yet, carrying a `core` record,
+      // is a home added/imported on another device — materialize it here
+      // too so both devices stay in sync, same as ratings do today.
+      if (!property && data.core) {
+        property = Object.assign({ id, weekends: [], hidden: false }, data.core);
+        properties.push(property);
+        initPropertyDerivedData([property]);
+        let ids = [];
+        try { ids = JSON.parse(localStorage.getItem('customPropertyIds') || '[]'); } catch (e) { ids = []; }
+        if (!ids.includes(id)) {
+          ids.push(id);
+          localStorage.setItem('customPropertyIds', JSON.stringify(ids));
+        }
+        localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
+      }
+
+      if (!property) return;
+
+      if (data.core) {
+        Object.assign(property, data.core);
+        const isCustom = (() => {
+          try { return (JSON.parse(localStorage.getItem('customPropertyIds') || '[]')).includes(id); } catch (e) { return false; }
+        })();
+        if (isCustom) {
+          localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
+        } else {
+          localStorage.setItem(`override_${id}`, JSON.stringify(data.core));
+        }
+      }
+      if (data.weekends !== undefined) {
+        property.weekends = data.weekends;
+        localStorage.setItem(`weekends_${id}`, JSON.stringify(data.weekends));
+      }
+      if (data.hidden !== undefined) {
+        property.hidden = data.hidden;
+        localStorage.setItem(`hidden_${id}`, data.hidden ? '1' : '0');
+      }
+      if (data.loved !== undefined) {
+        property.loved = data.loved;
+        localStorage.setItem(`loved_${id}`, data.loved ? '1' : '0');
+      }
 
       PEOPLE.forEach(({ key: person }) => {
         if (data.ratings && data.ratings[person] !== undefined) {
@@ -1898,7 +2258,6 @@
 
       if (activeEvalId === id) {
         refreshRatingViews(property);
-        document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
       }
     }
 
@@ -2207,12 +2566,24 @@
         document.getElementById('ratingContainer-active').innerHTML =
           renderStarSpans(property.id, activeRatingPerson, property.ratings[activeRatingPerson], { interactive: true, allowHalf: true });
       }
+      refreshFeatureRatingViews(property);
+    }
+
+    function refreshFeatureRatingViews(property) {
+      const readonlyEl = document.getElementById('featureRatingsGridReadonly');
+      if (readonlyEl) readonlyEl.innerHTML = renderFeatureRatingsReadonlyHtml(property);
+      if (ratingEditMode) {
+        const editEl = document.getElementById('featureRatingsGridEdit');
+        if (editEl) editEl.innerHTML = renderFeatureRatingsEditHtml(property, activeRatingPerson);
+      }
     }
 
     function toggleRatingEditMode() {
       ratingEditMode = !ratingEditMode;
       document.getElementById('ratingReadonlyView').classList.toggle('hidden', ratingEditMode);
       document.getElementById('ratingEditView').classList.toggle('hidden', !ratingEditMode);
+      document.getElementById('featureRatingsReadonlyView').classList.toggle('hidden', ratingEditMode);
+      document.getElementById('featureRatingsEditView').classList.toggle('hidden', !ratingEditMode);
       document.getElementById('ratingEditToggle').innerText = ratingEditMode ? 'Done' : 'Edit Ratings';
       if (ratingEditMode) {
         setActiveRatingPerson(activeRatingPerson);
@@ -2228,6 +2599,9 @@
       if (!property) return;
       document.getElementById('ratingContainer-active').innerHTML =
         renderStarSpans(activeEvalId, person, property.ratings[person], { interactive: true, allowHalf: true });
+      if (ratingEditMode) {
+        document.getElementById('featureRatingsGridEdit').innerHTML = renderFeatureRatingsEditHtml(property, person);
+      }
     }
 
     function getCleanPriorityLabel(group) {
@@ -2282,7 +2656,7 @@
       return html;
     }
 
-    function renderFeatureRatingsHtml(property) {
+    function renderFeatureRatingsReadonlyHtml(property) {
       let lastGroup = null;
       return FEATURES.map(({ key: featureKey, label, group }) => {
         const groupHeader = group !== lastGroup ? `<div class="feature-group-header">${group}</div>` : '';
@@ -2291,20 +2665,49 @@
           ${groupHeader}
           <div class="feature-rating-row">
             <span class="feature-rating-label">${label}</span>
-            ${renderFeatureStarsHtml(property.id, 'adam', featureKey, property.features.adam[featureKey])}
-            ${renderFeatureStarsHtml(property.id, 'lauren', featureKey, property.features.lauren[featureKey])}
+            ${renderFeatureStarsHtml(property.id, 'adam', featureKey, property.features.adam[featureKey], { interactive: false })}
+            ${renderFeatureStarsHtml(property.id, 'lauren', featureKey, property.features.lauren[featureKey], { interactive: false })}
           </div>
         `;
       }).join('');
     }
 
-    function renderFeatureStarsHtml(id, person, featureKey, rating) {
+    function renderFeatureRatingsEditHtml(property, person) {
+      let lastGroup = null;
+      return FEATURES.map(({ key: featureKey, label, group }) => {
+        const groupHeader = group !== lastGroup ? `<div class="feature-group-header">${group}</div>` : '';
+        lastGroup = group;
+        return `
+          ${groupHeader}
+          <div class="feature-rating-row-single">
+            <span class="feature-rating-label">${label}</span>
+            ${renderFeatureStarsHtml(property.id, person, featureKey, property.features[person][featureKey], { interactive: true, allowHalf: true })}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderFeatureStarsHtml(id, person, featureKey, rating, opts = {}) {
+      const { interactive = true, allowHalf = false } = opts;
       let stars = '';
       for (let i = 1; i <= 5; i++) {
         const pct = starFillPercent(rating, i);
-        stars += `<span class="star-wrap" onclick="event.stopPropagation(); setFeatureRating('${id}', '${person}', '${featureKey}', ${i})"><span class="star-bg">★</span><span class="star-fill" style="width:${pct}%">★</span></span>`;
+        const clickAttr = interactive
+          ? `onclick="event.stopPropagation(); handleFeatureStarClick(event, '${id}', '${person}', '${featureKey}', ${i}, ${allowHalf})"`
+          : '';
+        stars += `<span class="star-wrap" ${clickAttr}><span class="star-bg">★</span><span class="star-fill" style="width:${pct}%">★</span></span>`;
       }
       return `<div class="rating-stars small">${stars}</div>`;
+    }
+
+    function handleFeatureStarClick(evt, id, person, featureKey, starIndex, allowHalf) {
+      let value = starIndex;
+      if (allowHalf) {
+        const rect = evt.currentTarget.getBoundingClientRect();
+        const clickX = evt.clientX - rect.left;
+        if (clickX < rect.width / 2) value = starIndex - 0.5;
+      }
+      setFeatureRating(id, person, featureKey, value);
     }
 
     function showToast(message) {
@@ -2355,12 +2758,17 @@
 
             <div class="card-top">
               <span class="badge ${item.priorityClass}">${getCleanPriorityLabel(item.priorityGroup)}</span>
-              <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
-                <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
-                <span class="tour-checkbox-box">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </span>
-              </label>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="heart-btn ${item.loved ? 'loved' : ''}" onclick="event.stopPropagation(); toggleLovedForProperty('${item.id}')" title="${item.loved ? 'Remove from Loved' : 'Mark as Loved'}">
+                  <svg viewBox="0 0 24 24" fill="${item.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
+                </button>
+                <label class="tour-checkbox-wrap" onclick="event.stopPropagation()" title="Add to tour route">
+                  <input type="checkbox" ${selectedForTour.has(item.id) ? 'checked' : ''} onchange="toggleTourSelection('${item.id}', this.checked)">
+                  <span class="tour-checkbox-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                </label>
+              </div>
             </div>
 
             <div class="card-address-row">
@@ -2411,30 +2819,34 @@
         grid.appendChild(card);
         registerLazyPhoto(item);
 
-        const markerColor = getMarkerColor(item.priorityGroup);
+        // Manually-added/imported homes may not have a lat/lng yet — skip
+        // the map pin rather than plotting at (0,0) or throwing.
+        if (item.lat != null && item.lng != null) {
+          const markerColor = getMarkerColor(item.priorityGroup);
 
-        const customIcon = L.divIcon({
-          className: 'custom-leaflet-pin',
-          html: `<div class="pin-inner" id="pin-${item.id}" style="background-color:${markerColor};"></div>`,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
-        });
+          const customIcon = L.divIcon({
+            className: 'custom-leaflet-pin',
+            html: `<div class="pin-inner" id="pin-${item.id}" style="background-color:${markerColor};"></div>`,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          });
 
-        const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(map);
-        marker.bindPopup(`
-          <div style="font-family:var(--font-sans); padding:4px;">
-            <strong style="font-family:var(--font-display); font-size:1rem; color:var(--text);">${item.address}</strong><br/>
-            <span style="color:var(--coral-dark); font-weight:700;">${item.price}</span> (${item.beds}b/${item.baths}b)<br/>
-            <small style="color:var(--muted);">${item.openHouse}</small>
-          </div>
-        `);
-        marker.on('click', () => highlightProperty(item.id, false));
+          const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(map);
+          marker.bindPopup(`
+            <div style="font-family:var(--font-sans); padding:4px;">
+              <strong style="font-family:var(--font-display); font-size:1rem; color:var(--text);">${item.address}</strong><br/>
+              <span style="color:var(--coral-dark); font-weight:700;">${item.price}</span> (${item.beds}b/${item.baths}b)<br/>
+              <small style="color:var(--muted);">${item.openHouse}</small>
+            </div>
+          `);
+          marker.on('click', () => highlightProperty(item.id, false));
 
-        markers[item.id] = marker;
-        bounds.extend([item.lat, item.lng]);
+          markers[item.id] = marker;
+          bounds.extend([item.lat, item.lng]);
+        }
       });
 
-      if (data.length > 0) {
+      if (bounds.isValid()) {
         map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
       }
 
@@ -2448,10 +2860,15 @@
       const day = document.getElementById('dayFilter').value;
       const priority = document.getElementById('priorityFilter').value;
       const hideBungalows = document.getElementById('hideBungalows').checked;
+      const weekendId = document.getElementById('weekendFilter').value;
 
       updateFilterToggleState();
 
       const filtered = properties.filter(item => {
+        if (item.hidden) return false;
+        const matchesWeekend = weekendId === 'all' ? true
+          : weekendId === 'loved' ? !!item.loved
+          : (item.weekends || []).includes(weekendId);
         const matchesSearch = item.address.toLowerCase().includes(search) ||
                               item.notes.toLowerCase().includes(search) ||
                               item.style.toLowerCase().includes(search);
@@ -2459,7 +2876,7 @@
         const matchesPriority = priority === 'ALL' || item.priorityGroup === priority;
         const matchesBungalow = !hideBungalows || !item.isBungalow;
 
-        return matchesSearch && matchesDay && matchesPriority && matchesBungalow;
+        return matchesWeekend && matchesSearch && matchesDay && matchesPriority && matchesBungalow;
       });
 
       renderDashboard(filtered);
@@ -2619,6 +3036,662 @@
       });
     }
 
+    // ===== Manage Homes: master list, editing, weekend assignment, hide/unhide =====
+
+    // Persists a property's current in-memory core fields (+ weekends/hidden) so they
+    // survive a reload and sync cross-device, the same way ratings already do.
+    // Seed (properties.js) homes are stored as a partial override patch; homes that
+    // were manually added or imported are stored as their full record.
+    function isCustomPropertyId(id) {
+      try {
+        return JSON.parse(localStorage.getItem('customPropertyIds') || '[]').includes(id);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function registerNewCustomProperty(property) {
+      let ids = [];
+      try { ids = JSON.parse(localStorage.getItem('customPropertyIds') || '[]'); } catch (e) { ids = []; }
+      if (!ids.includes(property.id)) {
+        ids.push(property.id);
+        localStorage.setItem('customPropertyIds', JSON.stringify(ids));
+      }
+    }
+
+    function persistPropertyState(property) {
+      const id = property.id;
+      const isCustom = isCustomPropertyId(id);
+
+      if (isCustom) {
+        localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
+        syncPropertyToFirestore(id, { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved });
+      } else {
+        const { ratings, evalNotes, features, pricePerSqFt, ...corePatch } = property;
+        localStorage.setItem(`override_${id}`, JSON.stringify(corePatch));
+        syncPropertyToFirestore(id, { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved });
+      }
+      localStorage.setItem(`weekends_${id}`, JSON.stringify(property.weekends || []));
+      localStorage.setItem(`hidden_${id}`, property.hidden ? '1' : '0');
+      localStorage.setItem(`loved_${id}`, property.loved ? '1' : '0');
+    }
+
+    function openManageHomes() {
+      renderManageHomesList();
+      document.getElementById('manageBackdrop').classList.add('open');
+    }
+
+    function closeManageHomes() {
+      document.getElementById('manageBackdrop').classList.remove('open');
+    }
+
+    function renderManageHomesList() {
+      const tbody = document.getElementById('manageHomesTableBody');
+      const sorted = properties.slice().sort((a, b) => a.address.localeCompare(b.address));
+
+      tbody.innerHTML = sorted.map(p => {
+        const weekendChips = WEEKENDS.map(w => {
+          const active = (p.weekends || []).includes(w.id);
+          return `<button type="button" class="manage-weekend-chip ${active ? 'active' : ''}" onclick="toggleWeekendForProperty('${p.id}', '${w.id}')">${w.label}</button>`;
+        }).join('');
+        const unassignedTag = (!p.weekends || p.weekends.length === 0)
+          ? '<span class="manage-unassigned-tag">Unassigned</span>' : '';
+
+        return `
+          <tr class="${p.hidden ? 'hidden-row' : ''}">
+            <td>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="heart-btn ${p.loved ? 'loved' : ''}" onclick="toggleLovedForProperty('${p.id}')" title="${p.loved ? 'Remove from Loved' : 'Mark as Loved'}">
+                  <svg viewBox="0 0 24 24" fill="${p.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
+                </button>
+                <div>
+                  <div class="manage-address">${p.address}</div>
+                  <div style="font-size:0.78rem; color:var(--muted);">${p.city}</div>
+                </div>
+              </div>
+            </td>
+            <td>${p.price}</td>
+            <td>${p.beds} bd / ${p.baths} ba</td>
+            <td>${p.sqft}</td>
+            <td>${p.yearBuilt || '—'}</td>
+            <td><div class="manage-weekend-chips">${weekendChips}${unassignedTag}</div></td>
+            <td>${p.hidden ? '<span class="manage-hidden-tag">Hidden</span>' : ''}</td>
+            <td>
+              <div class="manage-row-actions">
+                <button class="btn-link" onclick="openEditPropertyForm('${p.id}')">Edit</button>
+                <button class="btn-link" onclick="toggleHiddenForProperty('${p.id}')">${p.hidden ? 'Unhide' : 'Hide'}</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('manageSubtitle').innerText =
+        `${properties.length} home${properties.length === 1 ? '' : 's'} total`;
+    }
+
+    function toggleWeekendForProperty(id, weekendId) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.weekends = property.weekends || [];
+      const idx = property.weekends.indexOf(weekendId);
+      if (idx >= 0) property.weekends.splice(idx, 1);
+      else property.weekends.push(weekendId);
+      persistPropertyState(property);
+      renderManageHomesList();
+      applyFilters();
+    }
+
+    // Soft-delete: hidden homes drop out of every weekend dashboard but stay in
+    // Manage Homes (and keep their ratings/notes) so they can be restored later.
+    function toggleHiddenForProperty(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.hidden = !property.hidden;
+      persistPropertyState(property);
+      renderManageHomesList();
+      applyFilters();
+    }
+
+    function toggleLovedForProperty(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.loved = !property.loved;
+      persistPropertyState(property);
+      applyFilters();
+      if (document.getElementById('manageBackdrop').classList.contains('open')) {
+        renderManageHomesList();
+      }
+    }
+
+    // ===== Edit / Add Home form =====
+
+    let editingPropertyId = null;
+
+    function openEditPropertyForm(id) {
+      editingPropertyId = id;
+      const property = id ? properties.find(p => p.id === id) : null;
+
+      document.getElementById('editPropertyTitle').innerText = property ? 'Edit Home' : 'Add Home';
+      document.getElementById('editAddress').value = property ? property.address : '';
+      document.getElementById('editCity').value = property ? property.city : '';
+      document.getElementById('editZip').value = property ? property.zip : '';
+      document.getElementById('editPrice').value = property ? property.rawPrice : '';
+      document.getElementById('editBeds').value = property ? property.beds : '';
+      document.getElementById('editBaths').value = property ? property.baths : '';
+      document.getElementById('editSqft').value = property ? property.rawSqft : '';
+      document.getElementById('editYearBuilt').value = property && property.yearBuilt ? property.yearBuilt : '';
+      document.getElementById('editStyle').value = property ? property.style : '';
+      document.getElementById('editDay').value = property ? (property.day || '—') : '—';
+      document.getElementById('editOpenHouseTime').value = property ? (property.openHouse || '') : '';
+      document.getElementById('editDescription').value = property ? (property.description || '') : '';
+      document.getElementById('editNotes').value = property ? (property.notes || '') : '';
+      document.getElementById('editUrl').value = property ? (property.url || '') : '';
+      document.getElementById('editPropertyStatus').innerText = '';
+
+      document.getElementById('editPropertyBackdrop').classList.add('open');
+    }
+
+    function closeEditPropertyForm() {
+      document.getElementById('editPropertyBackdrop').classList.remove('open');
+    }
+
+    function savePropertyEdits() {
+      const address = document.getElementById('editAddress').value.trim();
+      if (!address) {
+        document.getElementById('editPropertyStatus').innerText = 'Address is required.';
+        return;
+      }
+
+      const rawPrice = parseInt(document.getElementById('editPrice').value, 10) || 0;
+      const rawSqft = parseInt(document.getElementById('editSqft').value, 10) || 0;
+      const style = document.getElementById('editStyle').value.trim() || 'N/A';
+
+      const fields = {
+        address,
+        city: document.getElementById('editCity').value.trim(),
+        zip: document.getElementById('editZip').value.trim(),
+        rawPrice,
+        price: `$${rawPrice.toLocaleString()}`,
+        beds: parseFloat(document.getElementById('editBeds').value) || 0,
+        baths: parseFloat(document.getElementById('editBaths').value) || 0,
+        rawSqft,
+        sqft: rawSqft.toLocaleString(),
+        yearBuilt: parseInt(document.getElementById('editYearBuilt').value, 10) || null,
+        style,
+        isBungalow: /bungalow/i.test(style),
+        day: document.getElementById('editDay').value,
+        openHouse: document.getElementById('editOpenHouseTime').value.trim() || 'Not yet scheduled',
+        description: document.getElementById('editDescription').value,
+        notes: document.getElementById('editNotes').value,
+        url: document.getElementById('editUrl').value.trim(),
+      };
+
+      let property;
+      if (editingPropertyId) {
+        property = properties.find(p => p.id === editingPropertyId);
+        if (!property) return;
+        Object.assign(property, fields);
+      } else {
+        const id = `custom-manual-${Date.now()}`;
+        property = Object.assign({
+          id,
+          lat: null, lng: null,
+          priority: 'Verify', priorityGroup: 'Verify', priorityClass: 'badge-verify',
+          weekends: [], hidden: false,
+        }, fields);
+        properties.push(property);
+        registerNewCustomProperty(property);
+      }
+
+      initPropertyDerivedData([property]);
+      persistPropertyState(property);
+
+      closeEditPropertyForm();
+      renderManageHomesList();
+      applyFilters();
+    }
+
+    // ===== Import from OneHome (via HAR file) =====
+    // OneHome's own API can't be called live from this page: its ?token=
+    // exchange succeeds, but the GraphQL calls behind it require session
+    // state (almost certainly a cookie scoped to onehome.com) that only the
+    // real portal page can establish — a third-party origin can't get it.
+    // So import works from a HAR capture instead: the same request/response
+    // shapes captured live in onehome.har are parsed here, entirely
+    // client-side, out of a file the user exports from their own browser.
+
+    let oneHomeSession = null;
+    let oneHomeResults = [];
+
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('Could not read that file.'));
+        reader.readAsText(file);
+      });
+    }
+
+    function decodeHarContent(content) {
+      if (!content || content.text == null) return null;
+      if (content.encoding === 'base64') {
+        try { return atob(content.text); } catch (e) { return null; }
+      }
+      return content.text;
+    }
+
+    // Scans every POST/GraphQL entry in the HAR for OneHome listing-summary
+    // responses (listingsBySavedSearchId) and listing-detail responses
+    // (listingDetail), keyed by OneHome's own listing id so a detail
+    // response can enrich a summary row captured earlier in the same file.
+    function parseOneHomeHarText(harText) {
+      let har;
+      try { har = JSON.parse(harText); } catch (e) { throw new Error('That file is not valid JSON/HAR.'); }
+      const entries = (har.log && har.log.entries) || [];
+
+      const listingsById = new Map();
+      const detailById = new Map();
+
+      entries.forEach(entry => {
+        const req = entry.request || {};
+        if (req.method !== 'POST' || !(req.url || '').includes('graphql')) return;
+
+        const bodyText = decodeHarContent(entry.response && entry.response.content);
+        if (!bodyText) return;
+        let json;
+        try { json = JSON.parse(bodyText); } catch (e) { return; }
+
+        const block = json && json.data && json.data.listingsBySavedSearchId;
+        if (block && Array.isArray(block.listings)) {
+          block.listings.forEach(l => { if (l && l.id) listingsById.set(l.id, l); });
+        }
+        const detail = json && json.data && json.data.listingDetail;
+        if (detail && detail.id) detailById.set(detail.id, detail);
+      });
+
+      return Array.from(listingsById.values()).map(l => ({
+        onehomeId: l.id,
+        property: l.property,
+        detailProperty: (detailById.get(l.id) || {}).property || null,
+        thumbnail: (l.media && l.media[0] && l.media[0].Image && l.media[0].Image.Thumbnail)
+          ? l.media[0].Image.Thumbnail.mediaUrl : null,
+        openHouse: (l.openHouse && l.openHouse[0]) || null,
+        existing: findExistingPropertyForOneHomeListing(l.property)
+      }));
+    }
+
+    // ===== Direct OneHome API path (disabled in the UI — kept to troubleshoot later) =====
+    // The ?token= on a shareable saved-search link exchanges (no login) for a
+    // groupId/savedSearchId via /api/authentication/checkToken, which succeeds.
+    // But the GraphQL calls that actually fetch listings reject with a 401
+    // ("Unauthorized token") no matter what headers are sent — confirmed with
+    // both a live browser fetch and a bare curl, ruling out a CORS/Origin
+    // issue. Most likely the real portal sets a session cookie scoped to
+    // onehome.com that a third-party origin can never create. Left intact
+    // (and wired up, just gated behind a disabled button) in case there's a
+    // way around this worth revisiting.
+
+    const ONEHOME_API = 'https://services.onehome.com';
+
+    function extractOneHomeToken(url) {
+      try {
+        return new URL(url.trim()).searchParams.get('token');
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function oneHomeFetchJson(path, body) {
+      const res = await fetch(`${ONEHOME_API}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(`OneHome request failed (HTTP ${res.status}).`);
+      return res.json();
+    }
+
+    async function oneHomeGraphQL(operationName, query, variables) {
+      const json = await oneHomeFetchJson(`/graphql?${operationName}`, { operationName, query, variables });
+      if (json.errors && json.errors.length) {
+        throw new Error(json.errors[0].message || `OneHome error in ${operationName}.`);
+      }
+      return json.data;
+    }
+
+    async function fetchOneHomeToken(token) {
+      const json = await oneHomeFetchJson('/api/authentication/checkToken', { emailToken: token });
+      if (!json.groupID || !json.savedSearchID) {
+        throw new Error('That link did not resolve to a saved search.');
+      }
+      return { groupId: json.groupID, savedSearchId: json.savedSearchID };
+    }
+
+    async function fetchOneHomeListingIds(savedSearchId) {
+      const query = `query GetSavedSearchBySearchId($searchId: String!) {
+        savedSearch(id: $searchId) { id listingIds }
+      }`;
+      const data = await oneHomeGraphQL('GetSavedSearchBySearchId', query, { searchId: savedSearchId });
+      return (data.savedSearch && data.savedSearch.listingIds) || [];
+    }
+
+    async function fetchOneHomeSavedListings(groupId, savedSearchId, listingIds) {
+      const query = `query GetSavedListings($groupId: String!, $listingIds: [String!]!, $pageInput: PageInput, $savedSearchId: String!) {
+        listingsBySavedSearchId(groupId: $groupId, osks: $listingIds, pageInput: $pageInput, savedSearchId: $savedSearchId, includeDislikes: false, suppressEvent: true) {
+          pageInfo { totalElements totalPages pageNumber pageSize }
+          listings {
+            id
+            property {
+              OriginatingSystemKey StreetNumber StreetDirPrefix StreetName StreetSuffix StreetDirSuffix
+              City StateOrProvince PostalCode ListPrice ListingId LivingArea BedroomsTotal
+              BathroomsTotalInteger Latitude Longitude StandardStatus
+            }
+            media { Image { Thumbnail { mediaUrl } } }
+            openHouse { OpenHouseDate OpenHouseStartTime OpenHouseEndTime OpenHouseStatus }
+          }
+        }
+      }`;
+
+      let all = [];
+      let pageNum = 0;
+      let totalPages = 1;
+      do {
+        const data = await oneHomeGraphQL('GetSavedListings', query, {
+          groupId, savedSearchId, listingIds, pageInput: { pageNum, size: 25 }
+        });
+        const block = data.listingsBySavedSearchId || {};
+        all = all.concat(block.listings || []);
+        totalPages = block.pageInfo ? block.pageInfo.totalPages : 1;
+        pageNum += 1;
+      } while (pageNum < totalPages);
+      return all;
+    }
+
+    async function fetchOneHomeListingDetail(groupId, savedSearchId, onehomeId) {
+      const query = `query ListingById($listingId: String!, $groupId: String!, $savedSearchId: String) {
+        listingDetail(listingId: $listingId, groupId: $groupId, savedSearchId: $savedSearchId, suppressEvent: true) {
+          id
+          property { YearBuilt ArchitecturalStyle PublicRemarks BathroomsFull BathroomsHalf }
+        }
+      }`;
+      const data = await oneHomeGraphQL('ListingById', query, { listingId: onehomeId, groupId, savedSearchId });
+      return data.listingDetail;
+    }
+
+    async function runOneHomeImport() {
+      const status = document.getElementById('oneHomeStatus');
+      const urlInput = document.getElementById('oneHomeUrlInput').value.trim();
+      const token = extractOneHomeToken(urlInput);
+      if (!token) {
+        status.innerText = 'Paste a full OneHome link that includes a ?token= parameter.';
+        return;
+      }
+
+      status.innerText = 'Loading listings from OneHome…';
+      try {
+        const { groupId, savedSearchId } = await fetchOneHomeToken(token);
+        const listingIds = await fetchOneHomeListingIds(savedSearchId);
+        if (!listingIds.length) {
+          status.innerText = 'That saved search has no listings.';
+          return;
+        }
+        const listings = await fetchOneHomeSavedListings(groupId, savedSearchId, listingIds);
+        oneHomeSession = { groupId, savedSearchId, sourceUrl: urlInput };
+        oneHomeResults = listings.map(l => ({
+          onehomeId: l.id,
+          property: l.property,
+          detailProperty: null,
+          thumbnail: (l.media && l.media[0] && l.media[0].Image && l.media[0].Image.Thumbnail)
+            ? l.media[0].Image.Thumbnail.mediaUrl : null,
+          openHouse: (l.openHouse && l.openHouse[0]) || null,
+          existing: findExistingPropertyForOneHomeListing(l.property)
+        }));
+
+        status.innerText = `Loaded ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'}.`;
+        renderOneHomeResults();
+        document.getElementById('oneHomeResultsWrap').classList.remove('hidden');
+        document.getElementById('oneHomeImportBtn').classList.remove('hidden');
+      } catch (err) {
+        console.warn('OneHome import failed', err);
+        status.innerText = `Couldn't load that link: ${err.message}`;
+      }
+    }
+
+    function setOneHomeImportMode(mode) {
+      document.getElementById('oneHomeModeHarBtn').classList.toggle('active', mode === 'har');
+      document.getElementById('oneHomeModeDirectBtn').classList.toggle('active', mode === 'direct');
+      document.getElementById('oneHomeHarSection').classList.toggle('hidden', mode !== 'har');
+      document.getElementById('oneHomeDirectSection').classList.toggle('hidden', mode !== 'direct');
+      document.getElementById('oneHomeStatus').innerText = '';
+    }
+
+    function buildAddressFromOneHome(p) {
+      return [p.StreetNumber, p.StreetDirPrefix, p.StreetName, p.StreetSuffix, p.StreetDirSuffix]
+        .filter(Boolean).join(' ');
+    }
+
+    // Canonicalize common street-suffix/directional words to their USPS
+    // abbreviation before stripping punctuation, so "4518 Woodland Ave"
+    // (seed data) and "4518 Woodland Avenue" (OneHome) normalize to the
+    // same string instead of missing each other as a dedup match.
+    const ADDRESS_WORD_MAP = {
+      street: 'st', avenue: 'ave', boulevard: 'blvd', drive: 'dr', road: 'rd',
+      lane: 'ln', court: 'ct', place: 'pl', circle: 'cir', terrace: 'ter',
+      trail: 'trl', parkway: 'pkwy', highway: 'hwy', square: 'sq',
+      north: 'n', south: 's', east: 'e', west: 'w',
+      northeast: 'ne', northwest: 'nw', southeast: 'se', southwest: 'sw',
+    };
+
+    function normalizeAddress(addr) {
+      return (addr || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(word => ADDRESS_WORD_MAP[word] || word)
+        .join('');
+    }
+
+    function findExistingPropertyForOneHomeListing(p) {
+      const mlsKey = p.OriginatingSystemKey;
+      const addrNorm = normalizeAddress(buildAddressFromOneHome(p));
+      return properties.find(existing =>
+        (mlsKey && existing.mlsListingId === mlsKey) || normalizeAddress(existing.address) === addrNorm
+      );
+    }
+
+    function oneHomeDateToDayLabel(dateStr) {
+      const d = new Date(`${dateStr}T00:00:00`);
+      const day = d.getDay();
+      if (day === 6) return 'Sat';
+      if (day === 0) return 'Sun';
+      return '—';
+    }
+
+    function formatOneHomeTime(isoStr) {
+      return new Date(isoStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    function openOneHomeImportModal() {
+      document.getElementById('oneHomeHarInput').value = '';
+      document.getElementById('oneHomeSourceUrlInput').value = '';
+      document.getElementById('oneHomeUrlInput').value = '';
+      document.getElementById('oneHomeStatus').innerText = '';
+      document.getElementById('oneHomeResultsWrap').classList.add('hidden');
+      document.getElementById('oneHomeImportBtn').classList.add('hidden');
+      setOneHomeImportMode('har');
+      oneHomeSession = null;
+      oneHomeResults = [];
+      document.getElementById('oneHomeBackdrop').classList.add('open');
+    }
+
+    function closeOneHomeImport() {
+      document.getElementById('oneHomeBackdrop').classList.remove('open');
+    }
+
+    async function runOneHomeHarImport() {
+      const status = document.getElementById('oneHomeStatus');
+      const fileInput = document.getElementById('oneHomeHarInput');
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        status.innerText = 'Choose a .har file first.';
+        return;
+      }
+
+      status.innerText = 'Reading HAR file…';
+      try {
+        const text = await readFileAsText(file);
+        oneHomeResults = parseOneHomeHarText(text);
+        if (!oneHomeResults.length) {
+          status.innerText = 'No OneHome listing data found in that file — make sure the HAR was saved with response content included while the saved-search page was loaded.';
+          return;
+        }
+        oneHomeSession = { sourceUrl: document.getElementById('oneHomeSourceUrlInput').value.trim() || '' };
+
+        status.innerText = `Found ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'} in that file.`;
+        renderOneHomeResults();
+        document.getElementById('oneHomeResultsWrap').classList.remove('hidden');
+        document.getElementById('oneHomeImportBtn').classList.remove('hidden');
+      } catch (err) {
+        console.warn('HAR import failed', err);
+        status.innerText = `Couldn't read that file: ${err.message}`;
+      }
+    }
+
+    function renderOneHomeResults() {
+      const weekendPicker = document.getElementById('oneHomeWeekendPicker');
+      weekendPicker.innerHTML = WEEKENDS.map(w =>
+        `<button type="button" class="manage-weekend-chip" data-weekend="${w.id}" onclick="this.classList.toggle('active')">${w.label}</button>`
+      ).join('');
+
+      const list = document.getElementById('oneHomeResultsList');
+      list.innerHTML = oneHomeResults.map((r, i) => {
+        const p = r.property;
+        const address = buildAddressFromOneHome(p);
+        const price = p.ListPrice ? `$${Math.round(p.ListPrice).toLocaleString()}` : 'Price N/A';
+        const beds = p.BedroomsTotal != null ? p.BedroomsTotal : '—';
+        const baths = p.BathroomsTotalInteger != null ? p.BathroomsTotalInteger : '—';
+        const badge = r.existing
+          ? `<span class="badge badge-verify">Already in app</span>`
+          : `<span class="badge badge-good">New</span>`;
+        const thumb = r.thumbnail
+          ? `<img src="${r.thumbnail}" alt="">`
+          : `<div style="width:56px;height:56px;border-radius:8px;background:var(--bg);flex-shrink:0;"></div>`;
+
+        return `
+          <label class="onehome-result-row">
+            <input type="checkbox" data-onehome-index="${i}">
+            ${thumb}
+            <div style="flex:1; min-width:0;">
+              <div class="onehome-result-address">${address}</div>
+              <div class="onehome-result-meta">${price} • ${beds} bd • ${baths} ba • ${p.City}, ${p.StateOrProvince}</div>
+            </div>
+            ${badge}
+          </label>
+        `;
+      }).join('');
+    }
+
+    async function importOneHomeListing(result, selectedWeekends) {
+      const p = result.property;
+      const mlsKey = p.OriginatingSystemKey || p.ListingId;
+
+      // Full detail (year built, style, description) either came embedded in
+      // the HAR (a ListingById response captured while the user had the
+      // listing open), or — once the direct API path works — from a live
+      // fetch using the session established when results were loaded.
+      let dp = result.detailProperty || {};
+      if (!result.detailProperty && oneHomeSession && oneHomeSession.groupId) {
+        try {
+          const detail = await fetchOneHomeListingDetail(oneHomeSession.groupId, oneHomeSession.savedSearchId, result.onehomeId);
+          dp = (detail && detail.property) || {};
+        } catch (err) {
+          console.warn('Could not load full listing detail, importing with summary data only.', err);
+        }
+      }
+
+      const rawPrice = Math.round(p.ListPrice || 0);
+      const rawSqft = Math.round(p.LivingArea || 0);
+      const baths = dp.BathroomsFull != null
+        ? dp.BathroomsFull + (dp.BathroomsHalf ? dp.BathroomsHalf * 0.5 : 0)
+        : (p.BathroomsTotalInteger != null ? p.BathroomsTotalInteger : 0);
+      const style = (dp.ArchitecturalStyle && dp.ArchitecturalStyle[0]) || 'N/A';
+      const oh = result.openHouse;
+
+      const record = {
+        address: buildAddressFromOneHome(p),
+        city: [p.City, p.StateOrProvince].filter(Boolean).join(', '),
+        zip: p.PostalCode || '',
+        lat: p.Latitude != null ? p.Latitude : null,
+        lng: p.Longitude != null ? p.Longitude : null,
+        priority: 'Verify', priorityGroup: 'Verify', priorityClass: 'badge-verify',
+        day: oh && oh.OpenHouseDate ? oneHomeDateToDayLabel(oh.OpenHouseDate) : '—',
+        openHouse: (oh && oh.OpenHouseStartTime && oh.OpenHouseEndTime)
+          ? `${formatOneHomeTime(oh.OpenHouseStartTime)}–${formatOneHomeTime(oh.OpenHouseEndTime)}`
+          : 'Not yet scheduled',
+        price: `$${rawPrice.toLocaleString()}`, rawPrice,
+        beds: p.BedroomsTotal != null ? p.BedroomsTotal : 0,
+        baths: baths || 0,
+        sqft: rawSqft.toLocaleString(), rawSqft,
+        style, isBungalow: /bungalow/i.test(style),
+        notes: `Imported from OneHome on ${new Date().toLocaleDateString()}.`,
+        yearBuilt: dp.YearBuilt || null,
+        description: dp.PublicRemarks || '',
+        url: oneHomeSession.sourceUrl,
+        mlsListingId: mlsKey,
+        weekends: selectedWeekends.slice(),
+        hidden: false,
+      };
+
+      let property = result.existing;
+      if (property) {
+        const keepId = property.id;
+        Object.assign(property, record);
+        property.id = keepId;
+      } else {
+        record.id = `custom-${mlsKey}`;
+        property = record;
+        properties.push(property);
+        registerNewCustomProperty(property);
+      }
+
+      initPropertyDerivedData([property]);
+      persistPropertyState(property);
+    }
+
+    async function finalizeImportSelection() {
+      const checked = Array.from(document.querySelectorAll('#oneHomeResultsList input[type="checkbox"]:checked'))
+        .map(cb => parseInt(cb.dataset.onehomeIndex, 10));
+      const status = document.getElementById('oneHomeStatus');
+      if (!checked.length) {
+        status.innerText = 'Select at least one listing to import.';
+        return;
+      }
+      const selectedWeekends = Array.from(document.querySelectorAll('#oneHomeWeekendPicker .manage-weekend-chip.active'))
+        .map(btn => btn.dataset.weekend);
+
+      const importBtn = document.getElementById('oneHomeImportBtn');
+      importBtn.disabled = true;
+
+      for (let n = 0; n < checked.length; n++) {
+        const result = oneHomeResults[checked[n]];
+        status.innerText = `Importing ${n + 1} of ${checked.length}…`;
+        try {
+          await importOneHomeListing(result, selectedWeekends);
+        } catch (err) {
+          console.warn('Failed to import listing', result, err);
+        }
+      }
+
+      importBtn.disabled = false;
+      status.innerText = `Imported ${checked.length} home${checked.length === 1 ? '' : 's'}.`;
+      applyFilters();
+      if (document.getElementById('manageBackdrop').classList.contains('open')) {
+        renderManageHomesList();
+      }
+    }
+
     // ===== Easter Egg Logic (runs once ever, cookie-gated) =====
 
     function getCookie(name) {
@@ -2696,7 +3769,7 @@
       syncPropertyToFirestore(id, { features: { [person]: { [featureKey]: ratingValue } } });
 
       if (activeEvalId === id) {
-        document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
+        refreshFeatureRatingViews(property);
       }
     }
 
@@ -2736,13 +3809,13 @@
       activeRatingPerson = 'adam';
       document.getElementById('ratingReadonlyView').classList.remove('hidden');
       document.getElementById('ratingEditView').classList.add('hidden');
+      document.getElementById('featureRatingsReadonlyView').classList.remove('hidden');
+      document.getElementById('featureRatingsEditView').classList.add('hidden');
       document.getElementById('ratingEditToggle').innerText = 'Edit Ratings';
       document.querySelectorAll('.rating-person-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.person === 'adam');
       });
       refreshRatingViews(property);
-
-      document.getElementById('featureRatingsGrid').innerHTML = renderFeatureRatingsHtml(property);
 
       document.getElementById('panelZillowBtn').href = property.url;
 
@@ -2810,7 +3883,7 @@
 
     // Initial Dashboard Load
     applyTheme(localStorage.getItem('appTheme') || 'royal-oak');
-    renderDashboard(properties);
+    applyFilters();
     updateTourButtonBadge();
     initFirebaseSync();
   </script>
