@@ -154,6 +154,39 @@
 
     /* Lower-third badge next to the address in the fly-in panel */
     .panel-address-row { display: flex; align-items: center; gap: 10px; }
+
+    .panel-map-toggle-btn {
+      background: var(--bg);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+    .panel-map-toggle-btn:hover { background: var(--gray-light); color: var(--text); }
+    .panel-map-toggle-btn svg { width: 16px; height: 16px; }
+    .panel-map-toggle-btn.active { background: var(--navy); color: #ffffff; }
+
+    .panel-mini-map {
+      height: 180px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-top: 12px;
+      border: 1px solid var(--border);
+    }
+
+    /* Desktop: mini map always shows, toggle button irrelevant/hidden.
+       Mobile: hidden by default, shown only via the toggle button. */
+    @media (min-width: 900px) {
+      .panel-map-toggle-btn { display: none !important; }
+      .panel-mini-map.hidden { display: block; }
+    }
     .panel-address-badge { display: none; }
     [data-theme="house-hunters"] .panel-address-badge {
       display: flex;
@@ -2093,7 +2126,7 @@
             <option value="ALL">All Match Tiers</option>
             <option value="Top">Top Match Only</option>
             <option value="Good">Good Match Only</option>
-            <option value="Verify">Verify Only</option>
+            <option value="NONE">Unclassified Only</option>
           </select>
 
           <select id="sortSelect" class="select-pill" onchange="handleSortChange(this.value)">
@@ -2185,9 +2218,13 @@
               <svg viewBox="0 0 100 100"><path d="M50 8 L92 44 L78 44 L78 92 L22 92 L22 44 L8 44 Z" fill="var(--navy)"/></svg>
             </div>
             <h2 class="panel-address-title"><a href="#" id="panelAddress" target="_blank" rel="noopener" title="Get directions">915 E 6th St</a></h2>
+            <button type="button" class="panel-map-toggle-btn hidden" id="panelMapToggleBtn" onclick="toggleMiniMap()" title="Show map">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4Z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+            </button>
           </div>
           <p style="color:var(--muted); font-size:0.9rem;" id="panelCity">Royal Oak, MI 48067</p>
           <div class="panel-price" id="panelPrice">$475,000</div>
+          <div class="panel-mini-map hidden" id="panelMiniMap"></div>
         </div>
 
         <div class="panel-stats-grid">
@@ -2414,6 +2451,14 @@
         <div class="form-group">
           <label>Address</label>
           <input type="text" id="editAddress" placeholder="123 Main St">
+        </div>
+        <div class="form-group">
+          <label>Match Tier</label>
+          <select id="editPriority">
+            <option value="">— None —</option>
+            <option value="Top">Top Match</option>
+            <option value="Good">Good Match</option>
+          </select>
         </div>
         <div style="display:flex; gap:10px;">
           <div class="form-group" style="flex:1;">
@@ -3439,7 +3484,7 @@
     function getCleanPriorityLabel(group) {
       if (group === 'Top') return 'Top Match';
       if (group === 'Good') return 'Good Match';
-      return 'Verify';
+      return '';
     }
 
     function buildGoogleMapsUrl(item) {
@@ -3611,7 +3656,7 @@
             </div>
 
             <div class="card-top">
-              <span class="badge ${item.priorityClass}">${getCleanPriorityLabel(item.priorityGroup)}</span>
+              <span class="badge ${item.priorityClass}" ${item.priorityGroup ? '' : 'style="visibility:hidden;"'}>${getCleanPriorityLabel(item.priorityGroup) || ' '}</span>
               <div style="display:flex; align-items:center; gap:6px;">
                 <button type="button" class="heart-btn ${item.loved ? 'loved' : ''}" onclick="event.stopPropagation(); toggleLovedForProperty('${item.id}')" title="${item.loved ? 'Remove from Loved' : 'Mark as Loved'}">
                   <svg viewBox="0 0 24 24" fill="${item.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
@@ -3755,7 +3800,7 @@
                               item.notes.toLowerCase().includes(search) ||
                               item.style.toLowerCase().includes(search);
         const matchesDay = day === 'ALL' || item.day.includes(day);
-        const matchesPriority = priority === 'ALL' || item.priorityGroup === priority;
+        const matchesPriority = priority === 'ALL' || (priority === 'NONE' ? !item.priorityGroup : item.priorityGroup === priority);
         const matchesBungalow = !hideBungalows || !item.isBungalow;
         // Prefer real open-house dates (from OneHome/Zillow imports) over
         // the manual weekend-tag assignment — a home can genuinely have an
@@ -3884,7 +3929,7 @@
       const rows = [
         { label: 'Photo', render: p => `<div style="width:100%; height:110px; border-radius:10px; overflow:hidden; background:var(--bg);"><img id="compare-photo-${p.id}" alt="${p.address}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.style.display='none'"></div>` },
         { label: 'Address', render: p => `<div class="compare-col-address">${p.address}</div><div style="font-size:0.82rem; color:var(--muted);">${p.city} ${p.zip}</div>` },
-        { label: 'Match Tier', render: p => `<span class="badge ${p.priorityClass} compare-col-badge">${getCleanPriorityLabel(p.priorityGroup)}</span>` },
+        { label: 'Match Tier', render: p => p.priorityGroup ? `<span class="badge ${p.priorityClass} compare-col-badge">${getCleanPriorityLabel(p.priorityGroup)}</span>` : '<span style="color:var(--muted);">—</span>' },
         { label: 'Price', render: p => `<span class="compare-col-price">${p.price}</span>` },
         { label: '$ / Sq Ft', render: p => `$${p.pricePerSqFt}` },
         { label: 'Beds', render: p => p.beds },
@@ -4146,6 +4191,7 @@
 
       document.getElementById('editPropertyTitle').innerText = property ? 'Edit Home' : 'Add Home';
       document.getElementById('editAddress').value = property ? property.address : '';
+      document.getElementById('editPriority').value = property ? (property.priorityGroup || '') : '';
       document.getElementById('editCity').value = property ? property.city : '';
       document.getElementById('editZip').value = property ? property.zip : '';
       document.getElementById('editPrice').value = property ? property.rawPrice : '';
@@ -4179,9 +4225,12 @@
       const rawPrice = parseInt(document.getElementById('editPrice').value, 10) || 0;
       const rawSqft = parseInt(document.getElementById('editSqft').value, 10) || 0;
       const style = document.getElementById('editStyle').value.trim() || 'N/A';
+      const priorityGroup = document.getElementById('editPriority').value;
+      const priorityClass = priorityGroup === 'Top' ? 'badge-top' : priorityGroup === 'Good' ? 'badge-good' : '';
 
       const fields = {
         address,
+        priority: priorityGroup, priorityGroup, priorityClass,
         city: document.getElementById('editCity').value.trim(),
         zip: document.getElementById('editZip').value.trim(),
         rawPrice,
@@ -4211,7 +4260,7 @@
         property = Object.assign({
           id,
           lat: null, lng: null,
-          priority: 'Verify', priorityGroup: 'Verify', priorityClass: 'badge-verify',
+          priority: '', priorityGroup: '', priorityClass: '',
           weekends: [], hidden: false,
           source: 'manual', dateAdded: new Date().toISOString().slice(0, 10),
         }, fields);
@@ -5146,7 +5195,6 @@
         zip: p.PostalCode || '',
         lat: p.Latitude != null ? p.Latitude : null,
         lng: p.Longitude != null ? p.Longitude : null,
-        priority: 'Verify', priorityGroup: 'Verify', priorityClass: 'badge-verify',
         day: ohDisplay.day,
         openHouse: ohDisplay.openHouse,
         openHouses: ohDisplay.entries,
@@ -5191,6 +5239,12 @@
       } else {
         record.id = `custom-${mlsKey}`;
         record.dateAdded = new Date().toISOString().slice(0, 10);
+        // Only set on brand-new imports — an existing property keeps
+        // whatever Match Tier was manually assigned, if any, rather than
+        // getting silently reset to unclassified on every re-import.
+        record.priority = '';
+        record.priorityGroup = '';
+        record.priorityClass = '';
         property = record;
         properties.push(property);
         registerNewCustomProperty(property);
@@ -5496,6 +5550,7 @@
       panelAddressLink.href = buildGoogleMapsUrl(property);
       document.getElementById('panelCity').innerText = `${property.city} ${property.zip}`;
       document.getElementById('panelPrice').innerText = property.price;
+      updatePanelMiniMap(property);
       refreshTouredView(property);
       document.getElementById('panelBeds').innerText = property.beds;
       document.getElementById('panelBaths').innerText = property.baths;
@@ -5516,8 +5571,10 @@
         toggleEl.classList.toggle('hidden', descriptionEl.scrollHeight <= descriptionEl.clientHeight + 1);
       });
 
-      document.getElementById('panelBadge').innerText = getCleanPriorityLabel(property.priorityGroup);
-      document.getElementById('panelBadge').className = `badge ${property.priorityClass}`;
+      const panelBadgeEl = document.getElementById('panelBadge');
+      panelBadgeEl.innerText = getCleanPriorityLabel(property.priorityGroup);
+      panelBadgeEl.className = `badge ${property.priorityClass}`;
+      panelBadgeEl.classList.toggle('hidden', !property.priorityGroup);
 
       PEOPLE.forEach(({ key: person }) => {
         document.getElementById(`evalNotes-${person}`).value = property.evalNotes[person] || '';
@@ -5574,6 +5631,61 @@
 
     function closeModal() {
       document.getElementById('panelBackdrop').classList.remove('open');
+    }
+
+    // ---- Fly-in panel mini map ----
+    // Always visible on desktop; collapsed behind a toggle button on
+    // mobile so it doesn't eat screen space by default.
+    let panelMap = null;
+    let panelMapMarker = null;
+
+    function updatePanelMiniMap(property) {
+      const container = document.getElementById('panelMiniMap');
+      const toggleBtn = document.getElementById('panelMapToggleBtn');
+
+      if (property.lat == null || property.lng == null) {
+        container.classList.add('hidden');
+        toggleBtn.classList.add('hidden');
+        return;
+      }
+
+      toggleBtn.classList.remove('hidden');
+      toggleBtn.classList.remove('active');
+      toggleBtn.title = 'Show map';
+      // Starts collapsed on mobile for every newly-opened property; the
+      // desktop media query keeps it visible regardless of this class.
+      container.classList.add('hidden');
+
+      if (!panelMap) {
+        panelMap = L.map('panelMiniMap', {
+          zoomControl: false,
+          attributionControl: false,
+          scrollWheelZoom: false
+        });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19
+        }).addTo(panelMap);
+      }
+
+      panelMap.setView([property.lat, property.lng], 15);
+      if (panelMapMarker) panelMap.removeLayer(panelMapMarker);
+      panelMapMarker = L.marker([property.lat, property.lng]).addTo(panelMap);
+
+      // The container may be zero-size at this exact moment (mobile:
+      // collapsed via the hidden class; desktop: mid slide-in transform),
+      // so Leaflet needs a nudge once layout actually settles.
+      requestAnimationFrame(() => panelMap.invalidateSize());
+    }
+
+    function toggleMiniMap() {
+      const container = document.getElementById('panelMiniMap');
+      const toggleBtn = document.getElementById('panelMapToggleBtn');
+      const nowHidden = container.classList.toggle('hidden');
+      toggleBtn.classList.toggle('active', !nowHidden);
+      toggleBtn.title = nowHidden ? 'Show map' : 'Hide map';
+      if (!nowHidden && panelMap) {
+        requestAnimationFrame(() => panelMap.invalidateSize());
+      }
     }
 
     // ---- Share / permalink ----
