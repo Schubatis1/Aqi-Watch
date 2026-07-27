@@ -869,7 +869,7 @@
     .density-btn.active { background: #ffffff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
 
     /* Compact cards: photo shrinks way down, stats (beds/baths/sqft/built) hidden entirely */
-    .cards-grid.compact .card-photo-wrap { height: 64px; margin-bottom: 10px; }
+    .cards-grid.compact .card-photo-wrap { display: none; }
     .cards-grid.compact .property-card { padding: 14px; }
     .cards-grid.compact .card-stats { display: none; }
     .cards-grid.compact .card-price-row { margin-bottom: 8px; padding-bottom: 8px; }
@@ -2005,7 +2005,8 @@
         </div>
 
         <div class="panel-actions">
-          <a id="panelZillowBtn" href="#" target="_blank" class="btn-secondary" style="text-decoration:none; text-align:center; flex:1;">View on Zillow</a>
+          <a id="panelZillowBtn" href="#" target="_blank" class="btn-secondary hidden" style="text-decoration:none; text-align:center; flex:1;">View on Zillow</a>
+          <a id="panelOneHomeBtn" href="#" target="_blank" class="btn-secondary hidden" style="text-decoration:none; text-align:center; flex:1;">View on OneHome</a>
           <button class="btn-primary" style="flex:1; justify-content:center;" onclick="saveEvaluation()">Save Notes</button>
         </div>
       </div>
@@ -2176,8 +2177,12 @@
           <textarea id="editNotes" rows="2" placeholder="Notes about this home..."></textarea>
         </div>
         <div class="form-group">
-          <label>Listing URL</label>
+          <label>Listing URL (Zillow, etc.)</label>
           <input type="text" id="editUrl" placeholder="https://www.zillow.com/...">
+        </div>
+        <div class="form-group">
+          <label>OneHome Link</label>
+          <input type="text" id="editOneHomeUrl" placeholder="https://portal.onehome.com/...">
         </div>
         <span class="settings-status" id="editPropertyStatus"></span>
       </div>
@@ -3175,10 +3180,11 @@
               </div>
             </div>
 
+            ${item.day === '—' ? '' : `
             <div class="card-open-house">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 16 14"/></svg>
-              ${item.day === '—' ? 'No Open House Announced' : `Open ${item.day}: ${item.openHouse}`}
-            </div>
+              Open ${item.day}: ${item.openHouse}
+            </div>`}
           </div>
 
           <div class="card-footer">
@@ -3377,7 +3383,8 @@
         { label: "Adam's Notes", render: p => p.evalNotes.adam ? p.evalNotes.adam : '<span style="color:var(--muted);">—</span>' },
         { label: "Lauren's Notes", render: p => p.evalNotes.lauren ? p.evalNotes.lauren : '<span style="color:var(--muted);">—</span>' },
         { label: 'Notes', render: p => `<span style="font-size:0.85rem; color:var(--muted);">${p.notes}</span>` },
-        { label: 'Zillow', render: p => `<a href="${p.url}" target="_blank" style="color:var(--coral-dark); font-weight:700; font-size:0.85rem;">View Listing →</a>` },
+        { label: 'Zillow', render: p => p.url ? `<a href="${p.url}" target="_blank" style="color:var(--coral-dark); font-weight:700; font-size:0.85rem;">View Listing →</a>` : '<span style="color:var(--muted);">—</span>' },
+        { label: 'OneHome', render: p => p.oneHomeUrl ? `<a href="${p.oneHomeUrl}" target="_blank" style="color:var(--coral-dark); font-weight:700; font-size:0.85rem;">View Listing →</a>` : '<span style="color:var(--muted);">—</span>' },
         { label: '', render: p => `<button class="compare-remove-btn" onclick="removeFromCompare('${p.id}')" title="Remove from compare">&times;</button>` }
       ];
 
@@ -3576,6 +3583,7 @@
       document.getElementById('editDescription').value = property ? (property.description || '') : '';
       document.getElementById('editNotes').value = property ? (property.notes || '') : '';
       document.getElementById('editUrl').value = property ? (property.url || '') : '';
+      document.getElementById('editOneHomeUrl').value = property ? (property.oneHomeUrl || '') : '';
       document.getElementById('editPropertyStatus').innerText = '';
 
       document.getElementById('editPropertyBackdrop').classList.add('open');
@@ -3614,6 +3622,7 @@
         description: document.getElementById('editDescription').value,
         notes: document.getElementById('editNotes').value,
         url: document.getElementById('editUrl').value.trim(),
+        oneHomeUrl: document.getElementById('editOneHomeUrl').value.trim(),
       };
 
       let property;
@@ -3892,36 +3901,43 @@
       return data.listingDetail;
     }
 
+    // Pure loader — resolves the token, fetches the saved search's
+    // listings, and sets the oneHomeSession/oneHomeResults globals. No UI
+    // side effects, so it's shared between the manual "Load Listings"
+    // button and the silent background auto-sync below.
+    async function loadOneHomeResultsFromUrl(urlInput) {
+      const token = extractOneHomeToken(urlInput);
+      if (!token) throw new Error('That link is missing a ?token= parameter.');
+
+      const { groupId, savedSearchId, sessionToken } = await fetchOneHomeToken(token);
+      const listingIds = await fetchOneHomeListingIds(savedSearchId, sessionToken);
+      if (!listingIds.length) throw new Error('That saved search has no listings.');
+
+      const listings = await fetchOneHomeSavedListings(groupId, savedSearchId, listingIds, sessionToken);
+      oneHomeSession = { groupId, savedSearchId, sessionToken, sourceUrl: urlInput };
+      oneHomeResults = listings.map(l => ({
+        onehomeId: l.id,
+        property: l.property,
+        detailProperty: null,
+        thumbnail: pickOneHomeMediaUrl(l.media && l.media[0] && l.media[0].Image),
+        photoDataUrl: null,
+        harPhotoDataUrls: [],
+        openHouse: (l.openHouse && l.openHouse[0]) || null,
+        existing: findExistingPropertyForOneHomeListing(l.property)
+      }));
+    }
+
     async function runOneHomeImport() {
       const status = document.getElementById('oneHomeStatus');
       const urlInput = document.getElementById('oneHomeUrlInput').value.trim();
-      const token = extractOneHomeToken(urlInput);
-      if (!token) {
-        status.innerText = 'Paste a full OneHome link that includes a ?token= parameter.';
+      if (!urlInput) {
+        status.innerText = 'Paste a OneHome link first.';
         return;
       }
 
       status.innerText = 'Loading listings from OneHome…';
       try {
-        const { groupId, savedSearchId, sessionToken } = await fetchOneHomeToken(token);
-        const listingIds = await fetchOneHomeListingIds(savedSearchId, sessionToken);
-        if (!listingIds.length) {
-          status.innerText = 'That saved search has no listings.';
-          return;
-        }
-        const listings = await fetchOneHomeSavedListings(groupId, savedSearchId, listingIds, sessionToken);
-        oneHomeSession = { groupId, savedSearchId, sessionToken, sourceUrl: urlInput };
-        oneHomeResults = listings.map(l => ({
-          onehomeId: l.id,
-          property: l.property,
-          detailProperty: null,
-          thumbnail: pickOneHomeMediaUrl(l.media && l.media[0] && l.media[0].Image),
-          photoDataUrl: null,
-          harPhotoDataUrls: [],
-          openHouse: (l.openHouse && l.openHouse[0]) || null,
-          existing: findExistingPropertyForOneHomeListing(l.property)
-        }));
-
+        await loadOneHomeResultsFromUrl(urlInput);
         status.innerText = `Loaded ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'}.`;
         renderOneHomeResults();
         document.getElementById('oneHomeResultsWrap').classList.remove('hidden');
@@ -3930,6 +3946,26 @@
       } catch (err) {
         console.warn('OneHome import failed', err);
         status.innerText = `Couldn't load that link: ${err.message}`;
+      }
+    }
+
+    // Quietly keeps existing homes' open house time, map location, and
+    // photos fresh from OneHome without requiring a manual "Load Listings"
+    // click — runs once per page load, throttled so repeated reloads
+    // within the window don't re-hit OneHome's API unnecessarily.
+    const ONEHOME_AUTO_SYNC_INTERVAL_MS = 30 * 60 * 1000;
+
+    async function autoSyncOneHomeInBackground() {
+      if (!DEFAULT_ONEHOME_URL) return;
+      const last = parseInt(localStorage.getItem('oneHomeAutoSyncAt') || '0', 10);
+      if (Date.now() - last < ONEHOME_AUTO_SYNC_INTERVAL_MS) return;
+
+      try {
+        await loadOneHomeResultsFromUrl(DEFAULT_ONEHOME_URL);
+        localStorage.setItem('oneHomeAutoSyncAt', String(Date.now()));
+        await backfillPhotosForExistingMatches();
+      } catch (err) {
+        console.warn('OneHome background sync failed', err);
       }
     }
 
@@ -3955,8 +3991,11 @@
       // Settings for that), and re-loading here is the natural moment to
       // refresh it with whatever OneHome currently reports for a matched
       // home, rather than it just sitting on "Not yet scheduled".
+      // Price drifts too (reductions, re-lists) — same treatment: OneHome's
+      // live ListPrice wins whenever it disagrees with what's stored.
       let locationsFixed = 0;
       let schedulesFixed = 0;
+      let pricesFixed = 0;
       matches.forEach(r => {
         const existing = r.existing;
         let changed = false;
@@ -3984,9 +4023,20 @@
           }
         }
 
+        if (r.property.ListPrice != null) {
+          const rawPrice = Math.round(r.property.ListPrice);
+          if (existing.rawPrice !== rawPrice) {
+            existing.rawPrice = rawPrice;
+            existing.price = `$${rawPrice.toLocaleString()}`;
+            if (existing.rawSqft) existing.pricePerSqFt = Math.round(rawPrice / existing.rawSqft);
+            pricesFixed++;
+            changed = true;
+          }
+        }
+
         if (changed) persistPropertyState(existing);
       });
-      if (locationsFixed > 0 || schedulesFixed > 0) applyFilters();
+      if (locationsFixed > 0 || schedulesFixed > 0 || pricesFixed > 0) applyFilters();
 
       const candidates = [];
       for (const r of matches) {
@@ -3997,7 +4047,8 @@
         const fixParts = [];
         if (locationsFixed > 0) fixParts.push(`map location for ${locationsFixed}`);
         if (schedulesFixed > 0) fixParts.push(`open house time for ${schedulesFixed}`);
-        if (fixParts.length) status.innerText = `Fixed ${fixParts.join(' and ')} existing home${(locationsFixed + schedulesFixed) === 1 ? '' : 's'}.`;
+        if (pricesFixed > 0) fixParts.push(`price for ${pricesFixed}`);
+        if (fixParts.length) status.innerText = `Fixed ${fixParts.join(', ')} existing home${(locationsFixed + schedulesFixed + pricesFixed) === 1 ? '' : 's'}.`;
         return;
       }
 
@@ -4038,9 +4089,10 @@
       const parts = [];
       if (locationsFixed > 0) parts.push(`fixed the map location for ${locationsFixed}`);
       if (schedulesFixed > 0) parts.push(`fixed the open house time for ${schedulesFixed}`);
+      if (pricesFixed > 0) parts.push(`fixed the price for ${pricesFixed}`);
       if (backfilled > 0) parts.push(`backfilled photos for ${backfilled}`);
       status.innerText = parts.length
-        ? `Done — ${parts.join(', ')} existing home${(locationsFixed + schedulesFixed + backfilled) === 1 ? '' : 's'}.`
+        ? `Done — ${parts.join(', ')} existing home${(locationsFixed + schedulesFixed + pricesFixed + backfilled) === 1 ? '' : 's'}.`
         : `Loaded ${oneHomeResults.length} listing${oneHomeResults.length === 1 ? '' : 's'} — nothing to backfill.`;
     }
 
@@ -4262,7 +4314,7 @@
         notes: `Imported from OneHome on ${new Date().toLocaleDateString()}.`,
         yearBuilt: dp.YearBuilt || null,
         description: dp.PublicRemarks || '',
-        url: oneHomeSession.sourceUrl,
+        oneHomeUrl: oneHomeSession.sourceUrl,
         mlsListingId: mlsKey,
         weekends: selectedWeekends.slice(),
         hidden: false,
@@ -4550,7 +4602,21 @@
       });
       refreshRatingViews(property);
 
-      document.getElementById('panelZillowBtn').href = property.url;
+      const zillowBtn = document.getElementById('panelZillowBtn');
+      if (property.url) {
+        zillowBtn.href = property.url;
+        zillowBtn.classList.remove('hidden');
+      } else {
+        zillowBtn.classList.add('hidden');
+      }
+
+      const oneHomeBtn = document.getElementById('panelOneHomeBtn');
+      if (property.oneHomeUrl) {
+        oneHomeBtn.href = property.oneHomeUrl;
+        oneHomeBtn.classList.remove('hidden');
+      } else {
+        oneHomeBtn.classList.add('hidden');
+      }
 
       loadPanelPhoto(property);
 
@@ -4636,6 +4702,7 @@
     applyFilters();
     updateTourButtonBadge();
     initFirebaseSync();
+    autoSyncOneHomeInBackground();
   </script>
 </body>
 </html>
