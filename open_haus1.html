@@ -5069,8 +5069,17 @@
             changed = true;
           }
 
+          // Photos are the expensive part (dozens of full-size images per
+          // home) — only fetch them when this home doesn't already have a
+          // gallery. Without this check, every home with a direct OneHome
+          // link (which by now includes every OneHome-imported home, not
+          // just manually-annotated ones) re-downloaded its entire gallery
+          // on every 30-min cycle, which at real scale (30+ linked homes)
+          // turned this into a multi-minute network/IndexedDB job that
+          // bogged down the whole page during the sync window.
+          const existingPhotos = await GalleryStore.getPhotos(p.id);
           const mediaUrls = extractOneHomeMediaUrls(detail.media);
-          if (mediaUrls.length) {
+          if (mediaUrls.length && (!existingPhotos || !existingPhotos.length)) {
             const photos = await fetchPhotosFromMediaUrls(mediaUrls);
             if (photos.length) {
               await GalleryStore.savePhotos(p.id, photos);
@@ -5106,10 +5115,20 @@
         document.getElementById('oneHomeImportBtn').classList.remove('hidden');
         refreshLocationScheduleAndPriceForExistingMatches();
         backfillPhotosForExistingMatches();
-        await syncDirectlyLinkedProperties(oneHomeSession.groupId, oneHomeSession.sessionToken);
       } catch (err) {
         console.warn('OneHome import failed', err);
         status.innerText = `Couldn't load that link: ${err.message}`;
+        return;
+      }
+      // Decoupled from the try/catch above — a failure here shouldn't be
+      // reported as "couldn't load that link" when the load itself
+      // actually succeeded.
+      if (oneHomeSession && oneHomeSession.groupId) {
+        try {
+          await syncDirectlyLinkedProperties(oneHomeSession.groupId, oneHomeSession.sessionToken);
+        } catch (err) {
+          console.warn('Direct-link OneHome sync failed', err);
+        }
       }
     }
 
@@ -5134,13 +5153,25 @@
         await loadOneHomeResultsFromUrl(DEFAULT_ONEHOME_URL);
         localStorage.setItem('oneHomeAutoSyncAt', String(Date.now()));
         await backfillPhotosForExistingMatches();
-        // Homes with an explicit OneHome link get a full silent refresh
-        // (price/schedule/photos/etc), not just photos — see
-        // syncDirectlyLinkedProperties for why that's safe here even
-        // though the broader saved-search sync stays photos-only.
-        await syncDirectlyLinkedProperties(oneHomeSession.groupId, oneHomeSession.sessionToken);
       } catch (err) {
         console.warn('OneHome background sync failed', err);
+      }
+      // Runs in its own try/catch, decoupled from the saved-search fetch
+      // above — a direct-link sync shouldn't silently stop happening for
+      // every home just because the broader saved-search call hiccupped
+      // (it's independent: it looks listings up by their own id, not via
+      // the saved search). Still needs a session/token, so only runs when
+      // the fetch above actually produced one.
+      if (oneHomeSession && oneHomeSession.groupId) {
+        try {
+          // Homes with an explicit OneHome link get a full silent refresh
+          // (price/schedule/photos/etc), not just photos — see
+          // syncDirectlyLinkedProperties for why that's safe here even
+          // though the broader saved-search sync stays photos-only.
+          await syncDirectlyLinkedProperties(oneHomeSession.groupId, oneHomeSession.sessionToken);
+        } catch (err) {
+          console.warn('Direct-link OneHome sync failed', err);
+        }
       }
     }
 
