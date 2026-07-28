@@ -2479,11 +2479,11 @@
       </div>
       <div class="compare-body">
         <div class="match-tier-controls">
-          <label>Top Match ≥ <input type="number" id="matchTierTopInput" min="0" max="21" step="1"></label>
-          <label>Good Match ≥ <input type="number" id="matchTierGoodInput" min="0" max="21" step="1"></label>
+          <label>Top Match ≥ <input type="number" id="matchTierTopInput" min="0" max="33" step="1"></label>
+          <label>Good Match ≥ <input type="number" id="matchTierGoodInput" min="0" max="33" step="1"></label>
           <button class="btn-secondary" onclick="saveMatchTierCutoffs()">Save Cutoffs</button>
           <button class="btn-secondary" onclick="resetMatchTierCutoffsToDefault()">Reset to Default Split (~20/40/40)</button>
-          <span class="match-tier-controls-hint">Score range: 0–21. Homes with a manually-set Match Tier aren't affected.</span>
+          <span class="match-tier-controls-hint">Score range: 0–33. Homes with a manually-set Match Tier aren't affected.</span>
         </div>
         <table class="manage-table">
           <thead>
@@ -3600,6 +3600,161 @@
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
+    // --- Drive-time-to-work scoring ---------------------------------------
+    // Drive time (real road/traffic, not straight-line) to each person's
+    // workplace, via the Google Maps JS SDK's DistanceMatrixService.
+    // Deliberately NOT computed live inside the scoring function (that
+    // would mean a network call per property every time a score is
+    // shown) — instead computed once in the background and cached on the
+    // property, refreshed only under specific conditions:
+    //
+    // - A property with no drive time at all gets an immediate "off-peak"
+    //   fallback whenever the app is open, regardless of time of day, so
+    //   scoring has something to work with right away.
+    // - That fallback gets upgraded to a real rush-hour reading (and
+    //   re-validated every 2 weeks after that) only when the app happens
+    //   to be open Tue-Thu between 7:00-8:00am local time — using live
+    //   current traffic at that moment, not a simulated future time.
+    // - A new rush-hour reading that jumps more than 75% versus the
+    //   previous rush-hour reading is discarded (likely a one-off
+    //   accident/closure, not a real pattern change) — the old value is
+    //   kept and the property stays eligible to try again next window.
+    const WORK_ADDRESSES = {
+      adam: '2001 15th Street, Detroit, MI',
+      lauren: '12100 Beech Daly Road, Redford Charter Township, MI'
+    };
+    const DRIVE_TIME_REFRESH_INTERVAL_MS = 14 * 24 * 60 * 60 * 1000; // 2 weeks
+    const DRIVE_TIME_JUMP_DISCARD_RATIO = 1.75;
+
+    function isMorningRushHourNow() {
+      const now = new Date();
+      const day = now.getDay(); // 0=Sun .. 6=Sat
+      return day >= 2 && day <= 4 && now.getHours() === 7; // Tue/Wed/Thu, 7:00-7:59am
+    }
+
+    // Converts a drive time in minutes to points: <10min is 6, then -1
+    // point per extra 5 minutes (15min=5, 20min=4, ... 35min=1, 40+min=0).
+    function driveTimeToPoints(minutes) {
+      if (minutes == null) return 0;
+      if (minutes < 10) return 6;
+      if (minutes <= 15) return 5;
+      if (minutes <= 20) return 4;
+      if (minutes <= 25) return 3;
+      if (minutes <= 30) return 2;
+      if (minutes <= 35) return 1;
+      return 0;
+    }
+
+    let googleMapsSdkPromise = null;
+    function loadGoogleMapsSdk() {
+      if (googleMapsSdkPromise) return googleMapsSdkPromise;
+      googleMapsSdkPromise = new Promise((resolve, reject) => {
+        if (window.google && window.google.maps && window.google.maps.DistanceMatrixService) {
+          resolve();
+          return;
+        }
+        const key = HousePhotoService.getApiKey();
+        if (!key) { reject(new Error('No Google Maps API key configured.')); return; }
+        const callbackName = '__onGoogleMapsSdkLoaded';
+        window[callbackName] = () => { delete window[callbackName]; resolve(); };
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&callback=${callbackName}`;
+        script.onerror = () => reject(new Error('Failed to load the Google Maps SDK.'));
+        document.head.appendChild(script);
+      });
+      return googleMapsSdkPromise;
+    }
+
+    function fetchDistanceMatrix(origins, destinations) {
+      return new Promise((resolve, reject) => {
+        const service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix({
+          origins,
+          destinations,
+          travelMode: google.maps.TravelMode.DRIVING,
+          drivingOptions: { departureTime: new Date(), trafficModel: google.maps.TrafficModel.BEST_GUESS }
+        }, (response, status) => {
+          if (status === 'OK') resolve(response);
+          else reject(new Error(`Distance Matrix request failed: ${status}`));
+        });
+      });
+    }
+
+    // Distance Matrix caps origins/destinations per request — batch
+    // conservatively (well under the 25-origin client-side limit).
+    const DRIVE_TIME_BATCH_SIZE = 20;
+
+    async function syncDriveTimesInBackground() {
+      try {
+        const rushHourNow = isMorningRushHourNow();
+
+        function needsFetch(p) {
+          const adamMissing = p.driveTimeAdamMinutes == null;
+          const laurenMissing = p.driveTimeLaurenMinutes == null;
+          if (adamMissing || laurenMissing) return true;
+          if (!rushHourNow) return false;
+          const adamStale = !p.driveTimeAdamRushHourSample || (Date.now() - (p.driveTimeAdamComputedAt || 0)) >= DRIVE_TIME_REFRESH_INTERVAL_MS;
+          const laurenStale = !p.driveTimeLaurenRushHourSample || (Date.now() - (p.driveTimeLaurenComputedAt || 0)) >= DRIVE_TIME_REFRESH_INTERVAL_MS;
+          return adamStale || laurenStale;
+        }
+
+        const candidates = properties.filter(p => p.address && !p.hidden && needsFetch(p));
+        if (!candidates.length) return;
+
+        await loadGoogleMapsSdk();
+
+        for (let i = 0; i < candidates.length; i += DRIVE_TIME_BATCH_SIZE) {
+          const batch = candidates.slice(i, i + DRIVE_TIME_BATCH_SIZE);
+          const origins = batch.map(p => `${p.address}, ${p.city} ${p.zip}`);
+          let response;
+          try {
+            response = await fetchDistanceMatrix(origins, [WORK_ADDRESSES.adam, WORK_ADDRESSES.lauren]);
+          } catch (err) {
+            console.warn('Drive time batch failed', err);
+            continue;
+          }
+
+          response.rows.forEach((row, idx) => {
+            const p = batch[idx];
+            const adamEl = row.elements[0];
+            const laurenEl = row.elements[1];
+            const newAdamMin = adamEl && adamEl.status === 'OK' ? Math.round(adamEl.duration.value / 60) : null;
+            const newLaurenMin = laurenEl && laurenEl.status === 'OK' ? Math.round(laurenEl.duration.value / 60) : null;
+
+            let changed = false;
+
+            if (newAdamMin != null) {
+              const isJump = rushHourNow && p.driveTimeAdamRushHourSample && p.driveTimeAdamMinutes != null
+                && newAdamMin > p.driveTimeAdamMinutes * DRIVE_TIME_JUMP_DISCARD_RATIO;
+              if (!isJump) {
+                p.driveTimeAdamMinutes = newAdamMin;
+                p.driveTimeAdamComputedAt = Date.now();
+                p.driveTimeAdamRushHourSample = rushHourNow;
+                changed = true;
+              }
+            }
+
+            if (newLaurenMin != null) {
+              const isJump = rushHourNow && p.driveTimeLaurenRushHourSample && p.driveTimeLaurenMinutes != null
+                && newLaurenMin > p.driveTimeLaurenMinutes * DRIVE_TIME_JUMP_DISCARD_RATIO;
+              if (!isJump) {
+                p.driveTimeLaurenMinutes = newLaurenMin;
+                p.driveTimeLaurenComputedAt = Date.now();
+                p.driveTimeLaurenRushHourSample = rushHourNow;
+                changed = true;
+              }
+            }
+
+            if (changed) persistPropertyState(p);
+          });
+        }
+
+        applyFilters();
+      } catch (err) {
+        console.warn('Drive time sync failed', err);
+      }
+    }
+
     // Percentile helper: value at the given fraction (0-1) of a sorted-
     // ascending numeric array.
     function percentileOf(sortedAsc, fraction) {
@@ -3610,7 +3765,7 @@
 
     // Max possible score, given the current point weights below — used to
     // size the cutoff inputs and the Manage Homes tooltip.
-    const MAX_MATCH_SCORE = 3 + 3 + 2 + 1 + 6 + 3 + 3; // 21
+    const MAX_MATCH_SCORE = 3 + 3 + 2 + 1 + 6 + 3 + 3 + 6 + 6; // 33
 
     // Full breakdown (used by Manage Homes to explain the score) — a plain
     // total-only score is just the sum of gate.points below.
@@ -3688,6 +3843,21 @@
         label: 'Central air',
         detail: property.cooling && property.cooling.length ? property.cooling.join(', ') : 'unknown',
         points: hasCentralAir ? 3 : 0
+      });
+
+      // 8-9. Drive time to each person's work, at rush hour — see
+      // syncDriveTimesInBackground for how/when these get computed.
+      const adamMin = property.driveTimeAdamMinutes;
+      gates.push({
+        label: "Drive time to Adam's work",
+        detail: adamMin == null ? 'not yet computed' : `${adamMin} min${property.driveTimeAdamRushHourSample ? '' : ' (off-peak estimate)'}`,
+        points: driveTimeToPoints(adamMin)
+      });
+      const laurenMin = property.driveTimeLaurenMinutes;
+      gates.push({
+        label: "Drive time to Lauren's work",
+        detail: laurenMin == null ? 'not yet computed' : `${laurenMin} min${property.driveTimeLaurenRushHourSample ? '' : ' (off-peak estimate)'}`,
+        points: driveTimeToPoints(laurenMin)
       });
 
       const score = gates.reduce((sum, g) => sum + g.points, 0);
@@ -6443,6 +6613,7 @@
     openSharedPropertyFromUrl();
     initFirebaseSync();
     autoSyncOneHomeInBackground();
+    syncDriveTimesInBackground();
   </script>
 </body>
 </html>
