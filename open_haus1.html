@@ -2290,6 +2290,8 @@
           <p style="font-size:0.9rem; color:var(--muted);" id="panelStyle"><strong>Architectural Style:</strong> Craftsman</p>
           <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelHeating"><strong>Heating:</strong> —</p>
           <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelCooling"><strong>Cooling:</strong> —</p>
+          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelDriveTimeAdam"><strong>Drive to Adam's work:</strong> —</p>
+          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelDriveTimeLauren"><strong>Drive to Lauren's work:</strong> —</p>
         </div>
 
         <div>
@@ -3632,6 +3634,13 @@
       return day >= 2 && day <= 4 && now.getHours() === 7; // Tue/Wed/Thu, 7:00-7:59am
     }
 
+    // Shared display text for a cached drive time — used by both the Match
+    // Tier score breakdown and the fly-in panel.
+    function formatDriveTimeDisplay(minutes, isRushHourSample) {
+      if (minutes == null) return 'Not yet computed';
+      return `${minutes} min${isRushHourSample ? ' (rush hour)' : ' (off-peak estimate)'}`;
+    }
+
     // Converts a drive time in minutes to points: <10min is 6, then -1
     // point per extra 5 minutes (15min=5, 20min=4, ... 35min=1, 40+min=0).
     function driveTimeToPoints(minutes) {
@@ -3850,13 +3859,13 @@
       const adamMin = property.driveTimeAdamMinutes;
       gates.push({
         label: "Drive time to Adam's work",
-        detail: adamMin == null ? 'not yet computed' : `${adamMin} min${property.driveTimeAdamRushHourSample ? '' : ' (off-peak estimate)'}`,
+        detail: formatDriveTimeDisplay(adamMin, property.driveTimeAdamRushHourSample),
         points: driveTimeToPoints(adamMin)
       });
       const laurenMin = property.driveTimeLaurenMinutes;
       gates.push({
         label: "Drive time to Lauren's work",
-        detail: laurenMin == null ? 'not yet computed' : `${laurenMin} min${property.driveTimeLaurenRushHourSample ? '' : ' (off-peak estimate)'}`,
+        detail: formatDriveTimeDisplay(laurenMin, property.driveTimeLaurenRushHourSample),
         points: driveTimeToPoints(laurenMin)
       });
 
@@ -6329,6 +6338,8 @@
       document.getElementById('panelStyle').innerHTML = `<strong>Style:</strong> ${property.style}`;
       document.getElementById('panelHeating').innerHTML = `<strong>Heating:</strong> ${(property.heating && property.heating.length) ? property.heating.join(', ') : 'Unknown'}`;
       document.getElementById('panelCooling').innerHTML = `<strong>Cooling:</strong> ${(property.cooling && property.cooling.length) ? property.cooling.join(', ') : 'Unknown'}`;
+      document.getElementById('panelDriveTimeAdam').innerHTML = `<strong>Drive to Adam's work:</strong> ${formatDriveTimeDisplay(property.driveTimeAdamMinutes, property.driveTimeAdamRushHourSample)}`;
+      document.getElementById('panelDriveTimeLauren').innerHTML = `<strong>Drive to Lauren's work:</strong> ${formatDriveTimeDisplay(property.driveTimeLaurenMinutes, property.driveTimeLaurenRushHourSample)}`;
 
       const descriptionEl = document.getElementById('panelDescription');
       const toggleEl = document.getElementById('descriptionToggle');
