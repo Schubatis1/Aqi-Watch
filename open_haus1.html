@@ -2479,11 +2479,11 @@
       </div>
       <div class="compare-body">
         <div class="match-tier-controls">
-          <label>Top Match ≥ <input type="number" id="matchTierTopInput" min="0" max="15" step="1"></label>
-          <label>Good Match ≥ <input type="number" id="matchTierGoodInput" min="0" max="15" step="1"></label>
+          <label>Top Match ≥ <input type="number" id="matchTierTopInput" min="0" max="21" step="1"></label>
+          <label>Good Match ≥ <input type="number" id="matchTierGoodInput" min="0" max="21" step="1"></label>
           <button class="btn-secondary" onclick="saveMatchTierCutoffs()">Save Cutoffs</button>
           <button class="btn-secondary" onclick="resetMatchTierCutoffsToDefault()">Reset to Default Split (~20/40/40)</button>
-          <span class="match-tier-controls-hint">Score range: 0–15. Homes with a manually-set Match Tier aren't affected.</span>
+          <span class="match-tier-controls-hint">Score range: 0–21. Homes with a manually-set Match Tier aren't affected.</span>
         </div>
         <table class="manage-table">
           <thead>
@@ -3610,7 +3610,7 @@
 
     // Max possible score, given the current point weights below — used to
     // size the cutoff inputs and the Manage Homes tooltip.
-    const MAX_MATCH_SCORE = 3 + 3 + 2 + 1 + 3 + 3 + 3; // 18
+    const MAX_MATCH_SCORE = 3 + 3 + 2 + 1 + 6 + 3 + 3; // 21
 
     // Full breakdown (used by Manage Homes to explain the score) — a plain
     // total-only score is just the sum of gate.points below.
@@ -3643,13 +3643,17 @@
       const isFresh = daysOnMarket != null && daysOnMarket >= 0 && daysOnMarket < 21;
       gates.push({ label: 'On market < 3 weeks', detail: daysOnMarket == null ? 'no listing date' : `${daysOnMarket} days`, points: isFresh ? 1 : 0 });
 
-      // 5. Distance from downtown Royal Oak: closer is worth more.
+      // 5. Distance from downtown Royal Oak: closer is worth more. Steps
+      // down 1 point per extra quarter-mile, starting at 6 for <=0.25mi.
       let miles = null;
       let distPoints = 0;
       if (property.lat != null && property.lng != null) {
         miles = haversineMiles(property.lat, property.lng, DOWNTOWN_ROYAL_OAK.lat, DOWNTOWN_ROYAL_OAK.lng);
-        if (miles <= 0.5) distPoints = 3;
-        else if (miles <= 1) distPoints = 2;
+        if (miles <= 0.25) distPoints = 6;
+        else if (miles <= 0.5) distPoints = 5;
+        else if (miles <= 0.75) distPoints = 4;
+        else if (miles <= 1) distPoints = 3;
+        else if (miles <= 1.25) distPoints = 2;
         else if (miles <= 1.5) distPoints = 1;
       }
       gates.push({ label: 'Distance from downtown', detail: miles == null ? 'unknown' : `${miles.toFixed(2)} mi`, points: distPoints });
