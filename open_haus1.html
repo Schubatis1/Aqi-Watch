@@ -2481,11 +2481,11 @@
       </div>
       <div class="compare-body">
         <div class="match-tier-controls">
-          <label>Top Match ≥ <input type="number" id="matchTierTopInput" min="0" max="33" step="1"></label>
-          <label>Good Match ≥ <input type="number" id="matchTierGoodInput" min="0" max="33" step="1"></label>
+          <label>Top Match ≥ <input type="number" id="matchTierTopInput" min="0" max="36" step="1"></label>
+          <label>Good Match ≥ <input type="number" id="matchTierGoodInput" min="0" max="36" step="1"></label>
           <button class="btn-secondary" onclick="saveMatchTierCutoffs()">Save Cutoffs</button>
           <button class="btn-secondary" onclick="resetMatchTierCutoffsToDefault()">Reset to Default Split (~20/40/40)</button>
-          <span class="match-tier-controls-hint">Score range: 0–33. Homes with a manually-set Match Tier aren't affected.</span>
+          <span class="match-tier-controls-hint">Score range: 0–36. Homes with a manually-set Match Tier aren't affected.</span>
         </div>
         <table class="manage-table">
           <thead>
@@ -3774,7 +3774,7 @@
 
     // Max possible score, given the current point weights below — used to
     // size the cutoff inputs and the Manage Homes tooltip.
-    const MAX_MATCH_SCORE = 3 + 3 + 2 + 1 + 6 + 3 + 3 + 6 + 6; // 33
+    const MAX_MATCH_SCORE = 6 + 3 + 2 + 1 + 6 + 3 + 3 + 6 + 6; // 36
 
     // Full breakdown (used by Manage Homes to explain the score) — a plain
     // total-only score is just the sum of gate.points below.
@@ -3784,9 +3784,9 @@
       // 1. Price, tiered — closer to the sweet spot scores higher.
       const price = property.rawPrice;
       let pricePoints = 0;
-      if (price >= 375000 && price < 425000) pricePoints = 3;
-      else if (price >= 425000 && price < 475000) pricePoints = 2;
-      else if (price >= 475000 && price <= 525000) pricePoints = 1;
+      if (price >= 375000 && price < 425000) pricePoints = 6;
+      else if (price >= 425000 && price < 475000) pricePoints = 4;
+      else if (price >= 475000 && price <= 525000) pricePoints = 2;
       gates.push({ label: 'Price tier ($375k–$525k)', detail: price ? `$${price.toLocaleString()}` : 'unknown', points: pricePoints });
 
       // 2. Not a bungalow — heavily weighted, a hard preference.
