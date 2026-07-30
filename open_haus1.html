@@ -2455,8 +2455,8 @@
             <p id="panelCommuteLaurenPm"><strong>Return from Lauren's work:</strong> —</p>
             <p id="panelWalkDowntown"><strong>Walk to Downtown Royal Oak:</strong> —</p>
             <p id="panelBikeDowntown"><strong>Bike to Downtown Royal Oak:</strong> —</p>
-            <p id="panelWalkMilesBabyRo"><strong>Walk to Miles &amp; Baby Ro's:</strong> —</p>
-            <p id="panelBikeMilesBabyRo"><strong>Bike to Miles &amp; Baby Ro's:</strong> —</p>
+            <p id="panelWalkMilesBabyRo"><strong>Walk to Miles' and Baby Ro's House:</strong> —</p>
+            <p id="panelBikeMilesBabyRo"><strong>Bike to Miles' and Baby Ro's House:</strong> —</p>
           </div>
           <div class="schedule-recompute-actions">
             <button type="button" id="panelRecomputeMorningBtn" class="btn-secondary" onclick="forceRecomputeMorningCommute(activeEvalId)">Recompute Morning Commute</button>
@@ -3850,8 +3850,8 @@
       document.getElementById('panelCommuteLaurenPm').innerHTML = `<strong>Return from Lauren's work:</strong> ${formatDriveTimeDisplay(property.commuteLaurenPmMinutes, property.commuteLaurenPmRushHourSample)}`;
       document.getElementById('panelWalkDowntown').innerHTML = `<strong>Walk to Downtown Royal Oak:</strong> ${formatTravelTimeDisplay(property.walkTimeDowntownMinutes)}`;
       document.getElementById('panelBikeDowntown').innerHTML = `<strong>Bike to Downtown Royal Oak:</strong> ${formatTravelTimeDisplay(property.bikeTimeDowntownMinutes)}`;
-      document.getElementById('panelWalkMilesBabyRo').innerHTML = `<strong>Walk to Miles &amp; Baby Ro's:</strong> ${formatTravelTimeDisplay(property.walkTimeMilesBabyRoMinutes)}`;
-      document.getElementById('panelBikeMilesBabyRo').innerHTML = `<strong>Bike to Miles &amp; Baby Ro's:</strong> ${formatTravelTimeDisplay(property.bikeTimeMilesBabyRoMinutes)}`;
+      document.getElementById('panelWalkMilesBabyRo').innerHTML = `<strong>Walk to Miles' and Baby Ro's House:</strong> ${formatTravelTimeDisplay(property.walkTimeMilesBabyRoMinutes)}`;
+      document.getElementById('panelBikeMilesBabyRo').innerHTML = `<strong>Bike to Miles' and Baby Ro's House:</strong> ${formatTravelTimeDisplay(property.bikeTimeMilesBabyRoMinutes)}`;
     }
 
     // Converts a drive time in minutes to points: <10min is 6, then -1
