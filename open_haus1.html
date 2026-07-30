@@ -1321,6 +1321,32 @@
     .sidebar-nav-btn:hover { background: var(--gray-light); }
     .sidebar .select-pill { width: 100%; }
     .sidebar .card-density-toggle { width: 100%; }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: help;
+    }
+    .sync-status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #9ca3af;
+      flex-shrink: 0;
+    }
+    .sync-status.synced .sync-status-dot { background: #2f9e44; }
+    .sync-status.synced .sync-status-text { color: #2f9e44; }
+    .sync-status.error .sync-status-dot { background: var(--coral); }
+    .sync-status.error .sync-status-text { color: var(--coral-dark); }
+    .sync-status.disabled .sync-status-dot { background: #9ca3af; }
     .sidebar .card-density-toggle .density-btn { flex: 1; }
 
     .sidebar-backdrop {
@@ -2213,6 +2239,14 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2Z"/></svg>
         Preferences
       </button>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-label">Sync</span>
+      <div class="sync-status" id="syncStatusIndicator" title="Whether this device is receiving cross-device updates (loved/watchlist/homes added elsewhere) right now.">
+        <span class="sync-status-dot"></span>
+        <span class="sync-status-text">Checking…</span>
+      </div>
     </div>
   </nav>
 
@@ -3208,8 +3242,27 @@
         .catch(err => console.warn('Firestore sync failed', err));
     }
 
+    // Small visible indicator (Menu > Sync) for whether this device is
+    // actually receiving cross-device updates right now. Firestore sync
+    // failures (blocked CDN, network policy, offline) were previously
+    // silent — a device stuck on localStorage-only would just quietly show
+    // a partial home list and stale loved/watchlist state with no sign
+    // anything was wrong. This doesn't fix connectivity, but at least makes
+    // a stuck device obvious instead of invisible.
+    function setSyncStatus(state, text) {
+      const el = document.getElementById('syncStatusIndicator');
+      if (!el) return;
+      el.classList.remove('synced', 'error', 'disabled');
+      el.classList.add(state);
+      el.querySelector('.sync-status-text').innerText = text;
+    }
+
     function initFirebaseSync() {
-      if (!firebaseReady) return;
+      if (!firebaseReady) {
+        setSyncStatus('disabled', 'Local only (not configured)');
+        return;
+      }
+      setSyncStatus('disabled', 'Connecting…');
       db.collection('openHaus').onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
           if (change.type !== 'removed') {
@@ -3218,7 +3271,11 @@
         });
         applyFilters();
         retryOpenSharedProperty();
-      }, err => console.warn('Firestore listener error', err));
+        setSyncStatus('synced', `Synced ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+      }, err => {
+        console.warn('Firestore listener error', err);
+        setSyncStatus('error', 'Sync error — local only');
+      });
     }
 
     // Initialize Leaflet Map
@@ -3684,7 +3741,7 @@
         p.day = '—';
         p.openHouse = 'Not yet scheduled';
         p.openHouses = [];
-        persistPropertyState(p);
+        persistPropertyState(p, ['day', 'openHouse', 'openHouses']);
       });
 
       applyFilters();
@@ -3699,8 +3756,9 @@
 
       let changedCount = 0;
       properties.forEach(p => {
+        const wasManuallyLocked = p.priorityAuto === false;
         if (applyAutoMatchTier(p, properties)) changedCount++;
-        persistPropertyState(p);
+        if (!wasManuallyLocked) persistPropertyState(p, ['priority', 'priorityGroup', 'priorityClass', 'priorityAuto']);
       });
 
       applyFilters();
@@ -3954,7 +4012,7 @@
             const newAdamMin = adamEl && adamEl.status === 'OK' ? Math.round(adamEl.duration.value / 60) : null;
             const newLaurenMin = laurenEl && laurenEl.status === 'OK' ? Math.round(laurenEl.duration.value / 60) : null;
 
-            let changed = false;
+            const changedFields = [];
 
             if (newAdamMin != null) {
               const isJump = rushHourNow && p.driveTimeAdamRushHourSample && p.driveTimeAdamMinutes != null
@@ -3963,7 +4021,7 @@
                 p.driveTimeAdamMinutes = newAdamMin;
                 p.driveTimeAdamComputedAt = Date.now();
                 p.driveTimeAdamRushHourSample = rushHourNow;
-                changed = true;
+                changedFields.push('driveTimeAdamMinutes', 'driveTimeAdamComputedAt', 'driveTimeAdamRushHourSample');
               }
             }
 
@@ -3974,11 +4032,11 @@
                 p.driveTimeLaurenMinutes = newLaurenMin;
                 p.driveTimeLaurenComputedAt = Date.now();
                 p.driveTimeLaurenRushHourSample = rushHourNow;
-                changed = true;
+                changedFields.push('driveTimeLaurenMinutes', 'driveTimeLaurenComputedAt', 'driveTimeLaurenRushHourSample');
               }
             }
 
-            if (changed) persistPropertyState(p);
+            if (changedFields.length) persistPropertyState(p, changedFields);
           });
         }
 
@@ -4084,7 +4142,7 @@
               p[minutesField] = newMin;
               p[computedAtField] = Date.now();
               p[rushField] = rushNow;
-              persistPropertyState(p);
+              persistPropertyState(p, [minutesField, computedAtField, rushField]);
             });
           }
         }
@@ -4133,20 +4191,20 @@
           } catch (err) { console.warn('Bike time batch failed', err); }
 
           batch.forEach((p, idx) => {
-            let changed = false;
+            const changedFields = [];
             if (walkResponse) {
               const row = walkResponse.rows[idx];
               const downtownEl = row.elements[0], milesEl = row.elements[1];
-              if (downtownEl && downtownEl.status === 'OK') { p.walkTimeDowntownMinutes = Math.round(downtownEl.duration.value / 60); changed = true; }
-              if (milesEl && milesEl.status === 'OK') { p.walkTimeMilesBabyRoMinutes = Math.round(milesEl.duration.value / 60); changed = true; }
+              if (downtownEl && downtownEl.status === 'OK') { p.walkTimeDowntownMinutes = Math.round(downtownEl.duration.value / 60); changedFields.push('walkTimeDowntownMinutes'); }
+              if (milesEl && milesEl.status === 'OK') { p.walkTimeMilesBabyRoMinutes = Math.round(milesEl.duration.value / 60); changedFields.push('walkTimeMilesBabyRoMinutes'); }
             }
             if (bikeResponse) {
               const row = bikeResponse.rows[idx];
               const downtownEl = row.elements[0], milesEl = row.elements[1];
-              if (downtownEl && downtownEl.status === 'OK') { p.bikeTimeDowntownMinutes = Math.round(downtownEl.duration.value / 60); changed = true; }
-              if (milesEl && milesEl.status === 'OK') { p.bikeTimeMilesBabyRoMinutes = Math.round(milesEl.duration.value / 60); changed = true; }
+              if (downtownEl && downtownEl.status === 'OK') { p.bikeTimeDowntownMinutes = Math.round(downtownEl.duration.value / 60); changedFields.push('bikeTimeDowntownMinutes'); }
+              if (milesEl && milesEl.status === 'OK') { p.bikeTimeMilesBabyRoMinutes = Math.round(milesEl.duration.value / 60); changedFields.push('bikeTimeMilesBabyRoMinutes'); }
             }
-            if (changed) persistPropertyState(p);
+            if (changedFields.length) persistPropertyState(p, changedFields);
           });
         }
 
@@ -4173,18 +4231,24 @@
         const adamEl = row.elements[0];
         const laurenEl = row.elements[1];
         const rushHourNow = isMorningRushHourNow();
+        const changedFields = [];
         if (adamEl && adamEl.status === 'OK') {
           property.driveTimeAdamMinutes = Math.round(adamEl.duration.value / 60);
           property.driveTimeAdamComputedAt = Date.now();
           property.driveTimeAdamRushHourSample = rushHourNow;
+          changedFields.push('driveTimeAdamMinutes', 'driveTimeAdamComputedAt', 'driveTimeAdamRushHourSample');
         }
         if (laurenEl && laurenEl.status === 'OK') {
           property.driveTimeLaurenMinutes = Math.round(laurenEl.duration.value / 60);
           property.driveTimeLaurenComputedAt = Date.now();
           property.driveTimeLaurenRushHourSample = rushHourNow;
+          changedFields.push('driveTimeLaurenMinutes', 'driveTimeLaurenComputedAt', 'driveTimeLaurenRushHourSample');
         }
-        persistPropertyState(property);
-        applyFilters();
+        if (changedFields.length) persistPropertyState(property, changedFields);
+        // Not shown on the card grid — no need to rebuild it (see
+        // syncDriveTimesInBackground for why that would also re-fetch every
+        // visible photo). Guard against the panel having moved on to a
+        // different property while this request was in flight.
         if (activeEvalId === id) refreshPanelCommuteView(property);
       } catch (err) {
         alert(`Could not recompute morning commute: ${err.message}`);
@@ -4204,18 +4268,22 @@
         const response = await fetchDistanceMatrix([WORK_ADDRESSES.adam, WORK_ADDRESSES.lauren], [dest]);
         const adamEl = response.rows[0].elements[0];
         const laurenEl = response.rows[1].elements[0];
+        const changedFields = [];
         if (adamEl && adamEl.status === 'OK') {
           property.commuteAdamPmMinutes = Math.round(adamEl.duration.value / 60);
           property.commuteAdamPmComputedAt = Date.now();
           property.commuteAdamPmRushHourSample = isEveningRushHourAdamNow();
+          changedFields.push('commuteAdamPmMinutes', 'commuteAdamPmComputedAt', 'commuteAdamPmRushHourSample');
         }
         if (laurenEl && laurenEl.status === 'OK') {
           property.commuteLaurenPmMinutes = Math.round(laurenEl.duration.value / 60);
           property.commuteLaurenPmComputedAt = Date.now();
           property.commuteLaurenPmRushHourSample = isEveningRushHourLaurenNow();
+          changedFields.push('commuteLaurenPmMinutes', 'commuteLaurenPmComputedAt', 'commuteLaurenPmRushHourSample');
         }
-        persistPropertyState(property);
-        applyFilters();
+        if (changedFields.length) persistPropertyState(property, changedFields);
+        // Not shown on the card grid; guard against the panel having moved
+        // on to a different property while this request was in flight.
         if (activeEvalId === id) refreshPanelCommuteView(property);
       } catch (err) {
         alert(`Could not recompute evening commute: ${err.message}`);
@@ -4418,8 +4486,9 @@
     function retierAllFromCurrentCutoffs(forceOverrides) {
       let changedCount = 0;
       properties.forEach(p => {
+        const wasSkipped = !forceOverrides && p.priorityAuto === false;
         if (applyAutoMatchTier(p, properties, forceOverrides)) changedCount++;
-        persistPropertyState(p);
+        if (!wasSkipped) persistPropertyState(p, ['priority', 'priorityGroup', 'priorityClass', 'priorityAuto']);
       });
       applyFilters();
       return changedCount;
@@ -4980,17 +5049,37 @@
       }
     }
 
-    function persistPropertyState(property) {
+    // Top-level (not nested under `core`) Firestore fields on each openHaus
+    // doc — kept separate from `core` for historical reasons, but they're
+    // still subject to the same staleness risk described below.
+    const TOP_LEVEL_FIRESTORE_FIELDS = ['weekends', 'hidden', 'loved', 'watchlist', 'toured', 'touredDate'];
+
+    // changedFields: optional array of property key names this specific call
+    // actually intends to change. localStorage always gets the property's
+    // full current snapshot (that's fine — it's this device's own state, no
+    // race possible). But Firestore is shared across every device/tab, and
+    // by default this function used to resend the ENTIRE property (every
+    // field this device currently knows about) on every single call. Since
+    // background jobs (drive time, PM commute, walk/bike, OneHome refresh)
+    // run automatically and update all sorts of unrelated properties, any
+    // device whose in-memory copy of a field was even slightly stale (very
+    // common — Firestore sync is async, multiple tabs/devices can be open at
+    // once) would silently overwrite another device's more recent edit to
+    // that field the next time it saved anything for that property at all —
+    // this is why loved/watchlist/toured changes sometimes didn't stick.
+    // Passing changedFields restricts the Firestore write to just those
+    // keys; omit it only for genuinely-bulk operations (editing a home's
+    // full details, importing/re-importing a listing) where overwriting
+    // everything really is the intent.
+    function persistPropertyState(property, changedFields) {
       const id = property.id;
       const isCustom = isCustomPropertyId(id);
 
       if (isCustom) {
         localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
-        syncPropertyToFirestore(id, { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' });
       } else {
         const { ratings, evalNotes, features, pricePerSqFt, ...corePatch } = property;
         localStorage.setItem(`override_${id}`, JSON.stringify(corePatch));
-        syncPropertyToFirestore(id, { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' });
       }
       localStorage.setItem(`weekends_${id}`, JSON.stringify(property.weekends || []));
       localStorage.setItem(`hidden_${id}`, property.hidden ? '1' : '0');
@@ -4998,6 +5087,26 @@
       localStorage.setItem(`watchlist_${id}`, property.watchlist ? '1' : '0');
       localStorage.setItem(`toured_${id}`, property.toured ? '1' : '0');
       localStorage.setItem(`touredDate_${id}`, property.touredDate || '');
+
+      let patch;
+      if (changedFields && changedFields.length) {
+        patch = {};
+        const corePatchFields = {};
+        changedFields.forEach(key => {
+          if (TOP_LEVEL_FIRESTORE_FIELDS.includes(key)) {
+            patch[key] = property[key];
+          } else {
+            corePatchFields[key] = property[key];
+          }
+        });
+        if (Object.keys(corePatchFields).length) patch.core = corePatchFields;
+      } else if (isCustom) {
+        patch = { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' };
+      } else {
+        const { ratings, evalNotes, features, pricePerSqFt, ...corePatch } = property;
+        patch = { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' };
+      }
+      syncPropertyToFirestore(id, patch);
     }
 
     function openManageHomes() {
@@ -5101,7 +5210,7 @@
       const { orderField } = REORDER_LIST_CONFIG[reorderActiveList];
       orderedProperties.forEach((p, idx) => {
         p[orderField] = idx + 1;
-        persistPropertyState(p);
+        persistPropertyState(p, [orderField]);
       });
       applyFilters();
     }
@@ -5293,7 +5402,7 @@
       const idx = property.weekends.indexOf(weekendId);
       if (idx >= 0) property.weekends.splice(idx, 1);
       else property.weekends.push(weekendId);
-      persistPropertyState(property);
+      persistPropertyState(property, ['weekends']);
       renderManageHomesList();
       applyFilters();
     }
@@ -5304,7 +5413,7 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.hidden = !property.hidden;
-      persistPropertyState(property);
+      persistPropertyState(property, ['hidden']);
       renderManageHomesList();
       applyFilters();
     }
@@ -5313,7 +5422,7 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.loved = !property.loved;
-      persistPropertyState(property);
+      persistPropertyState(property, ['loved']);
       applyFilters();
       refreshQuickActionsView(property);
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
@@ -5329,7 +5438,7 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.watchlist = !property.watchlist;
-      persistPropertyState(property);
+      persistPropertyState(property, ['watchlist']);
       applyFilters();
       refreshQuickActionsView(property);
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
@@ -5341,7 +5450,7 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.watchlistAdam = !property.watchlistAdam;
-      persistPropertyState(property);
+      persistPropertyState(property, ['watchlistAdam']);
       applyFilters();
       refreshQuickActionsView(property);
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
@@ -5353,7 +5462,7 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.watchlistLauren = !property.watchlistLauren;
-      persistPropertyState(property);
+      persistPropertyState(property, ['watchlistLauren']);
       applyFilters();
       refreshQuickActionsView(property);
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
@@ -5383,7 +5492,7 @@
       if (!property) return;
       property.toured = !property.toured;
       property.touredDate = property.toured ? (property.touredDate || new Date().toISOString().slice(0, 10)) : '';
-      persistPropertyState(property);
+      persistPropertyState(property, ['toured', 'touredDate']);
       applyFilters();
       if (activeEvalId === id) { refreshTouredView(property); refreshQuickActionsView(property); }
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
@@ -5396,7 +5505,7 @@
       if (!property) return;
       property.touredDate = dateStr;
       property.toured = !!dateStr;
-      persistPropertyState(property);
+      persistPropertyState(property, ['toured', 'touredDate']);
       applyFilters();
     }
 
@@ -5415,7 +5524,7 @@
       if (!property) return;
       property.toured = checked;
       property.touredDate = checked ? (property.touredDate || new Date().toISOString().slice(0, 10)) : '';
-      persistPropertyState(property);
+      persistPropertyState(property, ['toured', 'touredDate']);
       applyFilters();
       refreshTouredView(property);
       refreshQuickActionsView(property);
@@ -5873,15 +5982,15 @@
           const detail = await fetchOneHomeListingDetail(groupId, link.searchId, link.onehomeId, sessionToken);
           if (!detail || !detail.property) return;
           const dp = detail.property;
-          let changed = false;
+          const changedFields = [];
 
           if (dp.ListPrice != null) {
             const rawPrice = Math.round(dp.ListPrice);
             if (p.rawPrice !== rawPrice) {
               p.rawPrice = rawPrice;
               p.price = `$${rawPrice.toLocaleString()}`;
-              if (p.rawSqft) p.pricePerSqFt = Math.round(rawPrice / p.rawSqft);
-              changed = true;
+              changedFields.push('rawPrice', 'price');
+              if (p.rawSqft) { p.pricePerSqFt = Math.round(rawPrice / p.rawSqft); changedFields.push('pricePerSqFt'); }
             }
           }
           if (dp.LivingArea != null) {
@@ -5889,40 +5998,40 @@
             if (p.rawSqft !== rawSqft) {
               p.rawSqft = rawSqft;
               p.sqft = rawSqft.toLocaleString();
-              if (p.rawPrice) p.pricePerSqFt = Math.round(p.rawPrice / rawSqft);
-              changed = true;
+              changedFields.push('rawSqft', 'sqft');
+              if (p.rawPrice) { p.pricePerSqFt = Math.round(p.rawPrice / rawSqft); changedFields.push('pricePerSqFt'); }
             }
           }
-          if (dp.BedroomsTotal != null && p.beds !== dp.BedroomsTotal) { p.beds = dp.BedroomsTotal; changed = true; }
+          if (dp.BedroomsTotal != null && p.beds !== dp.BedroomsTotal) { p.beds = dp.BedroomsTotal; changedFields.push('beds'); }
           const baths = dp.BathroomsFull != null
             ? dp.BathroomsFull + (dp.BathroomsHalf ? dp.BathroomsHalf * 0.5 : 0)
             : (dp.BathroomsTotalInteger != null ? dp.BathroomsTotalInteger : null);
-          if (baths != null && p.baths !== baths) { p.baths = baths; changed = true; }
+          if (baths != null && p.baths !== baths) { p.baths = baths; changedFields.push('baths'); }
           if (dp.Latitude != null && dp.Longitude != null && (p.lat !== dp.Latitude || p.lng !== dp.Longitude)) {
-            p.lat = dp.Latitude; p.lng = dp.Longitude; changed = true;
+            p.lat = dp.Latitude; p.lng = dp.Longitude; changedFields.push('lat', 'lng');
           }
-          if (dp.YearBuilt && p.yearBuilt !== dp.YearBuilt) { p.yearBuilt = dp.YearBuilt; changed = true; }
+          if (dp.YearBuilt && p.yearBuilt !== dp.YearBuilt) { p.yearBuilt = dp.YearBuilt; changedFields.push('yearBuilt'); }
           if (dp.ArchitecturalStyle && dp.ArchitecturalStyle[0] && p.style !== dp.ArchitecturalStyle[0]) {
             p.style = dp.ArchitecturalStyle[0];
             p.isBungalow = /bungalow/i.test(p.style);
-            changed = true;
+            changedFields.push('style', 'isBungalow');
           }
-          if (dp.PublicRemarks && p.description !== dp.PublicRemarks) { p.description = dp.PublicRemarks; changed = true; }
-          if (dp.ListingContractDate && p.listingDate !== dp.ListingContractDate) { p.listingDate = dp.ListingContractDate; changed = true; }
+          if (dp.PublicRemarks && p.description !== dp.PublicRemarks) { p.description = dp.PublicRemarks; changedFields.push('description'); }
+          if (dp.ListingContractDate && p.listingDate !== dp.ListingContractDate) { p.listingDate = dp.ListingContractDate; changedFields.push('listingDate'); }
           if (dp.Heating && dp.Heating.length) {
             const heating = dp.Heating.map(splitCamelCase);
-            if (JSON.stringify(p.heating || []) !== JSON.stringify(heating)) { p.heating = heating; changed = true; }
+            if (JSON.stringify(p.heating || []) !== JSON.stringify(heating)) { p.heating = heating; changedFields.push('heating'); }
           }
           if (dp.Cooling && dp.Cooling.length) {
             const cooling = dp.Cooling.map(splitCamelCase);
-            if (JSON.stringify(p.cooling || []) !== JSON.stringify(cooling)) { p.cooling = cooling; changed = true; }
+            if (JSON.stringify(p.cooling || []) !== JSON.stringify(cooling)) { p.cooling = cooling; changedFields.push('cooling'); }
           }
 
           const ohDisplay = buildOpenHouseDisplay(detail.openHouse);
           const entriesChanged = JSON.stringify(p.openHouses || []) !== JSON.stringify(ohDisplay.entries);
           if (p.day !== ohDisplay.day || p.openHouse !== ohDisplay.openHouse || entriesChanged) {
             p.day = ohDisplay.day; p.openHouse = ohDisplay.openHouse; p.openHouses = ohDisplay.entries;
-            changed = true;
+            changedFields.push('day', 'openHouse', 'openHouses');
           }
 
           // Photos are the expensive part (dozens of full-size images per
@@ -5944,7 +6053,7 @@
             }
           }
 
-          if (changed) persistPropertyState(p);
+          if (changedFields.length) persistPropertyState(p, changedFields);
         } catch (err) {
           console.warn('Direct OneHome link sync failed for', p.address, err);
         }
@@ -6060,7 +6169,7 @@
       let pricesFixed = 0;
       matches.forEach(r => {
         const existing = r.existing;
-        let changed = false;
+        const changedFields = [];
 
         const lat = r.property.Latitude;
         const lng = r.property.Longitude;
@@ -6068,7 +6177,7 @@
           existing.lat = lat;
           existing.lng = lng;
           locationsFixed++;
-          changed = true;
+          changedFields.push('lat', 'lng');
         }
 
         // Syncs in both directions: picks up new/changed open house dates,
@@ -6083,7 +6192,7 @@
             existing.openHouse = ohDisplay.openHouse;
             existing.openHouses = ohDisplay.entries;
             schedulesFixed++;
-            changed = true;
+            changedFields.push('day', 'openHouse', 'openHouses');
           }
         }
 
@@ -6092,9 +6201,9 @@
           if (existing.rawPrice !== rawPrice) {
             existing.rawPrice = rawPrice;
             existing.price = `$${rawPrice.toLocaleString()}`;
-            if (existing.rawSqft) existing.pricePerSqFt = Math.round(rawPrice / existing.rawSqft);
+            changedFields.push('rawPrice', 'price');
+            if (existing.rawSqft) { existing.pricePerSqFt = Math.round(rawPrice / existing.rawSqft); changedFields.push('pricePerSqFt'); }
             pricesFixed++;
-            changed = true;
           }
         }
 
@@ -6102,24 +6211,24 @@
         // actually has the value — never clobbered back to unknown.
         if (r.property.ListingContractDate && existing.listingDate !== r.property.ListingContractDate) {
           existing.listingDate = r.property.ListingContractDate;
-          changed = true;
+          changedFields.push('listingDate');
         }
         if (r.property.Heating && r.property.Heating.length) {
           const heating = r.property.Heating.map(splitCamelCase);
           if (JSON.stringify(existing.heating || []) !== JSON.stringify(heating)) {
             existing.heating = heating;
-            changed = true;
+            changedFields.push('heating');
           }
         }
         if (r.property.Cooling && r.property.Cooling.length) {
           const cooling = r.property.Cooling.map(splitCamelCase);
           if (JSON.stringify(existing.cooling || []) !== JSON.stringify(cooling)) {
             existing.cooling = cooling;
-            changed = true;
+            changedFields.push('cooling');
           }
         }
 
-        if (changed) persistPropertyState(existing);
+        if (changedFields.length) persistPropertyState(existing, changedFields);
       });
       if (locationsFixed > 0 || schedulesFixed > 0 || pricesFixed > 0) applyFilters();
 
