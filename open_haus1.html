@@ -3854,6 +3854,17 @@
       document.getElementById('panelBikeMilesBabyRo').innerHTML = `<strong>Bike to Miles' and Baby Ro's House:</strong> ${formatTravelTimeDisplay(property.bikeTimeMilesBabyRoMinutes)}`;
     }
 
+    // Called by the background commute/travel-time syncs once they finish a
+    // pass. None of that data appears on the card grid (only in the fly-in
+    // panel), so there's no need to call applyFilters() and rebuild every
+    // card — which would tear down and re-fetch every visible photo, and is
+    // the root cause of photos flashing repeatedly shortly after page load.
+    function refreshOpenPanelCommuteViewIfShowing() {
+      if (!activeEvalId) return;
+      const property = properties.find(p => p.id === activeEvalId);
+      if (property) refreshPanelCommuteView(property);
+    }
+
     // Converts a drive time in minutes to points: <10min is 6, then -1
     // point per extra 5 minutes (15min=5, 20min=4, ... 35min=1, 40+min=0).
     function driveTimeToPoints(minutes) {
@@ -3971,7 +3982,10 @@
           });
         }
 
-        applyFilters();
+        // Drive time isn't shown on the card grid, only in the fly-in panel
+        // — refresh that in place instead of rebuilding the whole grid
+        // (which would tear down and re-fetch every visible photo).
+        refreshOpenPanelCommuteViewIfShowing();
       } catch (err) {
         console.warn('Drive time sync failed', err);
       }
@@ -4082,7 +4096,9 @@
           await runLeg(laurenCandidates, WORK_ADDRESSES.lauren, laurenRushNow, 'commuteLaurenPmMinutes', 'commuteLaurenPmComputedAt', 'commuteLaurenPmRushHourSample');
         }
 
-        applyFilters();
+        // Not shown on the card grid — see the comment in
+        // syncDriveTimesInBackground for why this doesn't call applyFilters().
+        refreshOpenPanelCommuteViewIfShowing();
       } catch (err) {
         console.warn('PM commute sync failed', err);
       }
@@ -4134,7 +4150,9 @@
           });
         }
 
-        applyFilters();
+        // Not shown on the card grid — see the comment in
+        // syncDriveTimesInBackground for why this doesn't call applyFilters().
+        refreshOpenPanelCommuteViewIfShowing();
       } catch (err) {
         console.warn('Active travel time sync failed', err);
       }
