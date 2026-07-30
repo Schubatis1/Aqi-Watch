@@ -404,6 +404,69 @@
       padding: 0 30px 30px;
     }
 
+    /* Reorder Watch Lists panel */
+    .reorder-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .reorder-tab {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .reorder-tab.active { background: var(--navy); border-color: var(--navy); color: #ffffff; }
+    .reorder-tab:hover:not(.active) { border-color: var(--text); color: var(--text); }
+
+    .reorder-list { display: flex; flex-direction: column; gap: 8px; }
+    .reorder-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      cursor: grab;
+    }
+    .reorder-card.dragging { opacity: 0.4; }
+    .reorder-handle { color: var(--muted); flex-shrink: 0; display: flex; cursor: grab; }
+    .reorder-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .reorder-info { flex: 1; min-width: 0; }
+    .reorder-address {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .reorder-price { font-size: 0.8rem; color: var(--muted); }
+    .reorder-arrows { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+    .reorder-arrow-btn {
+      background: var(--bg);
+      border: none;
+      border-radius: 6px;
+      width: 26px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .reorder-arrow-btn:hover:not(:disabled) { color: var(--text); background: var(--gray-light); }
+    .reorder-arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
     .compare-table {
       width: 100%;
       border-collapse: collapse;
@@ -1796,6 +1859,43 @@
     .panel-share-btn:hover { background: var(--gray-light); color: var(--text); }
     .panel-share-btn svg { width: 17px; height: 17px; }
 
+    .panel-quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 30px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .quick-action-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .quick-action-pill svg { width: 15px; height: 15px; }
+    .quick-action-pill:hover { border-color: var(--text); color: var(--text); }
+    .quick-action-pill.quick-action-love.active { background: var(--coral); border-color: var(--coral); color: #ffffff; }
+    .quick-action-pill.quick-action-watchlist.active { background: #3b82f6; border-color: #3b82f6; color: #ffffff; }
+    .quick-action-pill.quick-action-adam.active { background: #f59e0b; border-color: #f59e0b; color: #ffffff; }
+    .quick-action-pill.quick-action-lauren.active { background: #8b5cf6; border-color: #8b5cf6; color: #ffffff; }
+    .quick-action-pill.quick-action-toured.active { background: #2f9e44; border-color: #2f9e44; color: #ffffff; }
+    .quick-action-pill.active svg[fill="none"] { fill: none; }
+    .quick-action-pill.quick-action-love.active svg { fill: currentColor; }
+
+    @media (max-width: 640px) {
+      .panel-quick-actions { padding: 0 20px 16px; }
+      .quick-action-pill span { display: none; }
+      .quick-action-pill { padding: 8px; }
+    }
+
     .share-modal {
       max-width: 460px;
     }
@@ -1843,6 +1943,32 @@
     }
 
     .panel-section-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+
+    .schedule-style-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      column-gap: 24px;
+    }
+    .schedule-style-grid p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+    @media (min-width: 900px) {
+      .schedule-style-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .schedule-recompute-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .schedule-recompute-actions .btn-secondary {
+      flex: 1;
+      min-width: 200px;
+      font-size: 0.82rem;
+      padding: 9px 12px;
+    }
 
     .panel-description {
       font-size: 0.9rem;
@@ -2067,6 +2193,10 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Manage Homes
       </button>
+      <button class="sidebar-nav-btn" onclick="closeSidebar(); openReorderPanel();">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><polyline points="17 15 20 18 17 21"/></svg>
+        Reorder Watch Lists
+      </button>
       <button class="sidebar-nav-btn" onclick="closeSidebar(); openOneHomeImportModal();">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Import
@@ -2228,6 +2358,34 @@
         </div>
       </div>
 
+      <div class="panel-quick-actions" id="panelQuickActions">
+        <button type="button" id="panelQuickAction-love" class="quick-action-pill quick-action-love" onclick="toggleLovedForProperty(activeEvalId)" title="Mark as Loved">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
+          <span>Love</span>
+        </button>
+        <button type="button" id="panelQuickAction-watchlist" class="quick-action-pill quick-action-watchlist" onclick="toggleWatchlistForProperty(activeEvalId)" title="Add to Main Watch List (share with realtor)">
+          <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
+          <span>Main Watch</span>
+        </button>
+        <button type="button" id="panelQuickAction-watchlistAdam" class="quick-action-pill quick-action-adam" onclick="toggleWatchlistAdamForProperty(activeEvalId)" title="Add to Adam's Watch List">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          <span>Adam's Watch</span>
+        </button>
+        <button type="button" id="panelQuickAction-watchlistLauren" class="quick-action-pill quick-action-lauren" onclick="toggleWatchlistLaurenForProperty(activeEvalId)" title="Add to Lauren's Watch List">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          <span>Lauren's Watch</span>
+        </button>
+        <button type="button" id="panelQuickAction-toured" class="quick-action-pill quick-action-toured" onclick="toggleTouredForProperty(activeEvalId)" title="Mark as Toured">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="14.5" cy="15" r="8"/>
+            <path d="M14.5 7c-2.7 3.3-2.7 12.7 0 16M14.5 7c2.7 3.3 2.7 12.7 0 16"/>
+            <path d="M6 15h17"/>
+            <path d="M1 9 22 1l-6 9-4-1-3 5-1-4-8-1z" fill="currentColor" stroke="none"/>
+          </svg>
+          <span>Toured</span>
+        </button>
+      </div>
+
       <div class="panel-body">
         <div class="panel-photo-wrap" id="panelPhotoWrap">
           <div class="photo-skeleton" id="panelPhotoSkeleton"></div>
@@ -2287,11 +2445,23 @@
         <div>
           <div class="panel-section-title">Schedule & Style</div>
           <p style="font-size:0.9rem; color:var(--text); margin-bottom: 4px;" id="panelOpenHouse"><strong>Open House:</strong> Sun 1:00–3:00 PM</p>
-          <p style="font-size:0.9rem; color:var(--muted);" id="panelStyle"><strong>Architectural Style:</strong> Craftsman</p>
-          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelHeating"><strong>Heating:</strong> —</p>
-          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelCooling"><strong>Cooling:</strong> —</p>
-          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelDriveTimeAdam"><strong>Drive to Adam's work:</strong> —</p>
-          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelDriveTimeLauren"><strong>Drive to Lauren's work:</strong> —</p>
+          <p style="font-size:0.9rem; color:var(--muted); margin-bottom:4px;" id="panelStyle"><strong>Architectural Style:</strong> Craftsman</p>
+          <div class="schedule-style-grid">
+            <p id="panelHeating"><strong>Heating:</strong> —</p>
+            <p id="panelCooling"><strong>Cooling:</strong> —</p>
+            <p id="panelDriveTimeAdam"><strong>Drive to Adam's work:</strong> —</p>
+            <p id="panelDriveTimeLauren"><strong>Drive to Lauren's work:</strong> —</p>
+            <p id="panelCommuteAdamPm"><strong>Return from Adam's work:</strong> —</p>
+            <p id="panelCommuteLaurenPm"><strong>Return from Lauren's work:</strong> —</p>
+            <p id="panelWalkDowntown"><strong>Walk to Downtown Royal Oak:</strong> —</p>
+            <p id="panelBikeDowntown"><strong>Bike to Downtown Royal Oak:</strong> —</p>
+            <p id="panelWalkMilesBabyRo"><strong>Walk to Miles &amp; Baby Ro's:</strong> —</p>
+            <p id="panelBikeMilesBabyRo"><strong>Bike to Miles &amp; Baby Ro's:</strong> —</p>
+          </div>
+          <div class="schedule-recompute-actions">
+            <button type="button" id="panelRecomputeMorningBtn" class="btn-secondary" onclick="forceRecomputeMorningCommute(activeEvalId)">Recompute Morning Commute</button>
+            <button type="button" id="panelRecomputeEveningBtn" class="btn-secondary" onclick="forceRecomputeEveningCommute(activeEvalId)">Recompute Evening Commute</button>
+          </div>
         </div>
 
         <div>
@@ -2504,6 +2674,28 @@
           </thead>
           <tbody id="manageHomesTableBody"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reorder Watch Lists Panel -->
+  <div class="compare-backdrop" id="reorderBackdrop" onclick="closeReorderPanel()">
+    <div class="compare-panel" onclick="event.stopPropagation()" style="max-width:720px;">
+      <div class="compare-header">
+        <div>
+          <h2>Reorder Watch Lists</h2>
+          <p id="reorderSubtitle">Drag to reorder, or use the arrows</p>
+        </div>
+        <button class="panel-close" onclick="closeReorderPanel()">&times;</button>
+      </div>
+      <div class="compare-body">
+        <div class="reorder-tabs" id="reorderTabs">
+          <button type="button" class="reorder-tab active" data-list="watchlist" onclick="setReorderTab('watchlist')">Main</button>
+          <button type="button" class="reorder-tab" data-list="watchlistAdam" onclick="setReorderTab('watchlistAdam')">Adam</button>
+          <button type="button" class="reorder-tab" data-list="watchlistLauren" onclick="setReorderTab('watchlistLauren')">Lauren</button>
+        </div>
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:16px;">Only the Main Watch List's order is shared with the realtor.</p>
+        <div class="reorder-list" id="reorderList"></div>
       </div>
     </div>
   </div>
@@ -2883,12 +3075,14 @@
       select.innerHTML = `
         <option value="all">View All</option>
         <option value="loved">View Loved ♥</option>
-        <option value="watchlist">View Watchlist 🔭</option>
+        <option value="watchlist">View Main Watch List 🔭</option>
+        <option value="watchlistAdam">View Adam's Watch List</option>
+        <option value="watchlistLauren">View Lauren's Watch List</option>
         ${weekendOptions}
       `;
 
       const savedWeekendId = localStorage.getItem('selectedWeekendId');
-      const validIds = ['all', 'loved', 'watchlist', ...WEEKENDS.map(w => w.id)];
+      const validIds = ['all', 'loved', 'watchlist', 'watchlistAdam', 'watchlistLauren', ...WEEKENDS.map(w => w.id)];
       select.value = validIds.includes(savedWeekendId) ? savedWeekendId : WEEKENDS[0].id;
     }
     initWeekendFilter();
@@ -3641,6 +3835,25 @@
       return `${minutes} min${isRushHourSample ? ' (rush hour)' : ' (off-peak estimate)'}`;
     }
 
+    // Walk/bike times aren't traffic-dependent, so there's no rush-hour label.
+    function formatTravelTimeDisplay(minutes) {
+      if (minutes == null) return 'Not yet computed';
+      return `${minutes} min`;
+    }
+
+    // Renders every commute/travel-time row in the fly-in's Schedule & Style
+    // section — shared by openModal() and the two force-recompute buttons.
+    function refreshPanelCommuteView(property) {
+      document.getElementById('panelDriveTimeAdam').innerHTML = `<strong>Drive to Adam's work:</strong> ${formatDriveTimeDisplay(property.driveTimeAdamMinutes, property.driveTimeAdamRushHourSample)}`;
+      document.getElementById('panelDriveTimeLauren').innerHTML = `<strong>Drive to Lauren's work:</strong> ${formatDriveTimeDisplay(property.driveTimeLaurenMinutes, property.driveTimeLaurenRushHourSample)}`;
+      document.getElementById('panelCommuteAdamPm').innerHTML = `<strong>Return from Adam's work:</strong> ${formatDriveTimeDisplay(property.commuteAdamPmMinutes, property.commuteAdamPmRushHourSample)}`;
+      document.getElementById('panelCommuteLaurenPm').innerHTML = `<strong>Return from Lauren's work:</strong> ${formatDriveTimeDisplay(property.commuteLaurenPmMinutes, property.commuteLaurenPmRushHourSample)}`;
+      document.getElementById('panelWalkDowntown').innerHTML = `<strong>Walk to Downtown Royal Oak:</strong> ${formatTravelTimeDisplay(property.walkTimeDowntownMinutes)}`;
+      document.getElementById('panelBikeDowntown').innerHTML = `<strong>Bike to Downtown Royal Oak:</strong> ${formatTravelTimeDisplay(property.bikeTimeDowntownMinutes)}`;
+      document.getElementById('panelWalkMilesBabyRo').innerHTML = `<strong>Walk to Miles &amp; Baby Ro's:</strong> ${formatTravelTimeDisplay(property.walkTimeMilesBabyRoMinutes)}`;
+      document.getElementById('panelBikeMilesBabyRo').innerHTML = `<strong>Bike to Miles &amp; Baby Ro's:</strong> ${formatTravelTimeDisplay(property.bikeTimeMilesBabyRoMinutes)}`;
+    }
+
     // Converts a drive time in minutes to points: <10min is 6, then -1
     // point per extra 5 minutes (15min=5, 20min=4, ... 35min=1, 40+min=0).
     function driveTimeToPoints(minutes) {
@@ -3761,6 +3974,235 @@
         applyFilters();
       } catch (err) {
         console.warn('Drive time sync failed', err);
+      }
+    }
+
+    // ---- Evening reverse commute (work -> home) + walk/bike travel times ----
+    // Adam and Lauren leave work at different times, so each reverse leg is
+    // only treated as a "real" rush-hour sample during its own window;
+    // outside that window a fetch still happens if the value is missing,
+    // it's just labeled an off-peak estimate (same convention as the AM legs).
+    const DOWNTOWN_ROYAL_OAK_ADDRESS = '430 S Main St, Royal Oak, MI 48067';
+    const MILES_BABY_RO_ADDRESS = '1203 N Maple, Royal Oak, MI';
+
+    function isEveningRushHourAdamNow() {
+      const now = new Date();
+      const day = now.getDay();
+      if (day < 2 || day > 4) return false; // Tue/Wed/Thu, same commute days as the AM gate
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+      return totalMin >= 16 * 60 + 30 && totalMin < 17 * 60 + 30; // 4:30-5:30pm
+    }
+
+    function isEveningRushHourLaurenNow() {
+      const now = new Date();
+      const day = now.getDay();
+      if (day < 2 || day > 4) return false;
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+      return totalMin >= 15 * 60 + 30 && totalMin < 16 * 60 + 30; // 3:30-4:30pm
+    }
+
+    function fetchDistanceMatrixMode(origins, destinations, travelMode) {
+      return new Promise((resolve, reject) => {
+        const service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix({ origins, destinations, travelMode }, (response, status) => {
+          if (status === 'OK') resolve(response);
+          else reject(new Error(`Distance Matrix request failed: ${status}`));
+        });
+      });
+    }
+
+    // One origin (a work address), many destinations (homes) — the mirror
+    // image of the AM batch shape, which is many origins/one pair of
+    // destinations.
+    function fetchReverseCommuteBatch(originAddress, destinationAddresses) {
+      return new Promise((resolve, reject) => {
+        const service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix({
+          origins: [originAddress],
+          destinations: destinationAddresses,
+          travelMode: google.maps.TravelMode.DRIVING,
+          drivingOptions: { departureTime: new Date(), trafficModel: google.maps.TrafficModel.BEST_GUESS }
+        }, (response, status) => {
+          if (status === 'OK') resolve(response.rows[0].elements);
+          else reject(new Error(`Distance Matrix request failed: ${status}`));
+        });
+      });
+    }
+
+    async function syncPmCommuteTimesInBackground() {
+      try {
+        const adamRushNow = isEveningRushHourAdamNow();
+        const laurenRushNow = isEveningRushHourLaurenNow();
+
+        function needsFetch(p, minutesField, rushField, computedAtField, rushNow) {
+          if (p[minutesField] == null) return true;
+          if (!rushNow) return false;
+          return !p[rushField] || (Date.now() - (p[computedAtField] || 0)) >= DRIVE_TIME_REFRESH_INTERVAL_MS;
+        }
+
+        const adamCandidates = properties.filter(p => p.address && !p.hidden &&
+          needsFetch(p, 'commuteAdamPmMinutes', 'commuteAdamPmRushHourSample', 'commuteAdamPmComputedAt', adamRushNow));
+        const laurenCandidates = properties.filter(p => p.address && !p.hidden &&
+          needsFetch(p, 'commuteLaurenPmMinutes', 'commuteLaurenPmRushHourSample', 'commuteLaurenPmComputedAt', laurenRushNow));
+
+        if (!adamCandidates.length && !laurenCandidates.length) return;
+
+        await loadGoogleMapsSdk();
+
+        async function runLeg(candidates, workAddress, rushNow, minutesField, computedAtField, rushField) {
+          for (let i = 0; i < candidates.length; i += DRIVE_TIME_BATCH_SIZE) {
+            const batch = candidates.slice(i, i + DRIVE_TIME_BATCH_SIZE);
+            const destinations = batch.map(p => `${p.address}, ${p.city} ${p.zip}`);
+            let elements;
+            try {
+              elements = await fetchReverseCommuteBatch(workAddress, destinations);
+            } catch (err) {
+              console.warn('PM commute batch failed', err);
+              continue;
+            }
+            elements.forEach((el, idx) => {
+              const p = batch[idx];
+              const newMin = el && el.status === 'OK' ? Math.round(el.duration.value / 60) : null;
+              if (newMin == null) return;
+              const isJump = rushNow && p[rushField] && p[minutesField] != null
+                && newMin > p[minutesField] * DRIVE_TIME_JUMP_DISCARD_RATIO;
+              if (isJump) return;
+              p[minutesField] = newMin;
+              p[computedAtField] = Date.now();
+              p[rushField] = rushNow;
+              persistPropertyState(p);
+            });
+          }
+        }
+
+        if (adamCandidates.length) {
+          await runLeg(adamCandidates, WORK_ADDRESSES.adam, adamRushNow, 'commuteAdamPmMinutes', 'commuteAdamPmComputedAt', 'commuteAdamPmRushHourSample');
+        }
+        if (laurenCandidates.length) {
+          await runLeg(laurenCandidates, WORK_ADDRESSES.lauren, laurenRushNow, 'commuteLaurenPmMinutes', 'commuteLaurenPmComputedAt', 'commuteLaurenPmRushHourSample');
+        }
+
+        applyFilters();
+      } catch (err) {
+        console.warn('PM commute sync failed', err);
+      }
+    }
+
+    // Walk/bike times to two fixed landmarks. These aren't traffic-dependent,
+    // so they're just computed once (whenever missing) rather than refreshed
+    // on an interval like the driving commutes above.
+    async function syncActiveTravelTimesInBackground() {
+      try {
+        function needsFetch(p) {
+          return p.walkTimeDowntownMinutes == null || p.bikeTimeDowntownMinutes == null ||
+            p.walkTimeMilesBabyRoMinutes == null || p.bikeTimeMilesBabyRoMinutes == null;
+        }
+
+        const candidates = properties.filter(p => p.address && !p.hidden && needsFetch(p));
+        if (!candidates.length) return;
+
+        await loadGoogleMapsSdk();
+        const destinations = [DOWNTOWN_ROYAL_OAK_ADDRESS, MILES_BABY_RO_ADDRESS];
+
+        for (let i = 0; i < candidates.length; i += DRIVE_TIME_BATCH_SIZE) {
+          const batch = candidates.slice(i, i + DRIVE_TIME_BATCH_SIZE);
+          const origins = batch.map(p => `${p.address}, ${p.city} ${p.zip}`);
+
+          let walkResponse = null, bikeResponse = null;
+          try {
+            walkResponse = await fetchDistanceMatrixMode(origins, destinations, google.maps.TravelMode.WALKING);
+          } catch (err) { console.warn('Walk time batch failed', err); }
+          try {
+            bikeResponse = await fetchDistanceMatrixMode(origins, destinations, google.maps.TravelMode.BICYCLING);
+          } catch (err) { console.warn('Bike time batch failed', err); }
+
+          batch.forEach((p, idx) => {
+            let changed = false;
+            if (walkResponse) {
+              const row = walkResponse.rows[idx];
+              const downtownEl = row.elements[0], milesEl = row.elements[1];
+              if (downtownEl && downtownEl.status === 'OK') { p.walkTimeDowntownMinutes = Math.round(downtownEl.duration.value / 60); changed = true; }
+              if (milesEl && milesEl.status === 'OK') { p.walkTimeMilesBabyRoMinutes = Math.round(milesEl.duration.value / 60); changed = true; }
+            }
+            if (bikeResponse) {
+              const row = bikeResponse.rows[idx];
+              const downtownEl = row.elements[0], milesEl = row.elements[1];
+              if (downtownEl && downtownEl.status === 'OK') { p.bikeTimeDowntownMinutes = Math.round(downtownEl.duration.value / 60); changed = true; }
+              if (milesEl && milesEl.status === 'OK') { p.bikeTimeMilesBabyRoMinutes = Math.round(milesEl.duration.value / 60); changed = true; }
+            }
+            if (changed) persistPropertyState(p);
+          });
+        }
+
+        applyFilters();
+      } catch (err) {
+        console.warn('Active travel time sync failed', err);
+      }
+    }
+
+    // ---- Force-recompute buttons (fly-in panel) — bypass the staleness/
+    // rush-hour gating above and refresh right now for just this property.
+    async function forceRecomputeMorningCommute(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      const btn = document.getElementById('panelRecomputeMorningBtn');
+      if (btn) { btn.disabled = true; btn.innerText = 'Recomputing…'; }
+      try {
+        await loadGoogleMapsSdk();
+        const origin = `${property.address}, ${property.city} ${property.zip}`;
+        const response = await fetchDistanceMatrix([origin], [WORK_ADDRESSES.adam, WORK_ADDRESSES.lauren]);
+        const row = response.rows[0];
+        const adamEl = row.elements[0];
+        const laurenEl = row.elements[1];
+        const rushHourNow = isMorningRushHourNow();
+        if (adamEl && adamEl.status === 'OK') {
+          property.driveTimeAdamMinutes = Math.round(adamEl.duration.value / 60);
+          property.driveTimeAdamComputedAt = Date.now();
+          property.driveTimeAdamRushHourSample = rushHourNow;
+        }
+        if (laurenEl && laurenEl.status === 'OK') {
+          property.driveTimeLaurenMinutes = Math.round(laurenEl.duration.value / 60);
+          property.driveTimeLaurenComputedAt = Date.now();
+          property.driveTimeLaurenRushHourSample = rushHourNow;
+        }
+        persistPropertyState(property);
+        applyFilters();
+        if (activeEvalId === id) refreshPanelCommuteView(property);
+      } catch (err) {
+        alert(`Could not recompute morning commute: ${err.message}`);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = 'Recompute Morning Commute'; }
+      }
+    }
+
+    async function forceRecomputeEveningCommute(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      const btn = document.getElementById('panelRecomputeEveningBtn');
+      if (btn) { btn.disabled = true; btn.innerText = 'Recomputing…'; }
+      try {
+        await loadGoogleMapsSdk();
+        const dest = `${property.address}, ${property.city} ${property.zip}`;
+        const response = await fetchDistanceMatrix([WORK_ADDRESSES.adam, WORK_ADDRESSES.lauren], [dest]);
+        const adamEl = response.rows[0].elements[0];
+        const laurenEl = response.rows[1].elements[0];
+        if (adamEl && adamEl.status === 'OK') {
+          property.commuteAdamPmMinutes = Math.round(adamEl.duration.value / 60);
+          property.commuteAdamPmComputedAt = Date.now();
+          property.commuteAdamPmRushHourSample = isEveningRushHourAdamNow();
+        }
+        if (laurenEl && laurenEl.status === 'OK') {
+          property.commuteLaurenPmMinutes = Math.round(laurenEl.duration.value / 60);
+          property.commuteLaurenPmComputedAt = Date.now();
+          property.commuteLaurenPmRushHourSample = isEveningRushHourLaurenNow();
+        }
+        persistPropertyState(property);
+        applyFilters();
+        if (activeEvalId === id) refreshPanelCommuteView(property);
+      } catch (err) {
+        alert(`Could not recompute evening commute: ${err.message}`);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = 'Recompute Evening Commute'; }
       }
     }
 
@@ -4153,7 +4595,7 @@
                 <button type="button" class="heart-btn ${item.loved ? 'loved' : ''}" onclick="event.stopPropagation(); toggleLovedForProperty('${item.id}')" title="${item.loved ? 'Remove from Loved' : 'Mark as Loved'}">
                   <svg viewBox="0 0 24 24" fill="${item.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
                 </button>
-                <button type="button" class="binoculars-btn ${item.watchlist ? 'watching' : ''}" onclick="event.stopPropagation(); toggleWatchlistForProperty('${item.id}')" title="${item.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
+                <button type="button" class="binoculars-btn ${item.watchlist ? 'watching' : ''}" onclick="event.stopPropagation(); toggleWatchlistForProperty('${item.id}')" title="${item.watchlist ? 'Remove from Main Watch List' : 'Add to Main Watch List (share with realtor)'}">
                   <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
                 </button>
                 <button type="button" id="toured-btn-${item.id}" class="toured-btn ${item.toured ? 'toured' : ''}" onclick="event.stopPropagation(); toggleTouredForProperty('${item.id}')" title="${item.toured ? `Toured${item.touredDate ? ' ' + item.touredDate : ''} — click to unmark` : 'Mark as Toured'}">
@@ -4295,6 +4737,8 @@
         const matchesWeekend = weekendId === 'all' ? true
           : weekendId === 'loved' ? !!item.loved
           : weekendId === 'watchlist' ? !!item.watchlist
+          : weekendId === 'watchlistAdam' ? !!item.watchlistAdam
+          : weekendId === 'watchlistLauren' ? !!item.watchlistLauren
           : (item.weekends || []).includes(weekendId);
         const matchesSearch = item.address.toLowerCase().includes(search) ||
                               item.notes.toLowerCase().includes(search) ||
@@ -4314,6 +4758,21 @@
 
         return matchesWeekend && matchesSearch && matchesDay && matchesPriority && matchesBungalow && matchesNextWeekend;
       });
+
+      // Each watch list has its own manual order (set from the Reorder
+      // Watch Lists panel) — the main list's order is what drives
+      // realtor-view.html, so keep all three views following it too.
+      const orderField = weekendId === 'watchlist' ? 'watchlistOrder'
+        : weekendId === 'watchlistAdam' ? 'watchlistAdamOrder'
+        : weekendId === 'watchlistLauren' ? 'watchlistLaurenOrder'
+        : null;
+      if (orderField) {
+        filtered.sort((a, b) => {
+          const ao = a[orderField] == null ? Infinity : a[orderField];
+          const bo = b[orderField] == null ? Infinity : b[orderField];
+          return ao - bo;
+        });
+      }
 
       renderDashboard(filtered);
     }
@@ -4535,6 +4994,159 @@
       document.getElementById('manageBackdrop').classList.remove('open');
     }
 
+    // ---- Reorder Watch Lists panel ----
+    // Main/Adam/Lauren each get their own order field. Main's order is the
+    // one that also feeds realtor-view.html's sort.
+    const REORDER_LIST_CONFIG = {
+      watchlist: { flagField: 'watchlist', orderField: 'watchlistOrder', label: 'Main Watch List' },
+      watchlistAdam: { flagField: 'watchlistAdam', orderField: 'watchlistAdamOrder', label: "Adam's Watch List" },
+      watchlistLauren: { flagField: 'watchlistLauren', orderField: 'watchlistLaurenOrder', label: "Lauren's Watch List" }
+    };
+    let reorderActiveList = 'watchlist';
+    let reorderDragId = null;
+
+    function openReorderPanel() {
+      reorderActiveList = 'watchlist';
+      document.querySelectorAll('.reorder-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.list === reorderActiveList));
+      renderReorderList();
+      document.getElementById('reorderBackdrop').classList.add('open');
+    }
+
+    function closeReorderPanel() {
+      document.getElementById('reorderBackdrop').classList.remove('open');
+    }
+
+    function setReorderTab(listKey) {
+      reorderActiveList = listKey;
+      document.querySelectorAll('.reorder-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.list === listKey));
+      renderReorderList();
+    }
+
+    function getReorderedList() {
+      const { flagField, orderField } = REORDER_LIST_CONFIG[reorderActiveList];
+      return properties
+        .filter(p => !p.hidden && p[flagField])
+        .sort((a, b) => {
+          const ao = a[orderField] == null ? Infinity : a[orderField];
+          const bo = b[orderField] == null ? Infinity : b[orderField];
+          return ao - bo;
+        });
+    }
+
+    function renderReorderList() {
+      const { label } = REORDER_LIST_CONFIG[reorderActiveList];
+      document.getElementById('reorderSubtitle').innerText = `${label} — drag to reorder, or use the arrows`;
+      const list = getReorderedList();
+      const container = document.getElementById('reorderList');
+      if (!list.length) {
+        container.innerHTML = `<p style="color:var(--muted); padding:20px 0;">No homes on this list yet.</p>`;
+        return;
+      }
+      container.innerHTML = list.map((p, idx) => `
+        <div class="reorder-card" draggable="true" data-id="${p.id}"
+             ondragstart="onReorderDragStart(event, '${p.id}')"
+             ondragover="onReorderDragOver(event)"
+             ondrop="onReorderDrop(event)"
+             ondragend="onReorderDragEnd(event)">
+          <span class="reorder-handle" title="Drag to reorder">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>
+          </span>
+          <img class="reorder-thumb" id="reorder-thumb-${p.id}" alt="">
+          <div class="reorder-info">
+            <div class="reorder-address">${p.address}</div>
+            <div class="reorder-price">${p.price || ''}</div>
+          </div>
+          <div class="reorder-arrows">
+            <button type="button" class="reorder-arrow-btn" ${idx === 0 ? 'disabled' : ''} onclick="moveReorderItem('${p.id}', -1)" title="Move up">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <button type="button" class="reorder-arrow-btn" ${idx === list.length - 1 ? 'disabled' : ''} onclick="moveReorderItem('${p.id}', 1)" title="Move down">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      list.forEach(p => loadReorderThumb(p));
+    }
+
+    async function loadReorderThumb(p) {
+      const img = document.getElementById(`reorder-thumb-${p.id}`);
+      if (!img) return;
+      const fullAddress = `${p.address}, ${p.city} ${p.zip}`;
+      const result = await HousePhotoService.get(fullAddress);
+      if (result && result.image) img.src = result.image;
+    }
+
+    // Renumbers the active list 1..n and persists, in whatever order the
+    // cards currently sit in — used by both arrow-button moves and drops.
+    function persistReorderOrder(orderedProperties) {
+      const { orderField } = REORDER_LIST_CONFIG[reorderActiveList];
+      orderedProperties.forEach((p, idx) => {
+        p[orderField] = idx + 1;
+        persistPropertyState(p);
+      });
+      applyFilters();
+    }
+
+    function moveReorderItem(id, direction) {
+      const list = getReorderedList();
+      const idx = list.findIndex(p => p.id === id);
+      const newIdx = idx + direction;
+      if (idx === -1 || newIdx < 0 || newIdx >= list.length) return;
+      const tmp = list[idx];
+      list[idx] = list[newIdx];
+      list[newIdx] = tmp;
+      persistReorderOrder(list);
+      renderReorderList();
+    }
+
+    function onReorderDragStart(e, id) {
+      reorderDragId = id;
+      e.dataTransfer.effectAllowed = 'move';
+      e.target.classList.add('dragging');
+    }
+
+    // Reference implementation of the classic "find the element the
+    // dragged card should land before" pattern for vanilla drag-and-drop
+    // reordering (no library — this file has no build step).
+    function getReorderDragAfterElement(container, y) {
+      const cards = [...container.querySelectorAll('.reorder-card:not(.dragging)')];
+      return cards.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset, element: child };
+        }
+        return closest;
+      }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+    }
+
+    function onReorderDragOver(e) {
+      e.preventDefault();
+      const container = document.getElementById('reorderList');
+      const dragging = container.querySelector('.reorder-card.dragging');
+      if (!dragging) return;
+      const afterElement = getReorderDragAfterElement(container, e.clientY);
+      if (afterElement == null) {
+        container.appendChild(dragging);
+      } else {
+        container.insertBefore(dragging, afterElement);
+      }
+    }
+
+    function onReorderDrop(e) {
+      e.preventDefault();
+    }
+
+    function onReorderDragEnd(e) {
+      e.target.classList.remove('dragging');
+      reorderDragId = null;
+      const ids = Array.from(document.querySelectorAll('#reorderList .reorder-card')).map(el => el.dataset.id);
+      const ordered = ids.map(id => properties.find(p => p.id === id)).filter(Boolean);
+      persistReorderOrder(ordered);
+      renderReorderList();
+    }
+
     function saveMatchTierCutoffs() {
       const top = parseFloat(document.getElementById('matchTierTopInput').value);
       const good = parseFloat(document.getElementById('matchTierGoodInput').value);
@@ -4620,7 +5232,7 @@
                 <button type="button" class="heart-btn ${p.loved ? 'loved' : ''}" onclick="toggleLovedForProperty('${p.id}')" title="${p.loved ? 'Remove from Loved' : 'Mark as Loved'}">
                   <svg viewBox="0 0 24 24" fill="${p.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
                 </button>
-                <button type="button" class="binoculars-btn ${p.watchlist ? 'watching' : ''}" onclick="toggleWatchlistForProperty('${p.id}')" title="${p.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
+                <button type="button" class="binoculars-btn ${p.watchlist ? 'watching' : ''}" onclick="toggleWatchlistForProperty('${p.id}')" title="${p.watchlist ? 'Remove from Main Watch List' : 'Add to Main Watch List (share with realtor)'}">
                   <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
                 </button>
                 <div>
@@ -4685,21 +5297,63 @@
       property.loved = !property.loved;
       persistPropertyState(property);
       applyFilters();
+      refreshQuickActionsView(property);
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
         renderManageHomesList();
       }
     }
 
     // Homes to flag for the realtor that nobody has toured in person yet.
+    // This is the "main" watch list — its order (watchlistOrder) drives the
+    // shared realtor-view.html sort. Adam's and Lauren's watch lists below
+    // are personal/private and never shown to the realtor.
     function toggleWatchlistForProperty(id) {
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.watchlist = !property.watchlist;
       persistPropertyState(property);
       applyFilters();
+      refreshQuickActionsView(property);
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
         renderManageHomesList();
       }
+    }
+
+    function toggleWatchlistAdamForProperty(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.watchlistAdam = !property.watchlistAdam;
+      persistPropertyState(property);
+      applyFilters();
+      refreshQuickActionsView(property);
+      if (document.getElementById('manageBackdrop').classList.contains('open')) {
+        renderManageHomesList();
+      }
+    }
+
+    function toggleWatchlistLaurenForProperty(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.watchlistLauren = !property.watchlistLauren;
+      persistPropertyState(property);
+      applyFilters();
+      refreshQuickActionsView(property);
+      if (document.getElementById('manageBackdrop').classList.contains('open')) {
+        renderManageHomesList();
+      }
+    }
+
+    // Reflects the current loved/watchlist*/toured state onto the pill
+    // buttons near the top of the fly-in panel.
+    function refreshQuickActionsView(property) {
+      if (activeEvalId !== property.id) return;
+      const btn = (name) => document.getElementById(`panelQuickAction-${name}`);
+      const set = (name, active) => { const el = btn(name); if (el) el.classList.toggle('active', !!active); };
+      set('love', property.loved);
+      set('watchlist', property.watchlist);
+      set('watchlistAdam', property.watchlistAdam);
+      set('watchlistLauren', property.watchlistLauren);
+      set('toured', property.toured);
     }
 
     // Marks a home as already toured (open house or private showing with
@@ -4713,7 +5367,7 @@
       property.touredDate = property.toured ? (property.touredDate || new Date().toISOString().slice(0, 10)) : '';
       persistPropertyState(property);
       applyFilters();
-      if (activeEvalId === id) refreshTouredView(property);
+      if (activeEvalId === id) { refreshTouredView(property); refreshQuickActionsView(property); }
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
         renderManageHomesList();
       }
@@ -4746,6 +5400,7 @@
       persistPropertyState(property);
       applyFilters();
       refreshTouredView(property);
+      refreshQuickActionsView(property);
       const card = document.getElementById(`toured-btn-${property.id}`);
       if (card) card.classList.toggle('toured', checked);
     }
@@ -6325,6 +6980,7 @@
       document.getElementById('panelPrice').innerText = property.price;
       updatePanelMiniMap(property);
       refreshTouredView(property);
+      refreshQuickActionsView(property);
       document.getElementById('panelBeds').innerText = property.beds;
       document.getElementById('panelBaths').innerText = property.baths;
       document.getElementById('panelSqft').innerText = property.sqft;
@@ -6338,8 +6994,7 @@
       document.getElementById('panelStyle').innerHTML = `<strong>Style:</strong> ${property.style}`;
       document.getElementById('panelHeating').innerHTML = `<strong>Heating:</strong> ${(property.heating && property.heating.length) ? property.heating.join(', ') : 'Unknown'}`;
       document.getElementById('panelCooling').innerHTML = `<strong>Cooling:</strong> ${(property.cooling && property.cooling.length) ? property.cooling.join(', ') : 'Unknown'}`;
-      document.getElementById('panelDriveTimeAdam').innerHTML = `<strong>Drive to Adam's work:</strong> ${formatDriveTimeDisplay(property.driveTimeAdamMinutes, property.driveTimeAdamRushHourSample)}`;
-      document.getElementById('panelDriveTimeLauren').innerHTML = `<strong>Drive to Lauren's work:</strong> ${formatDriveTimeDisplay(property.driveTimeLaurenMinutes, property.driveTimeLaurenRushHourSample)}`;
+      refreshPanelCommuteView(property);
 
       const descriptionEl = document.getElementById('panelDescription');
       const toggleEl = document.getElementById('descriptionToggle');
@@ -6625,6 +7280,8 @@
     initFirebaseSync();
     autoSyncOneHomeInBackground();
     syncDriveTimesInBackground();
+    syncPmCommuteTimesInBackground();
+    syncActiveTravelTimesInBackground();
   </script>
 </body>
 </html>
