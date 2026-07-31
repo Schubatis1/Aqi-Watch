@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear the Lane (v3.0.0)</title>
+    <title>Clear the Lane (v3.0.1)</title>
     <!-- Tailwind CSS for fast, clean mobile styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- EXIF parser to pull GPS and Timestamp from photos client-side -->
@@ -22,7 +22,7 @@
 
     <div class="bg-white rounded-xl shadow-md p-6 mb-6 mt-4 text-center">
         <h1 class="text-2xl font-bold text-blue-600 mb-1">Clear the Lane</h1>
-        <p class="text-xs text-slate-400 font-mono mb-2">v3.0.0</p>
+        <p class="text-xs text-slate-400 font-mono mb-2">v3.0.1</p>
         <p class="text-sm text-slate-500 mb-6">Select one or more photos to report blocked bike lanes to Improve Detroit.</p>
 
         <!-- Hidden File Input -->
@@ -55,11 +55,11 @@
     <!-- ON-SCREEN DEBUG CONSOLE -->
     <div class="mt-2 bg-slate-900 rounded-lg p-4 shadow-inner flex-grow">
         <div class="flex justify-between items-center mb-2">
-            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v3.0.0)</p>
+            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v3.0.1)</p>
             <button onclick="document.getElementById('debugLog').innerHTML = ''" class="text-xs text-slate-500 hover:text-white">Clear</button>
         </div>
         <div id="debugLog" class="font-mono text-[10px] text-green-400 h-48 overflow-y-auto break-all whitespace-pre-wrap">
-            App initialized (v3.0.0)...
+            App initialized (v3.0.1)...
         </div>
     </div>
 
@@ -67,13 +67,28 @@
         // ==========================================
         // CONFIGURATION
         // ==========================================
-        const APP_VERSION = '3.0.0';
+        const APP_VERSION = '3.0.1';
         const GOOGLE_MAPS_API_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
         const SEECLICKFIX_TOKEN = 'token-07/31/2026-07/30/2027--B10B9B5D01CC998EE5A6C6BB8266537173326DC0F21EFE605455E64047D75A81-1';
         const DETROIT_REQUEST_TYPE_ID = '22880';
         const NATURE_QUESTION_ID = '32751';
         const TIMING_QUESTION_ID = '33446';
         const HISTORY_KEY = 'clearTheLaneHistory';
+
+        // Known-good fallback if the live schema fetch below fails: the exact
+        // string (leading space included) that SeeClickFix accepted the one
+        // time this question was answered successfully. Everything else we
+        // tried by guessing ("Car traveling in bike lane" without the leading
+        // space, "Vehicle parked in bike lane") was rejected with "Question ...
+        // is not included in the list" -- this question is a strict picklist,
+        // not free text, so answers must come from SeeClickFix's own schema.
+        const NATURE_FALLBACK_VALUES = [{ key: ' Car traveling in bike lane', name: 'Car traveling in bike lane' }];
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
 
         // Custom Logger to pipe info to the UI
         function logToConsole(message, isError = false) {
@@ -106,6 +121,53 @@
 
         logToConsole(`Running version ${APP_VERSION}`);
         renderHistory();
+
+        // Fetch the real picklist options for request type 22880 once, up front,
+        // instead of guessing answer strings. Falls back to the one known-good
+        // value if the request type schema can't be reached.
+        let requestTypeSchemaPromise = null;
+        function getRequestTypeSchema() {
+            if (!requestTypeSchemaPromise) {
+                requestTypeSchemaPromise = fetchRequestTypeSchema();
+            }
+            return requestTypeSchemaPromise;
+        }
+
+        async function fetchRequestTypeSchema() {
+            try {
+                logToConsole(`Fetching question schema for request type ${DETROIT_REQUEST_TYPE_ID}...`);
+                const targetUrl = `https://seeclickfix.com/api/v2/request_types/${DETROIT_REQUEST_TYPE_ID}`;
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+                const response = await fetch(proxyUrl, {
+                    headers: { 'Authorization': `Bearer ${SEECLICKFIX_TOKEN}` }
+                });
+                if (!response.ok) {
+                    throw new Error(`Schema fetch failed: ${response.status}`);
+                }
+                const data = await response.json();
+                logToConsole(`Question schema loaded (${(data.questions || []).length} questions).`);
+                return data;
+            } catch (err) {
+                logToConsole(`Could not load question schema, falling back to known-good defaults: ${err instanceof Error ? err.message : err}`, true);
+                return null;
+            }
+        }
+
+        function getNatureSelectValues(schema) {
+            if (!schema || !Array.isArray(schema.questions)) return NATURE_FALLBACK_VALUES;
+            const q = schema.questions.find((q) =>
+                String(q.id ?? '') === NATURE_QUESTION_ID ||
+                String(q.primary_key ?? '') === NATURE_QUESTION_ID ||
+                (typeof q.question === 'string' && q.question.startsWith('What is the nature of the issue'))
+            );
+            if (!q || !Array.isArray(q.select_values) || q.select_values.length === 0) return NATURE_FALLBACK_VALUES;
+            return q.select_values;
+        }
+
+        function pickDefaultNatureValue(values) {
+            const parked = values.find((v) => /park/i.test(v.name));
+            return (parked || values[0]).key;
+        }
 
         // Handle File Selection (batch)
         photoInput.addEventListener('change', (e) => {
@@ -160,11 +222,10 @@
                     <div>
                         <label class="text-xs font-bold text-slate-500 uppercase">Nature of Issue</label>
                         <select data-role="nature" class="w-full text-sm border border-slate-200 rounded px-2 py-1 mt-1">
-                            <option value="Vehicle parked in bike lane">Vehicle parked in bike lane</option>
-                            <option value="Car traveling in bike lane">Car traveling in bike lane</option>
-                            <option value="__custom__">Custom...</option>
+                            <option value="">Loading options...</option>
                         </select>
                         <input type="text" data-role="natureCustom" placeholder="Describe the issue" class="hidden w-full text-sm border border-slate-200 rounded px-2 py-1 mt-2">
+                        <p class="text-[10px] text-slate-400 mt-1">Improve Detroit only accepts one of the listed options; custom text may be rejected.</p>
                     </div>
 
                     <div>
@@ -244,11 +305,17 @@
                     logToConsole(`[${item.file.name}] Google Maps returned status: ${geoData.status}. Using coordinates as address fallback.`, true);
                 }
 
+                const schema = await getRequestTypeSchema();
+                const natureValues = getNatureSelectValues(schema);
+                item.els.nature.innerHTML = natureValues.map((v) =>
+                    `<option value="${escapeHtml(v.key)}">${escapeHtml(v.name)}</option>`
+                ).join('') + '<option value="__custom__">Custom...</option>';
+
                 // Pre-fill the editor; every field stays fully mutable before submission.
                 item.els.address.value = address;
                 item.els.summary.value = 'Vehicle Blocking Bike Lane';
                 item.els.description.value = `Vehicle parked in bicycle lane at ${address}`;
-                item.els.nature.value = 'Vehicle parked in bike lane';
+                item.els.nature.value = pickDefaultNatureValue(natureValues);
                 item.els.timing.value = photoTimeString;
 
                 item.els.statusBadge.textContent = 'Ready to submit';
