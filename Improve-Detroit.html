@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear the Lane (v0.2.8)</title>
+    <title>Clear the Lane (v0.2.9)</title>
     <!-- Tailwind CSS for fast, clean mobile styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- EXIF parser to pull GPS and Timestamp from photos client-side -->
@@ -15,7 +15,7 @@
 
     <div class="bg-white rounded-xl shadow-md p-6 mb-6 mt-4 text-center">
         <h1 class="text-2xl font-bold text-blue-600 mb-1">Clear the Lane</h1>
-        <p class="text-xs text-slate-400 font-mono mb-2">v0.2.8</p>
+        <p class="text-xs text-slate-400 font-mono mb-2">v0.2.9</p>
         <p class="text-sm text-slate-500 mb-6">Upload a photo to automatically report a blocked bike lane to Improve Detroit.</p>
 
         <!-- Hidden File Input -->
@@ -54,11 +54,11 @@
     <!-- ON-SCREEN DEBUG CONSOLE -->
     <div class="mt-8 bg-slate-900 rounded-lg p-4 shadow-inner flex-grow">
         <div class="flex justify-between items-center mb-2">
-            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v0.2.8)</p>
+            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v0.2.9)</p>
             <button onclick="document.getElementById('debugLog').innerHTML = ''" class="text-xs text-slate-500 hover:text-white">Clear</button>
         </div>
         <div id="debugLog" class="font-mono text-[10px] text-green-400 h-48 overflow-y-auto break-all whitespace-pre-wrap">
-            App initialized (v0.2.8)...
+            App initialized (v0.2.9)...
         </div>
     </div>
 
@@ -66,7 +66,7 @@
         // ==========================================
         // CONFIGURATION 
         // ==========================================
-        const APP_VERSION = '0.2.8';
+        const APP_VERSION = '0.2.9';
         const GOOGLE_MAPS_API_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
         const SEECLICKFIX_TOKEN = 'token-07/31/2026-07/30/2027--B10B9B5D01CC998EE5A6C6BB8266537173326DC0F21EFE605455E64047D75A81-1';
         const DETROIT_REQUEST_TYPE_ID = '22880'; 
@@ -190,7 +190,7 @@
             statusMsg.textContent = "Sending to Improve Detroit...";
             statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
             
-            logToConsole("Building payload with exact 'answers' array notation...");
+            logToConsole("Building payload with indexed 'answers' array notation...");
 
             const formData = new FormData();
             formData.append('lat', currentLat);
@@ -199,20 +199,23 @@
             formData.append('request_type_id', DETROIT_REQUEST_TYPE_ID);
             formData.append('summary', 'Vehicle Blocking Bike Lane');
             formData.append('description', 'Vehicle blocking active bike lane.');
-            
-            // Fix 400 error: SeeClickFix V2 API expects answers submitted as a nested array format:
-            // answers[][question_id] and answers[][answer]
-            formData.append('answers[][question_id]', '32751');
-            formData.append('answers[][answer]', ' Car traveling in bike lane');
-            
-            formData.append('answers[][question_id]', '33446');
-            formData.append('answers[][answer]', photoTimeString);
-            
+
+            // Use explicitly indexed answers[N][...] keys rather than repeated
+            // answers[][...] keys. The duplicate-key form depends on the server
+            // (or any proxy in between) preserving exact field order to zip
+            // question_id/answer pairs back together; indexing removes that
+            // ambiguity and is what triggered the 500 after the proxy hop.
+            formData.append('answers[0][question_id]', '32751');
+            formData.append('answers[0][answer]', ' Car traveling in bike lane');
+
+            formData.append('answers[1][question_id]', '33446');
+            formData.append('answers[1][answer]', photoTimeString);
+
             formData.append('image', currentFile);
 
             try {
                 logToConsole("Dispatching POST request via CORS proxy...");
-                
+
                 const targetUrl = 'https://seeclickfix.com/api/v2/issues';
                 const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
@@ -223,6 +226,8 @@
                     },
                     body: formData
                 });
+
+                logToConsole(`Response: ${response.status} ${response.statusText} (content-type: ${response.headers.get('content-type')})`);
 
                 if (!response.ok) {
                     const errText = await response.text();
