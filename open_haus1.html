@@ -706,6 +706,8 @@
     }
     .match-tier-controls-hint { color: var(--muted); font-size: 0.78rem; }
 
+    .manage-status-filter-row { margin-bottom: 14px; }
+
     .manage-table { width: 100%; border-collapse: collapse; min-width: 900px; }
     .manage-table th, .manage-table td {
       padding: 12px 14px;
@@ -1774,6 +1776,30 @@
     .badge-good { background-color: #eef1f4; color: var(--navy-light); border: 1px solid rgba(44,62,80,0.15); }
     .badge-verify { background-color: var(--gray-light); color: var(--muted); }
 
+    /* Listing status badges */
+    .badge-status-onmarket { background-color: #2f9e44; color: #ffffff; }
+    .badge-status-pending { background-color: #f0a500; color: #ffffff; }
+    .badge-status-comingsoon { background-color: #3b82f6; color: #ffffff; }
+    .badge-status-sold { background-color: #6b7280; color: #ffffff; }
+    .badge-status-offmarket { background-color: #9ca3af; color: #ffffff; }
+    .badge-status-other { background-color: var(--gray-light); color: var(--muted); }
+
+    /* Card-grid status ribbon — only shown for a non-"On Market" status, so
+       it reads as an exception worth noticing rather than routine clutter. */
+    .card-status-ribbon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      z-index: 2;
+    }
+
     /* Interactive Gold Stars (layered glyphs so a star can be half-filled) */
     .rating-stars { display: inline-flex; gap: 2px; user-select: none; }
     .rating-stars .star-wrap { position: relative; display: inline-block; font-size: 1.1rem; line-height: 1; cursor: pointer; transition: transform 0.15s ease; }
@@ -2533,6 +2559,7 @@
       <div class="panel-header">
         <div>
           <span class="badge" id="panelBadge">Top Match</span>
+          <span class="badge hidden" id="panelStatusBadge" style="margin-left:6px;">On Market</span>
         </div>
         <div class="panel-header-actions">
           <button class="panel-share-btn" onclick="shareProperty()" title="Share a link to this home">
@@ -2845,6 +2872,13 @@
           <button class="btn-secondary" onclick="resetMatchTierCutoffsToDefault()">Reset to Default Split (~20/40/40)</button>
           <span class="match-tier-controls-hint">Score range: 0–36. Homes with a manually-set Match Tier aren't affected.</span>
         </div>
+        <div class="manage-status-filter-row">
+          <label class="toggle-pill">
+            <input type="checkbox" id="manageNotOnMarketFilter" onchange="renderManageHomesList()">
+            <span class="toggle-switch"></span>
+            Not on Market Only
+          </label>
+        </div>
         <table class="manage-table">
           <thead>
             <tr>
@@ -2854,9 +2888,10 @@
               <th class="sortable-th" data-field="sqft" onclick="sortManageHomesBy('sqft')">Sq Ft<span class="sort-arrow"></span></th>
               <th class="sortable-th" data-field="built" onclick="sortManageHomesBy('built')">Built<span class="sort-arrow"></span></th>
               <th class="sortable-th" data-field="match" onclick="sortManageHomesBy('match')">Match<span class="sort-arrow"></span></th>
+              <th class="sortable-th" data-field="status" onclick="sortManageHomesBy('status')">Listing Status<span class="sort-arrow"></span></th>
               <th>Weekends</th>
               <th class="sortable-th" data-field="source" onclick="sortManageHomesBy('source')">Source<span class="sort-arrow"></span></th>
-              <th>Status</th>
+              <th>Visibility</th>
               <th></th>
             </tr>
           </thead>
@@ -2920,13 +2955,27 @@
           <label>Address</label>
           <input type="text" id="editAddress" placeholder="123 Main St">
         </div>
-        <div class="form-group">
-          <label>Match Tier</label>
-          <select id="editPriority">
-            <option value="">— None —</option>
-            <option value="Top">Top Match</option>
-            <option value="Good">Good Match</option>
-          </select>
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>Match Tier</label>
+            <select id="editPriority">
+              <option value="">— None —</option>
+              <option value="Top">Top Match</option>
+              <option value="Good">Good Match</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Listing Status</label>
+            <select id="editStatus">
+              <option value="">— Unknown —</option>
+              <option value="On Market">On Market</option>
+              <option value="Coming Soon">Coming Soon</option>
+              <option value="Pending">Pending</option>
+              <option value="Under Contract">Under Contract</option>
+              <option value="Sold">Sold</option>
+              <option value="Off Market">Off Market</option>
+            </select>
+          </div>
         </div>
         <div style="display:flex; gap:10px;">
           <div class="form-group" style="flex:1;">
@@ -4150,6 +4199,52 @@
       return '';
     }
 
+    // ---- Listing status (On Market / Pending / Coming Soon / Sold / etc.) ----
+    // Maps a raw MLS "StandardStatus" (RESO Data Dictionary field, what
+    // OneHome's GraphQL API reports) to one of this app's clean display
+    // labels. Different MLS boards use slightly different raw strings, so
+    // unrecognized values pass through title-cased rather than being
+    // silently dropped — better to show something unexpected than nothing.
+    const LISTING_STATUS_MAP = {
+      'active': 'On Market',
+      'coming soon': 'Coming Soon',
+      'active under contract': 'Under Contract',
+      'pending': 'Pending',
+      'closed': 'Sold',
+      'withdrawn': 'Off Market',
+      'canceled': 'Off Market',
+      'cancelled': 'Off Market',
+      'expired': 'Off Market',
+      'hold': 'Off Market',
+    };
+
+    function normalizeListingStatus(rawStatus) {
+      if (!rawStatus) return null;
+      const key = String(rawStatus).trim().toLowerCase();
+      if (LISTING_STATUS_MAP[key]) return LISTING_STATUS_MAP[key];
+      return String(rawStatus).trim();
+    }
+
+    const LISTING_STATUS_BADGE_CLASSES = {
+      'On Market': 'badge-status-onmarket',
+      'Pending': 'badge-status-pending',
+      'Under Contract': 'badge-status-pending',
+      'Coming Soon': 'badge-status-comingsoon',
+      'Sold': 'badge-status-sold',
+      'Off Market': 'badge-status-offmarket',
+    };
+
+    function getListingStatusBadgeClass(status) {
+      return LISTING_STATUS_BADGE_CLASSES[status] || 'badge-status-other';
+    }
+
+    // Only a deviation from "on the market" (the assumed default for
+    // anything without a known status) is worth calling out on the card
+    // grid — the fly-in panel shows whatever status is known regardless.
+    function isNotableListingStatus(status) {
+      return !!status && status !== 'On Market';
+    }
+
     // =====================================================================
     // Match Tier auto-scoring — six gates, each worth points toward
     // Top Match (4+), Good Match (2+), or blank (everything else). The
@@ -4989,6 +5084,7 @@
                 <span>No Photo Available</span>
               </div>
               <img id="photo-img-${item.id}" alt="${item.address}">
+              ${isNotableListingStatus(item.status) ? `<span class="card-status-ribbon ${getListingStatusBadgeClass(item.status)}">${item.status}</span>` : ''}
             </div>
 
             <div class="card-top">
@@ -5681,6 +5777,7 @@
         case 'sqft': return p.rawSqft || 0;
         case 'built': return p.yearBuilt || 0;
         case 'match': return computeMatchScore(p, properties);
+        case 'status': return (p.status || '').toLowerCase();
         case 'source': return (SOURCE_LABELS[p.source] || p.source || '').toLowerCase();
         default: return 0;
       }
@@ -5701,7 +5798,9 @@
 
     function renderManageHomesList() {
       const tbody = document.getElementById('manageHomesTableBody');
-      const sorted = properties.slice().sort((a, b) => {
+      const notOnMarketOnly = document.getElementById('manageNotOnMarketFilter').checked;
+      const filtered = notOnMarketOnly ? properties.filter(p => isNotableListingStatus(p.status)) : properties;
+      const sorted = filtered.slice().sort((a, b) => {
         const va = getManageSortValue(a, manageSortField);
         const vb = getManageSortValue(b, manageSortField);
         const cmp = typeof va === 'string' ? va.localeCompare(vb) : va - vb;
@@ -5751,6 +5850,7 @@
               ${p.priorityGroup ? `<span class="badge ${p.priorityClass}" style="padding:3px 8px; font-size:0.65rem;">${getCleanPriorityLabel(p.priorityGroup)}</span>` : '<span style="color:var(--muted);">—</span>'}
               <div style="font-size:0.72rem; color:var(--muted); margin-top:2px;">${breakdown.score}/${MAX_MATCH_SCORE}</div>
             </td>
+            <td>${p.status ? `<span class="badge ${getListingStatusBadgeClass(p.status)}" style="padding:3px 8px; font-size:0.65rem;">${p.status}</span>` : '<span style="color:var(--muted);">—</span>'}</td>
             <td><div class="manage-weekend-chips">${weekendChips}${unassignedTag}</div></td>
             <td style="font-size:0.78rem; color:var(--muted);">
               ${SOURCE_LABELS[p.source] || p.source || '—'}${p.dateAdded ? `<br>${p.dateAdded}` : ''}
@@ -5766,8 +5866,9 @@
         `;
       }).join('');
 
-      document.getElementById('manageSubtitle').innerText =
-        `${properties.length} home${properties.length === 1 ? '' : 's'} total`;
+      document.getElementById('manageSubtitle').innerText = notOnMarketOnly
+        ? `${filtered.length} of ${properties.length} home${properties.length === 1 ? '' : 's'} — not on market`
+        : `${properties.length} home${properties.length === 1 ? '' : 's'} total`;
     }
 
     function toggleWeekendForProperty(id, weekendId) {
@@ -5930,6 +6031,7 @@
       // changes this field before saving — merely re-saving the form with
       // it untouched shouldn't block future auto-scoring on import.
       editPriorityOriginalValue = document.getElementById('editPriority').value;
+      document.getElementById('editStatus').value = property ? (property.status || '') : '';
       document.getElementById('editCity').value = property ? property.city : '';
       document.getElementById('editZip').value = property ? property.zip : '';
       document.getElementById('editPrice').value = property ? property.rawPrice : '';
@@ -5971,6 +6073,7 @@
         address,
         priority: priorityGroup, priorityGroup, priorityClass,
         ...(priorityManuallyChanged ? { priorityAuto: false } : {}),
+        status: document.getElementById('editStatus').value || null,
         city: document.getElementById('editCity').value.trim(),
         zip: document.getElementById('editZip').value.trim(),
         rawPrice,
@@ -6359,6 +6462,11 @@
           const dp = detail.property;
           const changedFields = [];
 
+          if (dp.StandardStatus) {
+            const status = normalizeListingStatus(dp.StandardStatus);
+            if (status !== p.status) { p.status = status; changedFields.push('status'); }
+          }
+
           if (dp.ListPrice != null) {
             const rawPrice = Math.round(dp.ListPrice);
             if (p.rawPrice !== rawPrice) {
@@ -6525,7 +6633,7 @@
     function refreshLocationScheduleAndPriceForExistingMatches() {
       const status = document.getElementById('oneHomeStatus');
       const matches = oneHomeResults.filter(r => r.existing);
-      if (!matches.length) return { locationsFixed: 0, schedulesFixed: 0, pricesFixed: 0 };
+      if (!matches.length) return { locationsFixed: 0, schedulesFixed: 0, pricesFixed: 0, statusesFixed: 0 };
 
       // Location correction: OneHome's own Latitude/Longitude is
       // authoritative and free here (already in the loaded summary data),
@@ -6542,9 +6650,19 @@
       let locationsFixed = 0;
       let schedulesFixed = 0;
       let pricesFixed = 0;
+      let statusesFixed = 0;
       matches.forEach(r => {
         const existing = r.existing;
         const changedFields = [];
+
+        if (r.property.StandardStatus) {
+          const newStatus = normalizeListingStatus(r.property.StandardStatus);
+          if (newStatus !== existing.status) {
+            existing.status = newStatus;
+            statusesFixed++;
+            changedFields.push('status');
+          }
+        }
 
         const lat = r.property.Latitude;
         const lng = r.property.Longitude;
@@ -6605,15 +6723,16 @@
 
         if (changedFields.length) persistPropertyState(existing, changedFields);
       });
-      if (locationsFixed > 0 || schedulesFixed > 0 || pricesFixed > 0) applyFilters();
+      if (locationsFixed > 0 || schedulesFixed > 0 || pricesFixed > 0 || statusesFixed > 0) applyFilters();
 
       const fixParts = [];
       if (locationsFixed > 0) fixParts.push(`map location for ${locationsFixed}`);
       if (schedulesFixed > 0) fixParts.push(`open house time for ${schedulesFixed}`);
       if (pricesFixed > 0) fixParts.push(`price for ${pricesFixed}`);
-      if (fixParts.length) status.innerText = `Fixed ${fixParts.join(', ')} existing home${(locationsFixed + schedulesFixed + pricesFixed) === 1 ? '' : 's'}.`;
+      if (statusesFixed > 0) fixParts.push(`listing status for ${statusesFixed}`);
+      if (fixParts.length) status.innerText = `Fixed ${fixParts.join(', ')} existing home${(locationsFixed + schedulesFixed + pricesFixed + statusesFixed) === 1 ? '' : 's'}.`;
 
-      return { locationsFixed, schedulesFixed, pricesFixed };
+      return { locationsFixed, schedulesFixed, pricesFixed, statusesFixed };
     }
 
     // Runs automatically after loading results (either mode), including
@@ -7143,6 +7262,9 @@
       // doesn't clobber what an earlier OneHome import already found.
       if (sourceType !== 'zillowHar' && p.Heating && p.Heating.length) record.heating = p.Heating.map(splitCamelCase);
       if (sourceType !== 'zillowHar' && p.Cooling && p.Cooling.length) record.cooling = p.Cooling.map(splitCamelCase);
+      if (sourceType !== 'zillowHar' && (dp.StandardStatus || p.StandardStatus)) {
+        record.status = normalizeListingStatus(dp.StandardStatus || p.StandardStatus);
+      }
       if (sourceType === 'zillowHar') {
         record.url = result.zillowUrl;
       } else if (oneHomeSession.token && oneHomeSession.savedSearchId && result.onehomeId) {
@@ -7511,6 +7633,11 @@
       panelBadgeEl.innerText = getCleanPriorityLabel(property.priorityGroup);
       panelBadgeEl.className = `badge ${property.priorityClass}`;
       panelBadgeEl.classList.toggle('hidden', !property.priorityGroup);
+
+      const panelStatusBadgeEl = document.getElementById('panelStatusBadge');
+      panelStatusBadgeEl.innerText = property.status || '';
+      panelStatusBadgeEl.className = `badge ${getListingStatusBadgeClass(property.status)}`;
+      panelStatusBadgeEl.classList.toggle('hidden', !property.status);
 
       PEOPLE.forEach(({ key: person }) => {
         document.getElementById(`evalNotes-${person}`).value = property.evalNotes[person] || '';
