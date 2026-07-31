@@ -7,7 +7,7 @@
     (function() {
       try {
         var t = localStorage.getItem('appTheme');
-        if (t === 'house-hunters') document.documentElement.setAttribute('data-theme', t);
+        if (t === 'house-hunters' || t === 'matrix') document.documentElement.setAttribute('data-theme', t);
       } catch (e) {}
     })();
   </script>
@@ -25,7 +25,7 @@
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Oswald:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -199,6 +199,78 @@
       flex-shrink: 0;
     }
     [data-theme="house-hunters"] .panel-address-badge svg { width: 18px; height: 18px; }
+
+    /* Matrix theme — black/green terminal aesthetic, monospace everywhere,
+       plus an animated digital-rain canvas behind the page content. */
+    [data-theme="matrix"] {
+      --navy: #001a03;
+      --navy-dark: #000d01;
+      --navy-light: #00ff41;
+      --coral: #00ff41;
+      --coral-dark: #00cc34;
+      --coral-light: #003b0d;
+      --bg: #000000;
+      --card: #050d05;
+      --text: #baffc9;
+      --muted: #4fae62;
+      --border: #0c3a17;
+      --gray-light: #071c0a;
+      --gold: #00ff41;
+
+      --font-display: 'Share Tech Mono', 'Courier New', monospace;
+      --font-sans: 'Share Tech Mono', 'Courier New', monospace;
+      --font-caps: 'Share Tech Mono', 'Courier New', monospace;
+      --shadow-soft: 0 0 24px rgba(0,255,65,0.12);
+      --shadow-hover: 0 0 34px rgba(0,255,65,0.22);
+      --shadow-sm: 0 0 12px rgba(0,255,65,0.1);
+    }
+
+    [data-theme="matrix"] body { text-shadow: 0 0 1px rgba(0,255,65,0.35); }
+    [data-theme="matrix"] .header-titles p { color: var(--muted); }
+    [data-theme="matrix"] .header { border: 1px solid var(--border); }
+    [data-theme="matrix"] .property-card,
+    [data-theme="matrix"] .slide-panel,
+    [data-theme="matrix"] .compare-panel,
+    [data-theme="matrix"] .settings-modal,
+    [data-theme="matrix"] .map-panel,
+    [data-theme="matrix"] .cards-panel { border: 1px solid var(--border); }
+    [data-theme="matrix"] .btn-primary,
+    [data-theme="matrix"] .btn-outline-primary { color: #001a03; text-shadow: none; }
+    [data-theme="matrix"] ::selection { background: var(--coral); color: #001a03; }
+    [data-theme="matrix"] input,
+    [data-theme="matrix"] select,
+    [data-theme="matrix"] textarea { caret-color: var(--coral); }
+
+    /* A handful of elements use --navy as a dark-text-on-light-surface
+       color, or sit on a hardcoded light background — both assumptions
+       that break once the surface underneath turns black. Re-point just
+       those to the bright green accent (or a legible dark-on-light pair)
+       instead of changing --navy globally, which doubles as the header/
+       button backgrounds paired with hardcoded white text and looks right
+       as-is. */
+    [data-theme="matrix"] .card-price,
+    [data-theme="matrix"] .sortable-th.sort-active,
+    [data-theme="matrix"] .import-progress-text,
+    [data-theme="matrix"] .btn-link:hover,
+    [data-theme="matrix"] .description-toggle:hover { color: var(--coral); }
+    [data-theme="matrix"] .map-header { background: var(--gray-light); }
+    [data-theme="matrix"] .badge-good { background-color: var(--gray-light); color: var(--coral); border-color: var(--border); }
+
+    /* Digital rain — fixed full-viewport canvas, drawn behind everything at
+       low opacity so page content stays fully readable on top of it. Only
+       present/animated while the Matrix theme is active; see matrixRain.js
+       logic further down for the start/stop/reduced-motion handling. */
+    #matrixRainCanvas {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.16;
+      pointer-events: none;
+    }
+    [data-theme="matrix"] #matrixRainCanvas { display: block; }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1479,6 +1551,7 @@
     .theme-swatch { width: 32px; height: 32px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(0,0,0,0.08); }
     .theme-swatch-royal-oak { background: linear-gradient(135deg, #2c3e50 50%, #e0603f 50%); }
     .theme-swatch-hh { background: linear-gradient(135deg, #595959 50%, #fec70c 50%); }
+    .theme-swatch-matrix { background: linear-gradient(135deg, #000000 50%, #00ff41 50%); }
 
     .settings-modal-footer {
       padding: 18px 26px 24px;
@@ -2192,6 +2265,9 @@
 </head>
 <body>
 
+  <!-- Matrix theme's digital-rain background; hidden/inert unless that theme is active -->
+  <canvas id="matrixRainCanvas" aria-hidden="true"></canvas>
+
   <!-- Left-hand settings menu (weekend/view controls + Manage Homes / Import / Settings) -->
   <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
   <nav class="sidebar" id="sidebar">
@@ -2644,6 +2720,10 @@
           <button type="button" class="theme-option" data-theme="house-hunters" onclick="setTheme('house-hunters')">
             <span class="theme-swatch theme-swatch-hh"></span>
             House Hunters
+          </button>
+          <button type="button" class="theme-option" data-theme="matrix" onclick="setTheme('matrix')">
+            <span class="theme-swatch theme-swatch-matrix"></span>
+            Matrix
           </button>
         </div>
       </div>
@@ -3622,7 +3702,7 @@
     }
 
     function applyTheme(theme) {
-      if (theme === 'house-hunters') {
+      if (theme === 'house-hunters' || theme === 'matrix') {
         document.documentElement.setAttribute('data-theme', theme);
       } else {
         document.documentElement.removeAttribute('data-theme');
@@ -3630,12 +3710,69 @@
       document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
       });
+      if (theme === 'matrix') startMatrixRain(); else stopMatrixRain();
     }
 
     function setTheme(theme) {
       localStorage.setItem('appTheme', theme);
       applyTheme(theme);
       if (typeof map !== 'undefined' && map) applyFilters();
+    }
+
+    // ---- Matrix theme: falling-code canvas background ----
+    // Fixed full-viewport canvas drawn behind all page content (z-index -1,
+    // low opacity) so text stays fully readable on top of it. Only runs
+    // while the Matrix theme is active, and skipped entirely for
+    // prefers-reduced-motion — the theme's colors/font still apply either way.
+    let matrixRainState = null;
+
+    function startMatrixRain() {
+      if (matrixRainState) return;
+      const canvas = document.getElementById('matrixRainCanvas');
+      if (!canvas) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const ctx = canvas.getContext('2d');
+      const glyphs = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789';
+      const fontSize = 16;
+      let columns, drops;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        columns = Math.max(1, Math.floor(canvas.width / fontSize));
+        drops = new Array(columns).fill(0).map(() => Math.random() * -50);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00ff41';
+        ctx.font = `${fontSize}px "Share Tech Mono", monospace`;
+        for (let i = 0; i < columns; i++) {
+          const glyph = glyphs[Math.floor(Math.random() * glyphs.length)];
+          ctx.fillText(glyph, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+          drops[i]++;
+        }
+      }
+
+      const intervalId = setInterval(draw, 60);
+      matrixRainState = { intervalId, resize };
+    }
+
+    function stopMatrixRain() {
+      if (!matrixRainState) return;
+      clearInterval(matrixRainState.intervalId);
+      window.removeEventListener('resize', matrixRainState.resize);
+      matrixRainState = null;
+      const canvas = document.getElementById('matrixRainCanvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     }
 
     // ---- Left-hand settings menu (mobile slide-out drawer) ----
