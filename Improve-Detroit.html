@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear the Lane (v3.0.1)</title>
+    <title>Clear the Lane (v3.0.2)</title>
     <!-- Tailwind CSS for fast, clean mobile styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- EXIF parser to pull GPS and Timestamp from photos client-side -->
@@ -22,7 +22,7 @@
 
     <div class="bg-white rounded-xl shadow-md p-6 mb-6 mt-4 text-center">
         <h1 class="text-2xl font-bold text-blue-600 mb-1">Clear the Lane</h1>
-        <p class="text-xs text-slate-400 font-mono mb-2">v3.0.1</p>
+        <p class="text-xs text-slate-400 font-mono mb-2">v3.0.2</p>
         <p class="text-sm text-slate-500 mb-6">Select one or more photos to report blocked bike lanes to Improve Detroit.</p>
 
         <!-- Hidden File Input -->
@@ -55,11 +55,11 @@
     <!-- ON-SCREEN DEBUG CONSOLE -->
     <div class="mt-2 bg-slate-900 rounded-lg p-4 shadow-inner flex-grow">
         <div class="flex justify-between items-center mb-2">
-            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v3.0.1)</p>
+            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v3.0.2)</p>
             <button onclick="document.getElementById('debugLog').innerHTML = ''" class="text-xs text-slate-500 hover:text-white">Clear</button>
         </div>
         <div id="debugLog" class="font-mono text-[10px] text-green-400 h-48 overflow-y-auto break-all whitespace-pre-wrap">
-            App initialized (v3.0.1)...
+            App initialized (v3.0.2)...
         </div>
     </div>
 
@@ -67,7 +67,7 @@
         // ==========================================
         // CONFIGURATION
         // ==========================================
-        const APP_VERSION = '3.0.1';
+        const APP_VERSION = '3.0.2';
         const GOOGLE_MAPS_API_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
         const SEECLICKFIX_TOKEN = 'token-07/31/2026-07/30/2027--B10B9B5D01CC998EE5A6C6BB8266537173326DC0F21EFE605455E64047D75A81-1';
         const DETROIT_REQUEST_TYPE_ID = '22880';
@@ -432,13 +432,21 @@
                 const data = await response.json();
                 logToConsole(`[${item.file.name}] Success! Issue ID: ${data.id}`);
 
+                // The ticket now exists in Improve Detroit's system -- nothing
+                // past this point may downgrade item.status or the "Submitted"
+                // UI back to an error state, or a user who believes it failed
+                // could hit "Try Again" and file a duplicate real ticket.
                 item.status = 'success';
                 item.issueId = data.id;
                 item.els.itemMsg.textContent = `Submitted — Issue #${data.id}`;
                 item.els.itemMsg.className = 'text-center text-xs font-bold text-emerald-600';
                 item.els.submitBtn.textContent = 'Submitted ✓';
 
-                await addToHistory(item, data.id, address);
+                try {
+                    await addToHistory(item, data.id, address);
+                } catch (historyErr) {
+                    logToConsole(`Ticket #${data.id} was submitted, but local history couldn't be saved: ${historyErr instanceof Error ? historyErr.message : historyErr}`, true);
+                }
 
             } catch (err) {
                 item.status = 'error';
@@ -463,8 +471,28 @@
             }
         }
 
+        // Some browser contexts (private/incognito mode, in-app WebViews like
+        // Gmail's) cap localStorage at zero and throw QuotaExceededError on
+        // the very first write. Trim oldest entries to make room; if even an
+        // empty list won't fit, give up quietly rather than throwing -- the
+        // ticket submission itself doesn't depend on this succeeding.
         function saveHistory(list) {
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+            const attempt = list.slice();
+            while (true) {
+                try {
+                    localStorage.setItem(HISTORY_KEY, JSON.stringify(attempt));
+                    if (attempt.length < list.length) {
+                        logToConsole(`Trimmed local history to ${attempt.length} entries to fit storage quota.`, true);
+                    }
+                    return;
+                } catch (err) {
+                    if (attempt.length === 0) {
+                        logToConsole('Local storage is unavailable (private browsing or a WebView with storage disabled?) -- submission history will not persist.', true);
+                        return;
+                    }
+                    attempt.pop(); // list is newest-first, so this drops the oldest entry
+                }
+            }
         }
 
         function makeThumbnail(file) {
