@@ -10,6 +10,50 @@
         if (t === 'house-hunters' || t === 'matrix') document.documentElement.setAttribute('data-theme', t);
       } catch (e) {}
     })();
+
+    // ---- Debug log capture (Menu > Debug > View Debug Log) ----
+    // Runs before every other script on the page (Leaflet, Firebase, the
+    // main app script) so nothing that happens during load is missed —
+    // this is the only way to see what actually happened on a phone, where
+    // there's no attached devtools console. Wraps console.log/warn/error/
+    // info (real console output is untouched, just mirrored into a buffer)
+    // and also catches uncaught errors, unhandled promise rejections, and
+    // failed resource loads (blocked/offline CDN scripts, etc.) via a
+    // capturing-phase window 'error' listener.
+    (function () {
+      window.__debugLog = [];
+      var MAX_LINES = 500;
+      function stringifyArg(a) {
+        if (a instanceof Error) return a.stack || a.message;
+        if (typeof a === 'object' && a !== null) {
+          try { return JSON.stringify(a); } catch (e) { return String(a); }
+        }
+        return String(a);
+      }
+      function push(level, args) {
+        var line = Array.prototype.map.call(args, stringifyArg).join(' ');
+        window.__debugLog.push({ time: new Date().toISOString(), level: level, line: line });
+        if (window.__debugLog.length > MAX_LINES) window.__debugLog.shift();
+        if (typeof window.__onDebugLogUpdate === 'function') window.__onDebugLogUpdate();
+      }
+      ['log', 'warn', 'error', 'info'].forEach(function (level) {
+        var original = console[level] ? console[level].bind(console) : function () {};
+        console[level] = function () {
+          original.apply(console, arguments);
+          push(level, arguments);
+        };
+      });
+      window.addEventListener('error', function (e) {
+        if (e.target && e.target !== window && e.target.tagName) {
+          push('error', ['Resource failed to load:', e.target.tagName, e.target.src || e.target.href || '']);
+        } else {
+          push('error', ['Uncaught error:', e.message, 'at ' + e.filename + ':' + e.lineno + ':' + e.colno]);
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function (e) {
+        push('error', ['Unhandled promise rejection:', e.reason]);
+      });
+    })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Royal Oak Open Houses</title>
@@ -538,6 +582,26 @@
     }
     .reorder-arrow-btn:hover:not(:disabled) { color: var(--text); background: var(--gray-light); }
     .reorder-arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Debug Console panel */
+    .debug-log {
+      background: #12161c;
+      color: #d8dee6;
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+    .debug-log-line { display: block; }
+    .debug-log-line .debug-log-time { color: #6b7280; margin-right: 8px; }
+    .debug-log-line.warn { color: #ffce54; }
+    .debug-log-line.error { color: #ff6b6b; }
+    .debug-log-empty { color: #6b7280; font-style: italic; }
 
     .compare-table {
       width: 100%;
@@ -1419,6 +1483,8 @@
     .sync-status.error .sync-status-dot { background: var(--coral); }
     .sync-status.error .sync-status-text { color: var(--coral-dark); }
     .sync-status.disabled .sync-status-dot { background: #9ca3af; }
+    .sync-status.stalled .sync-status-dot { background: #f0a500; }
+    .sync-status.stalled .sync-status-text { color: #b3790a; }
     .sidebar .card-density-toggle .density-btn { flex: 1; }
 
     .sidebar-backdrop {
@@ -2324,6 +2390,14 @@
         <span class="sync-status-text">Checking…</span>
       </div>
     </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-label">Debug</span>
+      <button class="sidebar-nav-btn" onclick="closeSidebar(); openDebugConsole();">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        View Debug Log
+      </button>
+    </div>
   </nav>
 
   <div class="app-container">
@@ -2814,6 +2888,26 @@
     </div>
   </div>
 
+  <!-- Debug Console Panel -->
+  <div class="compare-backdrop" id="debugConsoleBackdrop" onclick="closeDebugConsole()">
+    <div class="compare-panel" onclick="event.stopPropagation()" style="max-width:900px;">
+      <div class="compare-header">
+        <div>
+          <h2>Debug Log</h2>
+          <p id="debugConsoleSubtitle">Mirrors this browser's console — share this if something isn't syncing right.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn-secondary" onclick="copyDebugLog()" id="debugConsoleCopyBtn">Copy Log</button>
+          <button class="btn-secondary" onclick="clearDebugLog()">Clear</button>
+          <button class="panel-close" onclick="closeDebugConsole()">&times;</button>
+        </div>
+      </div>
+      <div class="compare-body">
+        <pre class="debug-log" id="debugConsoleOutput"></pre>
+      </div>
+    </div>
+  </div>
+
   <!-- Edit / Add Home Modal -->
   <div class="settings-backdrop" id="editPropertyBackdrop" onclick="closeEditPropertyForm()">
     <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:560px;">
@@ -3217,11 +3311,15 @@
     // --- Firebase Firestore sync (cross-device ratings/notes) ---
     let db = null;
     let firebaseReady = false;
+    console.log('Firebase: checking config...');
     try {
-      if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
+      if (typeof firebase === 'undefined') {
+        console.warn('Firebase: SDK script never loaded (firebase-app-compat.js / firebase-firestore-compat.js) — check network/ad-blocker. Using localStorage only.');
+      } else if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         firebaseReady = true;
+        console.log('Firebase: initializeApp + firestore() succeeded, project =', firebaseConfig.projectId);
       } else {
         console.warn('Firebase not configured - fill in firebase-config.js to enable cross-device sync. Using localStorage only.');
       }
@@ -3332,10 +3430,16 @@
     function setSyncStatus(state, text) {
       const el = document.getElementById('syncStatusIndicator');
       if (!el) return;
-      el.classList.remove('synced', 'error', 'disabled');
+      el.classList.remove('synced', 'error', 'disabled', 'stalled');
       el.classList.add(state);
       el.querySelector('.sync-status-text').innerText = text;
     }
+
+    // How long to wait for onSnapshot's first callback (success OR error)
+    // before assuming the connection is stuck rather than just slow. Plain
+    // "Connecting…" forever, with nothing logged, was the whole problem —
+    // this turns a silent hang into a visible, timestamped log line.
+    const FIRESTORE_CONNECT_TIMEOUT_MS = 12000;
 
     function initFirebaseSync() {
       if (!firebaseReady) {
@@ -3343,7 +3447,21 @@
         return;
       }
       setSyncStatus('disabled', 'Connecting…');
+      console.log('Firestore: attaching realtime listener to "openHaus"...');
+
+      let firstResponseReceived = false;
+      const stallTimer = setTimeout(() => {
+        if (firstResponseReceived) return;
+        console.warn(`Firestore: no response after ${FIRESTORE_CONNECT_TIMEOUT_MS / 1000}s — connection appears stuck (check network/firewall/VPN). Still listening in case it recovers.`);
+        setSyncStatus('stalled', 'Stalled — check network');
+      }, FIRESTORE_CONNECT_TIMEOUT_MS);
+
       db.collection('openHaus').onSnapshot(snapshot => {
+        if (!firstResponseReceived) {
+          firstResponseReceived = true;
+          clearTimeout(stallTimer);
+          console.log(`Firestore: first snapshot received (${snapshot.docChanges().length} change(s), ${snapshot.size} doc(s) total, fromCache=${snapshot.metadata.fromCache}).`);
+        }
         snapshot.docChanges().forEach(change => {
           if (change.type !== 'removed') {
             applyRemotePropertyData(change.doc.id, change.doc.data());
@@ -3353,6 +3471,8 @@
         retryOpenSharedProperty();
         setSyncStatus('synced', `Synced ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
       }, err => {
+        firstResponseReceived = true;
+        clearTimeout(stallTimer);
         console.warn('Firestore listener error', err);
         setSyncStatus('error', 'Sync error — local only');
       });
@@ -5278,6 +5398,66 @@
 
     function closeReorderPanel() {
       document.getElementById('reorderBackdrop').classList.remove('open');
+    }
+
+    // ---- Debug Console (Menu > Debug > View Debug Log) ----
+    // Renders window.__debugLog (captured by the head script's console
+    // wrapper) — the point is to give a way to see what's happening on a
+    // phone, where there's no attached devtools. Escapes text content since
+    // logged values (URLs, error messages) are untrusted-ish and this is
+    // rendered as innerHTML for the per-line color coding.
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderDebugLog() {
+      const out = document.getElementById('debugConsoleOutput');
+      if (!out) return;
+      const log = window.__debugLog || [];
+      if (!log.length) {
+        out.innerHTML = '<span class="debug-log-empty">Nothing logged yet.</span>';
+        return;
+      }
+      const wasScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 4;
+      out.innerHTML = log.map(entry => {
+        const time = entry.time.slice(11, 19); // HH:MM:SS
+        return `<span class="debug-log-line ${entry.level}"><span class="debug-log-time">${time}</span>${escapeHtml(entry.line)}</span>`;
+      }).join('\n');
+      if (wasScrolledToBottom) out.scrollTop = out.scrollHeight;
+    }
+
+    function openDebugConsole() {
+      renderDebugLog();
+      window.__onDebugLogUpdate = renderDebugLog;
+      document.getElementById('debugConsoleBackdrop').classList.add('open');
+      const out = document.getElementById('debugConsoleOutput');
+      out.scrollTop = out.scrollHeight;
+    }
+
+    function closeDebugConsole() {
+      document.getElementById('debugConsoleBackdrop').classList.remove('open');
+      window.__onDebugLogUpdate = null;
+    }
+
+    function clearDebugLog() {
+      window.__debugLog = [];
+      renderDebugLog();
+    }
+
+    async function copyDebugLog() {
+      const log = window.__debugLog || [];
+      const text = log.map(e => `[${e.time}] ${e.level.toUpperCase()}: ${e.line}`).join('\n');
+      const btn = document.getElementById('debugConsoleCopyBtn');
+      try {
+        await navigator.clipboard.writeText(text || '(empty)');
+        if (btn) {
+          const original = btn.innerText;
+          btn.innerText = 'Copied!';
+          setTimeout(() => { btn.innerText = original; }, 1500);
+        }
+      } catch (err) {
+        alert('Could not copy automatically — select the log text manually instead.');
+      }
     }
 
     function setReorderTab(listKey) {
