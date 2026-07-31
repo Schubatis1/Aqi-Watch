@@ -76,7 +76,6 @@
             const logLine = document.createElement('div');
             logLine.className = isError ? 'text-red-400 mb-1' : 'mb-1';
             
-            // Format object errors safely
             let formattedMessage = message;
             if (message instanceof Error) {
                 formattedMessage = `${message.name}: ${message.message}`;
@@ -86,7 +85,7 @@
 
             logLine.textContent = `[${timestamp}] ${formattedMessage}`;
             logWindow.appendChild(logLine);
-            logWindow.scrollTop = logWindow.scrollHeight; // Auto-scroll to bottom
+            logWindow.scrollTop = logWindow.scrollHeight;
         }
 
         // App State
@@ -114,7 +113,6 @@
             statusMsg.textContent = "Extracting photo metadata...";
             statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
             
-            // Show preview
             imagePreview.src = URL.createObjectURL(file);
             previewCard.classList.remove('hidden');
             previewCard.classList.add('flex');
@@ -132,7 +130,6 @@
                 currentLng = gps.longitude;
                 logToConsole(`GPS found: ${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}`);
 
-                // Parse Photo Date & Time from EXIF
                 const rawDate = exifData?.DateTimeOriginal || exifData?.CreateDate || new Date(file.lastModified);
                 const photoDateObj = new Date(rawDate);
                 
@@ -146,7 +143,6 @@
                 statusMsg.textContent = "Resolving cross streets...";
                 logToConsole("Fetching reverse geocode from Google Maps...");
 
-                // Reverse Geocode with Google Maps
                 const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLat},${currentLng}&key=${GOOGLE_MAPS_API_KEY}&result_type=intersection`;
                 const geoRes = await fetch(geoUrl);
                 
@@ -204,8 +200,13 @@
             formData.append('image', currentFile);
 
             try {
-                logToConsole("Dispatching POST request to SeeClickFix...");
-                const response = await fetch('https://seeclickfix.com/api/v2/issues', {
+                logToConsole("Dispatching POST request via CORS proxy...");
+                
+                // Wrapped with a public CORS proxy to bypass browser restrictions
+                const targetUrl = 'https://seeclickfix.com/api/v2/issues';
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
+                const response = await fetch(proxyUrl, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${SEECLICKFIX_TOKEN}`
