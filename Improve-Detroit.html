@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear the Lane (v3.0.2)</title>
+    <title>Clear the Lane (v3.0.3)</title>
     <!-- Tailwind CSS for fast, clean mobile styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- EXIF parser to pull GPS and Timestamp from photos client-side -->
@@ -22,7 +22,7 @@
 
     <div class="bg-white rounded-xl shadow-md p-6 mb-6 mt-4 text-center">
         <h1 class="text-2xl font-bold text-blue-600 mb-1">Clear the Lane</h1>
-        <p class="text-xs text-slate-400 font-mono mb-2">v3.0.2</p>
+        <p class="text-xs text-slate-400 font-mono mb-2">v3.0.3</p>
         <p class="text-sm text-slate-500 mb-6">Select one or more photos to report blocked bike lanes to Improve Detroit.</p>
 
         <!-- Hidden File Input -->
@@ -55,11 +55,11 @@
     <!-- ON-SCREEN DEBUG CONSOLE -->
     <div class="mt-2 bg-slate-900 rounded-lg p-4 shadow-inner flex-grow">
         <div class="flex justify-between items-center mb-2">
-            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v3.0.2)</p>
+            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v3.0.3)</p>
             <button onclick="document.getElementById('debugLog').innerHTML = ''" class="text-xs text-slate-500 hover:text-white">Clear</button>
         </div>
         <div id="debugLog" class="font-mono text-[10px] text-green-400 h-48 overflow-y-auto break-all whitespace-pre-wrap">
-            App initialized (v3.0.2)...
+            App initialized (v3.0.3)...
         </div>
     </div>
 
@@ -67,7 +67,7 @@
         // ==========================================
         // CONFIGURATION
         // ==========================================
-        const APP_VERSION = '3.0.2';
+        const APP_VERSION = '3.0.3';
         const GOOGLE_MAPS_API_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
         const SEECLICKFIX_TOKEN = 'token-07/31/2026-07/30/2027--B10B9B5D01CC998EE5A6C6BB8266537173326DC0F21EFE605455E64047D75A81-1';
         const DETROIT_REQUEST_TYPE_ID = '22880';
@@ -118,6 +118,15 @@
         let queue = [];
         let itemCounter = 0;
         function nextId() { return `item-${++itemCounter}-${Date.now()}`; }
+
+        function loadHistoryFromStorage() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+        let historyCache = loadHistoryFromStorage();
 
         logToConsole(`Running version ${APP_VERSION}`);
         renderHistory();
@@ -463,34 +472,30 @@
         // ==========================================
         // Submission History & Receipt Tracker
         // ==========================================
-        function loadHistory() {
-            try {
-                return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-            } catch {
-                return [];
-            }
-        }
-
-        // Some browser contexts (private/incognito mode, in-app WebViews like
-        // Gmail's) cap localStorage at zero and throw QuotaExceededError on
-        // the very first write. Trim oldest entries to make room; if even an
-        // empty list won't fit, give up quietly rather than throwing -- the
-        // ticket submission itself doesn't depend on this succeeding.
-        function saveHistory(list) {
-            const attempt = list.slice();
+        // historyCache is the source of truth for what's rendered. localStorage
+        // is best-effort persistence layered on top of it, not a passthrough --
+        // some browser contexts (private/incognito mode, in-app WebViews like
+        // Gmail's, or a page opened as a local file:// rather than hosted) cap
+        // localStorage at zero and throw QuotaExceededError on the very first
+        // write. Reading straight from localStorage on every render meant a
+        // just-submitted ticket wouldn't show up at all in those contexts, even
+        // seconds after a confirmed 201 -- now it always shows for the current
+        // session, and persists across reloads only where storage allows it.
+        function persistHistory() {
+            const attempt = historyCache.slice();
             while (true) {
                 try {
                     localStorage.setItem(HISTORY_KEY, JSON.stringify(attempt));
-                    if (attempt.length < list.length) {
-                        logToConsole(`Trimmed local history to ${attempt.length} entries to fit storage quota.`, true);
+                    if (attempt.length < historyCache.length) {
+                        logToConsole(`Local storage only fit ${attempt.length} of ${historyCache.length} history entries; all still show for this session.`, true);
                     }
                     return;
                 } catch (err) {
                     if (attempt.length === 0) {
-                        logToConsole('Local storage is unavailable (private browsing or a WebView with storage disabled?) -- submission history will not persist.', true);
+                        logToConsole('Local storage is unavailable (private browsing, a restricted WebView, or a file:// page) -- history shows for this session but will not persist after reload.', true);
                         return;
                     }
-                    attempt.pop(); // list is newest-first, so this drops the oldest entry
+                    attempt.pop(); // newest-first, so this drops the oldest entry
                 }
             }
         }
@@ -517,8 +522,7 @@
 
         async function addToHistory(item, issueId, address) {
             const thumbnail = await makeThumbnail(item.file);
-            const list = loadHistory();
-            list.unshift({
+            historyCache.unshift({
                 issueId,
                 thumbnail,
                 address,
@@ -526,17 +530,16 @@
                 status: 'Open',
                 link: `https://seeclickfix.com/issues/${issueId}`
             });
-            saveHistory(list);
+            persistHistory();
             renderHistory();
         }
 
         function renderHistory() {
-            const list = loadHistory();
-            if (list.length === 0) {
+            if (historyCache.length === 0) {
                 historyList.innerHTML = '<p class="text-xs text-slate-400 px-1">No submissions yet.</p>';
                 return;
             }
-            historyList.innerHTML = list.map((entry, idx) => `
+            historyList.innerHTML = historyCache.map((entry, idx) => `
                 <div class="bg-white rounded-lg shadow-sm p-3 flex gap-3 items-center">
                     <img src="${entry.thumbnail}" class="w-12 h-12 object-cover rounded flex-shrink-0" alt="Submitted photo">
                     <div class="flex-1 min-w-0">
@@ -553,8 +556,7 @@
         }
 
         async function refreshHistoryStatus(idx) {
-            const list = loadHistory();
-            const entry = list[idx];
+            const entry = historyCache[idx];
             if (!entry) return;
 
             logToConsole(`Checking status for issue #${entry.issueId}...`);
@@ -569,8 +571,7 @@
                 }
                 const data = await response.json();
                 entry.status = data.status || entry.status;
-                list[idx] = entry;
-                saveHistory(list);
+                persistHistory();
                 renderHistory();
                 logToConsole(`Issue #${entry.issueId} status: ${entry.status}`);
             } catch (err) {
