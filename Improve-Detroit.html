@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear the Lane (v0.2.7)</title>
+    <title>Clear the Lane (v0.2.8)</title>
     <!-- Tailwind CSS for fast, clean mobile styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- EXIF parser to pull GPS and Timestamp from photos client-side -->
@@ -15,7 +15,7 @@
 
     <div class="bg-white rounded-xl shadow-md p-6 mb-6 mt-4 text-center">
         <h1 class="text-2xl font-bold text-blue-600 mb-1">Clear the Lane</h1>
-        <p class="text-xs text-slate-400 font-mono mb-2">v0.2.7</p>
+        <p class="text-xs text-slate-400 font-mono mb-2">v0.2.8</p>
         <p class="text-sm text-slate-500 mb-6">Upload a photo to automatically report a blocked bike lane to Improve Detroit.</p>
 
         <!-- Hidden File Input -->
@@ -54,11 +54,11 @@
     <!-- ON-SCREEN DEBUG CONSOLE -->
     <div class="mt-8 bg-slate-900 rounded-lg p-4 shadow-inner flex-grow">
         <div class="flex justify-between items-center mb-2">
-            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v0.2.7)</p>
+            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v0.2.8)</p>
             <button onclick="document.getElementById('debugLog').innerHTML = ''" class="text-xs text-slate-500 hover:text-white">Clear</button>
         </div>
         <div id="debugLog" class="font-mono text-[10px] text-green-400 h-48 overflow-y-auto break-all whitespace-pre-wrap">
-            App initialized (v0.2.7)...
+            App initialized (v0.2.8)...
         </div>
     </div>
 
@@ -66,7 +66,7 @@
         // ==========================================
         // CONFIGURATION 
         // ==========================================
-        const APP_VERSION = '0.2.7';
+        const APP_VERSION = '0.2.8';
         const GOOGLE_MAPS_API_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
         const SEECLICKFIX_TOKEN = 'token-07/31/2026-07/30/2027--B10B9B5D01CC998EE5A6C6BB8266537173326DC0F21EFE605455E64047D75A81-1';
         const DETROIT_REQUEST_TYPE_ID = '22880'; 
@@ -190,21 +190,23 @@
             statusMsg.textContent = "Sending to Improve Detroit...";
             statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
             
-            logToConsole("Building payload with corrected request type fields...");
+            logToConsole("Building payload with exact 'answers' array notation...");
 
             const formData = new FormData();
             formData.append('lat', currentLat);
             formData.append('lng', currentLng);
             formData.append('address', currentAddress);
             formData.append('request_type_id', DETROIT_REQUEST_TYPE_ID);
-            
-            // Fix 422 error: Provide explicit top-level summary matching Detroit requirements
             formData.append('summary', 'Vehicle Blocking Bike Lane');
             formData.append('description', 'Vehicle blocking active bike lane.');
             
-            // Fix 422 error: Use correct bracket mapping notation that maps to SeeClickFix request_type_answers base
-            formData.append('request_type_answers[32751]', ' Car traveling in bike lane');
-            formData.append('request_type_answers[33446]', photoTimeString);
+            // Fix 400 error: SeeClickFix V2 API expects answers submitted as a nested array format:
+            // answers[][question_id] and answers[][answer]
+            formData.append('answers[][question_id]', '32751');
+            formData.append('answers[][answer]', ' Car traveling in bike lane');
+            
+            formData.append('answers[][question_id]', '33446');
+            formData.append('answers[][answer]', photoTimeString);
             
             formData.append('image', currentFile);
 
