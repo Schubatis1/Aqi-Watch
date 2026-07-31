@@ -186,8 +186,9 @@
             statusMsg.textContent = "Sending to Improve Detroit...";
             statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
             
-            logToConsole("Building payload with structured answers for SeeClickFix API...");
+            logToConsole("Building FormData payload...");
 
+            // Reverting to clean standard FormData fields that SeeClickFix V2 natively supports
             const formData = new FormData();
             formData.append('lat', currentLat);
             formData.append('lng', currentLng);
@@ -196,13 +197,10 @@
             formData.append('summary', 'Vehicle Blocking Bike Lane');
             formData.append('description', 'Vehicle blocking active bike lane.');
             
-            // Structured Answers array mapping for SeeClickFix V2 API
-            formData.append('answers[][question_id]', '32751');
-            formData.append('answers[][answer]', ' Car traveling in bike lane');
-
-            formData.append('answers[][question_id]', '33446');
-            formData.append('answers[][answer]', photoTimeString);
-
+            // Standard flat custom questions parameter structure
+            formData.append('questions[32751]', ' Car traveling in bike lane');
+            formData.append('questions[33446]', photoTimeString);
+            
             formData.append('image', currentFile);
 
             try {
