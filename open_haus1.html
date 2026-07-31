@@ -3296,7 +3296,7 @@
     initWeekendFilter();
 
     function setCardDensity(mode) {
-      localStorage.setItem('cardDensity', mode);
+      safeLocalStorageSet('cardDensity', mode);
       document.getElementById('cardsGrid').classList.toggle('compact', mode === 'compact');
       document.getElementById('densityFullBtn').classList.toggle('active', mode === 'full');
       document.getElementById('densityCompactBtn').classList.toggle('active', mode === 'compact');
@@ -3304,7 +3304,7 @@
     setCardDensity(localStorage.getItem('cardDensity') || 'full');
 
     function selectWeekend(weekendId) {
-      localStorage.setItem('selectedWeekendId', weekendId);
+      safeLocalStorageSet('selectedWeekendId', weekendId);
       applyFilters();
     }
 
@@ -3342,9 +3342,9 @@
         try { ids = JSON.parse(localStorage.getItem('customPropertyIds') || '[]'); } catch (e) { ids = []; }
         if (!ids.includes(id)) {
           ids.push(id);
-          localStorage.setItem('customPropertyIds', JSON.stringify(ids));
+          safeLocalStorageSet('customPropertyIds', JSON.stringify(ids));
         }
-        localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
+        safeLocalStorageSet(`customProperty_${id}`, JSON.stringify(property));
       }
 
       if (!property) return;
@@ -3355,44 +3355,44 @@
           try { return (JSON.parse(localStorage.getItem('customPropertyIds') || '[]')).includes(id); } catch (e) { return false; }
         })();
         if (isCustom) {
-          localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
+          safeLocalStorageSet(`customProperty_${id}`, JSON.stringify(property));
         } else {
-          localStorage.setItem(`override_${id}`, JSON.stringify(data.core));
+          safeLocalStorageSet(`override_${id}`, JSON.stringify(data.core));
         }
       }
       if (data.weekends !== undefined) {
         property.weekends = data.weekends;
-        localStorage.setItem(`weekends_${id}`, JSON.stringify(data.weekends));
+        safeLocalStorageSet(`weekends_${id}`, JSON.stringify(data.weekends));
       }
       if (data.hidden !== undefined) {
         property.hidden = data.hidden;
-        localStorage.setItem(`hidden_${id}`, data.hidden ? '1' : '0');
+        safeLocalStorageSet(`hidden_${id}`, data.hidden ? '1' : '0');
       }
       if (data.loved !== undefined) {
         property.loved = data.loved;
-        localStorage.setItem(`loved_${id}`, data.loved ? '1' : '0');
+        safeLocalStorageSet(`loved_${id}`, data.loved ? '1' : '0');
       }
       if (data.watchlist !== undefined) {
         property.watchlist = data.watchlist;
-        localStorage.setItem(`watchlist_${id}`, data.watchlist ? '1' : '0');
+        safeLocalStorageSet(`watchlist_${id}`, data.watchlist ? '1' : '0');
       }
       if (data.toured !== undefined) {
         property.toured = data.toured;
-        localStorage.setItem(`toured_${id}`, data.toured ? '1' : '0');
+        safeLocalStorageSet(`toured_${id}`, data.toured ? '1' : '0');
       }
       if (data.touredDate !== undefined) {
         property.touredDate = data.touredDate;
-        localStorage.setItem(`touredDate_${id}`, data.touredDate || '');
+        safeLocalStorageSet(`touredDate_${id}`, data.touredDate || '');
       }
 
       PEOPLE.forEach(({ key: person }) => {
         if (data.ratings && data.ratings[person] !== undefined) {
           property.ratings[person] = data.ratings[person];
-          localStorage.setItem(`rating_${person}_${id}`, data.ratings[person]);
+          safeLocalStorageSet(`rating_${person}_${id}`, data.ratings[person]);
         }
         if (data.notes && data.notes[person] !== undefined) {
           property.evalNotes[person] = data.notes[person];
-          localStorage.setItem(`notes_${person}_${id}`, data.notes[person]);
+          safeLocalStorageSet(`notes_${person}_${id}`, data.notes[person]);
           const textarea = document.getElementById(`evalNotes-${person}`);
           if (activeEvalId === id && textarea && document.activeElement !== textarea) {
             textarea.value = data.notes[person];
@@ -3403,7 +3403,7 @@
             const value = data.features[person][featureKey];
             if (value !== undefined) {
               property.features[person][featureKey] = value;
-              localStorage.setItem(`feat_${person}_${featureKey}_${id}`, value);
+              safeLocalStorageSet(`feat_${person}_${featureKey}_${id}`, value);
             }
           });
         }
@@ -3464,7 +3464,16 @@
         }
         snapshot.docChanges().forEach(change => {
           if (change.type !== 'removed') {
-            applyRemotePropertyData(change.doc.id, change.doc.data());
+            // Defense-in-depth: safeLocalStorageSet already stops a storage
+            // failure from throwing, but this still guards against any
+            // other unexpected error in a single doc's update — one bad
+            // doc should never again be able to skip applyFilters()/
+            // setSyncStatus('synced') for the rest of the batch.
+            try {
+              applyRemotePropertyData(change.doc.id, change.doc.data());
+            } catch (err) {
+              console.warn(`Failed to apply remote update for ${change.doc.id}`, err);
+            }
           }
         });
         applyFilters();
@@ -3540,13 +3549,66 @@
       return { getBestMatch, getAllForAddress };
     })();
 
+    // A single bad localStorage.setItem() call (almost always
+    // QuotaExceededError — this device's storage is full, usually from
+    // accumulated cached photos) used to be able to crash whatever code
+    // path it happened in, uncaught. That was the actual cause behind the
+    // app "freezing" — a write failing partway through processing a
+    // Firestore snapshot would abort that whole handler, silently skipping
+    // both the card-list refresh (applyFilters()) and the Sync status
+    // update, permanently stuck on "Connecting…" even though sync had
+    // actually succeeded. Every localStorage.setItem() call in this file
+    // now goes through here instead: on failure, it evicts the oldest
+    // cached photos (by far the largest thing stored — base64 images from
+    // OneHome imports) to try to free enough room, retries once, and
+    // otherwise just logs a warning and moves on rather than throwing.
+    const PHOTO_CACHE_PREFIX = 'housephoto_';
+
+    function evictOldestPhotoCacheEntries(count) {
+      try {
+        const entries = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith(PHOTO_CACHE_PREFIX)) continue;
+          let timestamp = 0;
+          try { timestamp = JSON.parse(localStorage.getItem(key)).timestamp || 0; } catch (e) { /* corrupt entry — still evictable */ }
+          entries.push({ key, timestamp });
+        }
+        if (!entries.length) return false;
+        entries.sort((a, b) => a.timestamp - b.timestamp);
+        entries.slice(0, count).forEach(e => localStorage.removeItem(e.key));
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function safeLocalStorageSet(key, value) {
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (err) {
+        if (evictOldestPhotoCacheEntries(5)) {
+          try {
+            localStorage.setItem(key, value);
+            return true;
+          } catch (err2) {
+            console.warn(`localStorage.setItem('${key}') failed even after evicting cached photos — this device's local cache may be incomplete, but the app keeps running.`, err2);
+            return false;
+          }
+        }
+        console.warn(`localStorage.setItem('${key}') failed and there was nothing cached to evict — this device's local cache may be incomplete, but the app keeps running.`, err);
+        return false;
+      }
+    }
+
     // =====================================================================
     // HousePhotoService — provider-based photo abstraction
     // UI never talks to Street View / MLS / etc directly, only this service.
     // =====================================================================
 
     const HousePhotoService = (function () {
-      const CACHE_PREFIX = 'housephoto_';
+      const CACHE_PREFIX = PHOTO_CACHE_PREFIX;
       const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
       function cacheKey(address) {
@@ -3569,13 +3631,9 @@
       }
 
       function setCached(address, provider, image) {
-        try {
-          localStorage.setItem(cacheKey(address), JSON.stringify({
-            provider, image, timestamp: Date.now()
-          }));
-        } catch (e) {
-          // localStorage full or unavailable — fail silently, not critical
-        }
+        safeLocalStorageSet(cacheKey(address), JSON.stringify({
+          provider, image, timestamp: Date.now()
+        }));
       }
 
       // Default key, used until the user saves their own in Settings.
@@ -3834,7 +3892,7 @@
     }
 
     function setTheme(theme) {
-      localStorage.setItem('appTheme', theme);
+      safeLocalStorageSet('appTheme', theme);
       applyTheme(theme);
       if (typeof map !== 'undefined' && map) applyFilters();
     }
@@ -3933,7 +3991,7 @@
       const value = input.value.trim();
 
       if (value) {
-        localStorage.setItem('googleMapsKey', value);
+        safeLocalStorageSet('googleMapsKey', value);
         status.innerText = 'Key saved locally. Reopen a listing to load its photo.';
       } else {
         localStorage.removeItem('googleMapsKey');
@@ -4704,16 +4762,16 @@
         matchTierCutoffs = { top: savedTop, good: savedGood };
       } else {
         matchTierCutoffs = computeDefaultMatchTierCutoffs(allProperties);
-        localStorage.setItem('matchTierTopCutoff', String(matchTierCutoffs.top));
-        localStorage.setItem('matchTierGoodCutoff', String(matchTierCutoffs.good));
+        safeLocalStorageSet('matchTierTopCutoff', String(matchTierCutoffs.top));
+        safeLocalStorageSet('matchTierGoodCutoff', String(matchTierCutoffs.good));
       }
       return matchTierCutoffs;
     }
 
     function setMatchTierCutoffs(top, good) {
       matchTierCutoffs = { top, good };
-      localStorage.setItem('matchTierTopCutoff', String(top));
-      localStorage.setItem('matchTierGoodCutoff', String(good));
+      safeLocalStorageSet('matchTierTopCutoff', String(top));
+      safeLocalStorageSet('matchTierGoodCutoff', String(good));
     }
 
     function matchScoreToTier(score) {
@@ -5302,7 +5360,7 @@
       try { ids = JSON.parse(localStorage.getItem('customPropertyIds') || '[]'); } catch (e) { ids = []; }
       if (!ids.includes(property.id)) {
         ids.push(property.id);
-        localStorage.setItem('customPropertyIds', JSON.stringify(ids));
+        safeLocalStorageSet('customPropertyIds', JSON.stringify(ids));
       }
     }
 
@@ -5333,17 +5391,17 @@
       const isCustom = isCustomPropertyId(id);
 
       if (isCustom) {
-        localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
+        safeLocalStorageSet(`customProperty_${id}`, JSON.stringify(property));
       } else {
         const { ratings, evalNotes, features, pricePerSqFt, ...corePatch } = property;
-        localStorage.setItem(`override_${id}`, JSON.stringify(corePatch));
+        safeLocalStorageSet(`override_${id}`, JSON.stringify(corePatch));
       }
-      localStorage.setItem(`weekends_${id}`, JSON.stringify(property.weekends || []));
-      localStorage.setItem(`hidden_${id}`, property.hidden ? '1' : '0');
-      localStorage.setItem(`loved_${id}`, property.loved ? '1' : '0');
-      localStorage.setItem(`watchlist_${id}`, property.watchlist ? '1' : '0');
-      localStorage.setItem(`toured_${id}`, property.toured ? '1' : '0');
-      localStorage.setItem(`touredDate_${id}`, property.touredDate || '');
+      safeLocalStorageSet(`weekends_${id}`, JSON.stringify(property.weekends || []));
+      safeLocalStorageSet(`hidden_${id}`, property.hidden ? '1' : '0');
+      safeLocalStorageSet(`loved_${id}`, property.loved ? '1' : '0');
+      safeLocalStorageSet(`watchlist_${id}`, property.watchlist ? '1' : '0');
+      safeLocalStorageSet(`toured_${id}`, property.toured ? '1' : '0');
+      safeLocalStorageSet(`touredDate_${id}`, property.touredDate || '');
 
       let patch;
       if (changedFields && changedFields.length) {
@@ -6433,7 +6491,7 @@
 
       try {
         await loadOneHomeResultsFromUrl(DEFAULT_ONEHOME_URL);
-        localStorage.setItem('oneHomeAutoSyncAt', String(Date.now()));
+        safeLocalStorageSet('oneHomeAutoSyncAt', String(Date.now()));
         await backfillPhotosForExistingMatches();
       } catch (err) {
         console.warn('OneHome background sync failed', err);
@@ -7360,7 +7418,7 @@
       const property = properties.find(p => p.id === id);
       if (property) {
         property.ratings[person] = ratingValue;
-        localStorage.setItem(`rating_${person}_${id}`, ratingValue);
+        safeLocalStorageSet(`rating_${person}_${id}`, ratingValue);
         syncPropertyToFirestore(id, { ratings: { [person]: ratingValue } });
         showToast(`${person === 'adam' ? 'Adam' : 'Lauren'}'s rating updated to ${ratingValue} stars`);
         applyFilters();
@@ -7375,7 +7433,7 @@
       if (!property) return;
 
       property.features[person][featureKey] = ratingValue;
-      localStorage.setItem(`feat_${person}_${featureKey}_${id}`, ratingValue);
+      safeLocalStorageSet(`feat_${person}_${featureKey}_${id}`, ratingValue);
       syncPropertyToFirestore(id, { features: { [person]: { [featureKey]: ratingValue } } });
 
       if (activeEvalId === id) {
@@ -7670,7 +7728,7 @@
         PEOPLE.forEach(({ key: person }) => {
           const value = document.getElementById(`evalNotes-${person}`).value;
           property.evalNotes[person] = value;
-          localStorage.setItem(`notes_${person}_${activeEvalId}`, value);
+          safeLocalStorageSet(`notes_${person}_${activeEvalId}`, value);
           notesPatch[person] = value;
         });
         syncPropertyToFirestore(activeEvalId, { notes: notesPatch });
