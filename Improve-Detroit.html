@@ -1,0 +1,221 @@
+Here is the updated code.
+The exifr parser now extracts the original photo timestamp (DateTimeOriginal or CreateDate) directly from the image's EXIF metadata. It formats it into your requested format (e.g., 7/30/2026 at approximately 8:06 PM) and passes that exact string into the required question field (33446). If the photo lacks a timestamp tag, it cleanly falls back to the file's last modified timestamp.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear the Lane</title>
+    <!-- Tailwind CSS for fast, clean mobile styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- EXIF parser to pull GPS and Timestamp from photos client-side -->
+    <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+    <!-- PWA Manifest stub to allow saving to home screen -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2xlYXIgVGhlIExhbmUiLCJzaG9ydF9uYW1lIjoiQ2xlYXJMYW5lIiwiZGlzcGxheSI6InN0YW5kYWxvbmUifQ==">
+</head>
+<body class="bg-slate-100 p-4 font-sans text-slate-800 max-w-md mx-auto min-h-screen flex flex-col">
+
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6 mt-4 text-center">
+        <h1 class="text-2xl font-bold text-blue-600 mb-2">Clear the Lane</h1>
+        <p class="text-sm text-slate-500 mb-6">Upload a photo to automatically report a blocked bike lane to Improve Detroit.</p>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="photoInput" accept="image/*" class="hidden">
+        
+        <!-- Upload Button -->
+        <button onclick="document.getElementById('photoInput').click()" 
+                class="w-full bg-blue-600 text-white font-semibold py-4 rounded-lg shadow hover:bg-blue-700 transition">
+            Snap / Select Photo
+        </button>
+    </div>
+
+    <!-- Preview & Submission Card (Hidden by default) -->
+    <div id="previewCard" class="bg-white rounded-xl shadow-md p-6 hidden flex-col gap-4">
+        <img id="imagePreview" class="w-full h-48 object-cover rounded-lg shadow-sm" alt="Selected photo">
+        
+        <div class="bg-slate-50 p-3 rounded border border-slate-200">
+            <p class="text-xs font-bold text-slate-500 uppercase">Detected Location</p>
+            <p id="addressText" class="font-medium text-slate-800 text-sm mt-1">Loading cross streets...</p>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded border border-slate-200">
+            <p class="text-xs font-bold text-slate-500 uppercase">Photo Timestamp</p>
+            <p id="timeText" class="font-mono text-slate-600 text-sm mt-1">--</p>
+        </div>
+
+        <button id="submitBtn" onclick="submitToSeeClickFix()" 
+                class="w-full bg-emerald-600 text-white font-semibold py-4 rounded-lg shadow hover:bg-emerald-700 transition mt-2">
+            Submit to Improve Detroit
+        </button>
+    </div>
+
+    <!-- Status Messages -->
+    <p id="statusMsg" class="mt-4 text-center text-sm font-medium"></p>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION 
+        // ==========================================
+        const GOOGLE_MAPS_API_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
+        const SEECLICKFIX_TOKEN = 'token-07/31/2026-07/30/2027--B10B9B5D01CC998EE5A6C6BB8266537173326DC0F21EFE605455E64047D75A81-1';
+        const DETROIT_REQUEST_TYPE_ID = '22880'; 
+        
+        // App State
+        let currentFile = null;
+        let currentLat = null;
+        let currentLng = null;
+        let currentAddress = null;
+        let photoTimeString = null;
+
+        const photoInput = document.getElementById('photoInput');
+        const previewCard = document.getElementById('previewCard');
+        const imagePreview = document.getElementById('imagePreview');
+        const addressText = document.getElementById('addressText');
+        const timeText = document.getElementById('timeText');
+        const statusMsg = document.getElementById('statusMsg');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Handle File Selection & Extraction
+        photoInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            currentFile = file;
+            statusMsg.textContent = "Extracting photo metadata...";
+            statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
+            
+            // Show preview
+            imagePreview.src = URL.createObjectURL(file);
+            previewCard.classList.remove('hidden');
+            previewCard.classList.add('flex');
+
+            try {
+                // Extract EXIF Metadata (GPS & Timestamp)
+                const exifData = await exifr.parse(file);
+                const gps = await exifr.gps(file);
+                
+                if (!gps) {
+                    throw new Error("No GPS data found. Ensure 'Location Tags' are enabled in your camera settings.");
+                }
+
+                currentLat = gps.latitude;
+                currentLng = gps.longitude;
+
+                // Parse Photo Date & Time from EXIF
+                const rawDate = exifData?.DateTimeOriginal || exifData?.CreateDate || new Date(file.lastModified);
+                const photoDateObj = new Date(rawDate);
+                
+                const datePart = photoDateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+                const timePart = photoDateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+                // Construct exact requested string format
+                photoTimeString = `${datePart} at approximately ${timePart}`;
+                timeText.textContent = photoTimeString;
+
+                statusMsg.textContent = "Resolving cross streets...";
+
+                // Reverse Geocode with Google Maps
+                const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLat},${currentLng}&key=${GOOGLE_MAPS_API_KEY}&result_type=intersection`;
+                const geoRes = await fetch(geoUrl);
+                const geoData = await geoRes.json();
+
+                if (geoData.status === 'OK' && geoData.results.length > 0) {
+                    currentAddress = geoData.results[0].formatted_address;
+                } else {
+                    currentAddress = `${currentLat}, ${currentLng}`; // Fallback to raw coords
+                }
+                
+                addressText.textContent = currentAddress;
+                statusMsg.textContent = "Ready to submit!";
+                statusMsg.className = "mt-4 text-center text-sm font-medium text-emerald-600";
+
+            } catch (err) {
+                addressText.textContent = "Location extraction failed.";
+                timeText.textContent = "--";
+                statusMsg.textContent = err.message;
+                statusMsg.className = "mt-4 text-center text-sm font-medium text-red-600";
+                console.error(err);
+            }
+        });
+
+        // Submit to Improve Detroit (SeeClickFix)
+        async function submitToSeeClickFix() {
+            if (!currentLat || !currentLng || !currentFile) {
+                alert("Missing location or image data.");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Submitting...";
+            submitBtn.classList.replace('bg-emerald-600', 'bg-slate-400');
+            statusMsg.textContent = "Sending to Improve Detroit...";
+            statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
+
+            // Format multipart payload for SeeClickFix
+            const formData = new FormData();
+            formData.append('lat', currentLat);
+            formData.append('lng', currentLng);
+            formData.append('address', currentAddress);
+            formData.append('request_type_id', DETROIT_REQUEST_TYPE_ID);
+            
+            // Standard descriptive field
+            formData.append('description', 'Vehicle blocking active bike lane.');
+            
+            // Required Custom Questions from Category 22880 JSON Payload
+            
+            // 1. Issue Title (primary_key: "summary", response_required: true)
+            formData.append('questions[summary]', 'Vehicle Blocking Bike Lane');
+            
+            // 2. Nature of the Issue (primary_key: "32751", response_required: true)
+            formData.append('questions[32751]', ' Car traveling in bike lane');
+            
+            // 3. When are the violations occurring? (primary_key: "33446", response_required: true)
+            formData.append('questions[33446]', photoTimeString);
+            
+            // File Attachment
+            formData.append('image', currentFile);
+
+            try {
+                const response = await fetch('https://seeclickfix.com/api/v2/issues', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SEECLICKFIX_TOKEN}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`API Error: ${response.status} - ${errText}`);
+                }
+
+                statusMsg.textContent = "Ticket successfully submitted! 🚴";
+                statusMsg.className = "mt-4 text-center text-sm font-bold text-emerald-600";
+                submitBtn.textContent = "Success";
+                
+                // Clear state for next submission after a delay
+                setTimeout(() => {
+                    previewCard.classList.add('hidden');
+                    previewCard.classList.remove('flex');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Submit to Improve Detroit";
+                    submitBtn.classList.replace('bg-slate-400', 'bg-emerald-600');
+                    statusMsg.textContent = "";
+                    photoInput.value = ''; // Reset input
+                }, 4000);
+
+            } catch (error) {
+                statusMsg.textContent = "Failed to submit ticket.";
+                statusMsg.className = "mt-4 text-center text-sm font-medium text-red-600";
+                console.error(error);
+                alert(error.message);
+                
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Try Again";
+                submitBtn.classList.replace('bg-slate-400', 'bg-emerald-600');
+            }
+        }
+    </script>
+</body>
+</html>
+
