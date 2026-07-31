@@ -33,7 +33,7 @@
         
         <div class="bg-slate-50 p-3 rounded border border-slate-200">
             <p class="text-xs font-bold text-slate-500 uppercase">Detected Location</p>
-            <p id="addressText" class="font-medium text-slate-800 text-sm mt-1">Loading cross streets...</p>
+            <p id="addressText" class="font-medium text-slate-800 text-sm mt-1">Loading address...</p>
         </div>
 
         <div class="bg-slate-50 p-3 rounded border border-slate-200">
@@ -140,10 +140,11 @@
                 timeText.textContent = photoTimeString;
                 logToConsole(`Timestamp generated: ${photoTimeString}`);
 
-                statusMsg.textContent = "Resolving cross streets...";
-                logToConsole("Fetching reverse geocode from Google Maps...");
+                statusMsg.textContent = "Finding address...";
+                logToConsole("Fetching standard address lookup from Google Maps...");
 
-                const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLat},${currentLng}&key=${GOOGLE_MAPS_API_KEY}&result_type=intersection`;
+                // Standard Geocode lookup for nearest address
+                const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLat},${currentLng}&key=${GOOGLE_MAPS_API_KEY}`;
                 const geoRes = await fetch(geoUrl);
                 
                 if (!geoRes.ok) {
@@ -156,8 +157,8 @@
                     currentAddress = geoData.results[0].formatted_address;
                     logToConsole(`Address resolved: ${currentAddress}`);
                 } else {
-                    currentAddress = `${currentLat}, ${currentLng}`; 
-                    logToConsole(`Google Maps returned status: ${geoData.status}. Falling back to coordinates.`, true);
+                    currentAddress = `${currentLat}, ${currentLng}`;
+                    logToConsole(`Google Maps returned status: ${geoData.status}. Using coordinates as address fallback.`, true);
                 }
                 
                 addressText.textContent = currentAddress;
@@ -186,9 +187,8 @@
             statusMsg.textContent = "Sending to Improve Detroit...";
             statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
             
-            logToConsole("Building FormData payload...");
+            logToConsole("Building payload with explicit 'answers' structure...");
 
-            // Reverting to clean standard FormData fields that SeeClickFix V2 natively supports
             const formData = new FormData();
             formData.append('lat', currentLat);
             formData.append('lng', currentLng);
@@ -197,9 +197,11 @@
             formData.append('summary', 'Vehicle Blocking Bike Lane');
             formData.append('description', 'Vehicle blocking active bike lane.');
             
-            // Standard flat custom questions parameter structure
-            formData.append('questions[32751]', ' Car traveling in bike lane');
-            formData.append('questions[33446]', photoTimeString);
+            // Explicitly structured array keys matching SeeClickFix API specs for answers
+            formData.append('answers[0][question_id]', '32751');
+            formData.append('answers[0][answer]', ' Car traveling in bike lane');
+            formData.append('answers[1][question_id]', '33446');
+            formData.append('answers[1][answer]', photoTimeString);
             
             formData.append('image', currentFile);
 
