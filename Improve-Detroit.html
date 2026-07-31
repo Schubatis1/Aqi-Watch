@@ -186,23 +186,28 @@
             statusMsg.textContent = "Sending to Improve Detroit...";
             statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
             
-            logToConsole("Building payload for SeeClickFix API...");
+            logToConsole("Building payload with structured answers for SeeClickFix API...");
 
             const formData = new FormData();
             formData.append('lat', currentLat);
             formData.append('lng', currentLng);
             formData.append('address', currentAddress);
             formData.append('request_type_id', DETROIT_REQUEST_TYPE_ID);
+            formData.append('summary', 'Vehicle Blocking Bike Lane');
             formData.append('description', 'Vehicle blocking active bike lane.');
-            formData.append('questions[summary]', 'Vehicle Blocking Bike Lane');
-            formData.append('questions[32751]', ' Car traveling in bike lane');
-            formData.append('questions[33446]', photoTimeString);
+            
+            // Structured Answers array mapping for SeeClickFix V2 API
+            formData.append('answers[][question_id]', '32751');
+            formData.append('answers[][answer]', ' Car traveling in bike lane');
+
+            formData.append('answers[][question_id]', '33446');
+            formData.append('answers[][answer]', photoTimeString);
+
             formData.append('image', currentFile);
 
             try {
                 logToConsole("Dispatching POST request via CORS proxy...");
                 
-                // Wrapped with a public CORS proxy to bypass browser restrictions
                 const targetUrl = 'https://seeclickfix.com/api/v2/issues';
                 const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
