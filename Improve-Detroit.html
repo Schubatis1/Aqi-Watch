@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear the Lane</title>
+    <title>Clear the Lane (v0.2.6)</title>
     <!-- Tailwind CSS for fast, clean mobile styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- EXIF parser to pull GPS and Timestamp from photos client-side -->
@@ -14,7 +14,8 @@
 <body class="bg-slate-100 p-4 font-sans text-slate-800 max-w-md mx-auto min-h-screen flex flex-col">
 
     <div class="bg-white rounded-xl shadow-md p-6 mb-6 mt-4 text-center">
-        <h1 class="text-2xl font-bold text-blue-600 mb-2">Clear the Lane</h1>
+        <h1 class="text-2xl font-bold text-blue-600 mb-1">Clear the Lane</h1>
+        <p class="text-xs text-slate-400 font-mono mb-2">v0.2.6</p>
         <p class="text-sm text-slate-500 mb-6">Upload a photo to automatically report a blocked bike lane to Improve Detroit.</p>
 
         <!-- Hidden File Input -->
@@ -53,11 +54,11 @@
     <!-- ON-SCREEN DEBUG CONSOLE -->
     <div class="mt-8 bg-slate-900 rounded-lg p-4 shadow-inner flex-grow">
         <div class="flex justify-between items-center mb-2">
-            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console</p>
+            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v0.2.6)</p>
             <button onclick="document.getElementById('debugLog').innerHTML = ''" class="text-xs text-slate-500 hover:text-white">Clear</button>
         </div>
         <div id="debugLog" class="font-mono text-[10px] text-green-400 h-48 overflow-y-auto break-all whitespace-pre-wrap">
-            App initialized...
+            App initialized (v0.2.6)...
         </div>
     </div>
 
@@ -65,6 +66,7 @@
         // ==========================================
         // CONFIGURATION 
         // ==========================================
+        const APP_VERSION = '0.2.6';
         const GOOGLE_MAPS_API_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
         const SEECLICKFIX_TOKEN = 'token-07/31/2026-07/30/2027--B10B9B5D01CC998EE5A6C6BB8266537173326DC0F21EFE605455E64047D75A81-1';
         const DETROIT_REQUEST_TYPE_ID = '22880'; 
@@ -102,6 +104,8 @@
         const timeText = document.getElementById('timeText');
         const statusMsg = document.getElementById('statusMsg');
         const submitBtn = document.getElementById('submitBtn');
+
+        logToConsole(`Running version ${APP_VERSION}`);
 
         // Handle File Selection & Extraction
         photoInput.addEventListener('change', async (e) => {
@@ -143,7 +147,6 @@
                 statusMsg.textContent = "Finding address...";
                 logToConsole("Fetching standard address lookup from Google Maps...");
 
-                // Standard Geocode lookup for nearest address
                 const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLat},${currentLng}&key=${GOOGLE_MAPS_API_KEY}`;
                 const geoRes = await fetch(geoUrl);
                 
@@ -187,22 +190,32 @@
             statusMsg.textContent = "Sending to Improve Detroit...";
             statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
             
-            logToConsole("Building payload with explicit 'answers' structure...");
+            logToConsole("Building payload using nested JSON structure for answers...");
 
+            // SeeClickFix V2 API strictly requires JSON payload for nested question answers
+            const payload = {
+                lat: currentLat,
+                lng: currentLng,
+                address: currentAddress,
+                request_type_id: DETROIT_REQUEST_TYPE_ID,
+                summary: 'Vehicle Blocking Bike Lane',
+                description: 'Vehicle blocking active bike lane.',
+                answers: [
+                    { question_id: '32751', answer: ' Car traveling in bike lane' },
+                    { question_id: '33446', answer: photoTimeString }
+                ]
+            };
+
+            // Since we need to send both text data and an image file, 
+            // we use FormData but structure the answers as a serialized JSON string field
             const formData = new FormData();
-            formData.append('lat', currentLat);
-            formData.append('lng', currentLng);
-            formData.append('address', currentAddress);
-            formData.append('request_type_id', DETROIT_REQUEST_TYPE_ID);
-            formData.append('summary', 'Vehicle Blocking Bike Lane');
-            formData.append('description', 'Vehicle blocking active bike lane.');
-            
-            // Explicitly structured array keys matching SeeClickFix API specs for answers
-            formData.append('answers[0][question_id]', '32751');
-            formData.append('answers[0][answer]', ' Car traveling in bike lane');
-            formData.append('answers[1][question_id]', '33446');
-            formData.append('answers[1][answer]', photoTimeString);
-            
+            formData.append('lat', payload.lat);
+            formData.append('lng', payload.lng);
+            formData.append('address', payload.address);
+            formData.append('request_type_id', payload.request_type_id);
+            formData.append('summary', payload.summary);
+            formData.append('description', payload.description);
+            formData.append('answers', JSON.stringify(payload.answers));
             formData.append('image', currentFile);
 
             try {
