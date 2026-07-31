@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear the Lane (v2.9.1)</title>
+    <title>Clear the Lane (v3.0.0)</title>
     <!-- Tailwind CSS for fast, clean mobile styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- EXIF parser to pull GPS and Timestamp from photos client-side -->
     <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+    <!-- Leaflet for the draggable map pin fine-tuner -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* Tailwind's preflight caps img width/height at 100%/auto, which breaks Leaflet's tile grid */
+        .leaflet-container img { max-width: none !important; }
+    </style>
     <!-- PWA Manifest stub to allow saving to home screen -->
     <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2xlYXIgVGhlIExhbmUiLCJzaG9ydF9uYW1lIjoiQ2xlYXJMYW5lIiwiZGlzcGxheSI6InN0YW5kYWxvbmUifQ==">
 </head>
@@ -15,69 +22,66 @@
 
     <div class="bg-white rounded-xl shadow-md p-6 mb-6 mt-4 text-center">
         <h1 class="text-2xl font-bold text-blue-600 mb-1">Clear the Lane</h1>
-        <p class="text-xs text-slate-400 font-mono mb-2">v2.9.1</p>
-        <p class="text-sm text-slate-500 mb-6">Upload a photo to automatically report a blocked bike lane to Improve Detroit.</p>
+        <p class="text-xs text-slate-400 font-mono mb-2">v3.0.0</p>
+        <p class="text-sm text-slate-500 mb-6">Select one or more photos to report blocked bike lanes to Improve Detroit.</p>
 
         <!-- Hidden File Input -->
-        <input type="file" id="photoInput" accept="image/*" class="hidden">
-        
+        <input type="file" id="photoInput" accept="image/*" multiple class="hidden">
+
         <!-- Upload Button -->
-        <button onclick="document.getElementById('photoInput').click()" 
+        <button onclick="document.getElementById('photoInput').click()"
                 class="w-full bg-blue-600 text-white font-semibold py-4 rounded-lg shadow hover:bg-blue-700 transition">
-            Snap / Select Photo
+            Snap / Select Photos
         </button>
     </div>
 
-    <!-- Preview & Submission Card (Hidden by default) -->
-    <div id="previewCard" class="bg-white rounded-xl shadow-md p-6 hidden flex-col gap-4">
-        <img id="imagePreview" class="w-full h-48 object-cover rounded-lg shadow-sm" alt="Selected photo">
-        
-        <div class="bg-slate-50 p-3 rounded border border-slate-200">
-            <p class="text-xs font-bold text-slate-500 uppercase">Detected Location</p>
-            <p id="addressText" class="font-medium text-slate-800 text-sm mt-1">Loading address...</p>
-        </div>
+    <!-- Queued photo preview/editor cards get inserted here -->
+    <div id="queueContainer"></div>
 
-        <div class="bg-slate-50 p-3 rounded border border-slate-200">
-            <p class="text-xs font-bold text-slate-500 uppercase">Photo Timestamp</p>
-            <p id="timeText" class="font-mono text-slate-600 text-sm mt-1">--</p>
-        </div>
-
-        <button id="submitBtn" onclick="submitToSeeClickFix()" 
-                class="w-full bg-emerald-600 text-white font-semibold py-4 rounded-lg shadow hover:bg-emerald-700 transition mt-2">
-            Submit to Improve Detroit
+    <!-- Batch submit bar (shown once at least one photo is ready) -->
+    <div id="submitAllBar" class="hidden mb-6">
+        <button id="submitAllBtn"
+                class="w-full bg-blue-600 text-white font-semibold py-4 rounded-lg shadow hover:bg-blue-700 transition">
+            Submit All Queued Photos
         </button>
     </div>
 
-    <!-- Status Messages -->
-    <p id="statusMsg" class="mt-4 text-center text-sm font-medium"></p>
+    <!-- Submission History & Receipt Tracker -->
+    <div class="mb-6">
+        <h2 class="text-xs font-bold text-slate-500 uppercase mb-2 px-1">Submission History</h2>
+        <div id="historyList" class="flex flex-col gap-2"></div>
+    </div>
 
     <!-- ON-SCREEN DEBUG CONSOLE -->
-    <div class="mt-8 bg-slate-900 rounded-lg p-4 shadow-inner flex-grow">
+    <div class="mt-2 bg-slate-900 rounded-lg p-4 shadow-inner flex-grow">
         <div class="flex justify-between items-center mb-2">
-            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v2.9.1)</p>
+            <p class="text-xs font-bold text-slate-400 uppercase">Debug Console (v3.0.0)</p>
             <button onclick="document.getElementById('debugLog').innerHTML = ''" class="text-xs text-slate-500 hover:text-white">Clear</button>
         </div>
         <div id="debugLog" class="font-mono text-[10px] text-green-400 h-48 overflow-y-auto break-all whitespace-pre-wrap">
-            App initialized (v2.9.1)...
+            App initialized (v3.0.0)...
         </div>
     </div>
 
     <script>
         // ==========================================
-        // CONFIGURATION 
+        // CONFIGURATION
         // ==========================================
-        const APP_VERSION = '2.9.1';
+        const APP_VERSION = '3.0.0';
         const GOOGLE_MAPS_API_KEY = 'AIzaSyAts-aj_Ezg_OtGj05Tkh8kXRLPUcA9fAg';
         const SEECLICKFIX_TOKEN = 'token-07/31/2026-07/30/2027--B10B9B5D01CC998EE5A6C6BB8266537173326DC0F21EFE605455E64047D75A81-1';
-        const DETROIT_REQUEST_TYPE_ID = '22880'; 
-        
+        const DETROIT_REQUEST_TYPE_ID = '22880';
+        const NATURE_QUESTION_ID = '32751';
+        const TIMING_QUESTION_ID = '33446';
+        const HISTORY_KEY = 'clearTheLaneHistory';
+
         // Custom Logger to pipe info to the UI
         function logToConsole(message, isError = false) {
             const logWindow = document.getElementById('debugLog');
             const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
             const logLine = document.createElement('div');
             logLine.className = isError ? 'text-red-400 mb-1' : 'mb-1';
-            
+
             let formattedMessage = message;
             if (message instanceof Error) {
                 formattedMessage = `${message.name}: ${message.message}`;
@@ -90,174 +94,392 @@
             logWindow.scrollTop = logWindow.scrollHeight;
         }
 
-        // App State
-        let currentFile = null;
-        let currentLat = null;
-        let currentLng = null;
-        let currentAddress = null;
-        let photoTimeString = null;
-
         const photoInput = document.getElementById('photoInput');
-        const previewCard = document.getElementById('previewCard');
-        const imagePreview = document.getElementById('imagePreview');
-        const addressText = document.getElementById('addressText');
-        const timeText = document.getElementById('timeText');
-        const statusMsg = document.getElementById('statusMsg');
-        const submitBtn = document.getElementById('submitBtn');
+        const queueContainer = document.getElementById('queueContainer');
+        const submitAllBar = document.getElementById('submitAllBar');
+        const submitAllBtn = document.getElementById('submitAllBtn');
+        const historyList = document.getElementById('historyList');
+
+        let queue = [];
+        let itemCounter = 0;
+        function nextId() { return `item-${++itemCounter}-${Date.now()}`; }
 
         logToConsole(`Running version ${APP_VERSION}`);
+        renderHistory();
 
-        // Handle File Selection & Extraction
-        photoInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        // Handle File Selection (batch)
+        photoInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files || []);
+            photoInput.value = '';
+            if (files.length === 0) return;
 
-            logToConsole(`File selected: ${file.name} (${Math.round(file.size/1024)}KB)`);
-            currentFile = file;
-            statusMsg.textContent = "Extracting photo metadata...";
-            statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
-            
-            imagePreview.src = URL.createObjectURL(file);
-            previewCard.classList.remove('hidden');
-            previewCard.classList.add('flex');
+            logToConsole(`${files.length} photo(s) selected.`);
+            files.forEach((file) => {
+                logToConsole(`File queued: ${file.name} (${Math.round(file.size / 1024)}KB)`);
+                addQueueItem(file);
+            });
+        });
 
+        // Build a preview/editor card for one queued photo and kick off its processing
+        function addQueueItem(file) {
+            const id = nextId();
+            const previewUrl = URL.createObjectURL(file);
+            const item = { id, file, previewUrl, status: 'processing', issueId: null, map: null, marker: null };
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'bg-white rounded-xl shadow-md p-4 mb-4 flex flex-col gap-3';
+            wrapper.dataset.itemId = id;
+            wrapper.innerHTML = `
+                <div class="flex gap-3 items-start">
+                    <img src="${previewUrl}" class="w-20 h-20 object-cover rounded-lg shadow-sm flex-shrink-0" alt="Selected photo">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-slate-400 truncate">${file.name}</p>
+                        <p class="text-xs font-bold uppercase mt-1 text-blue-600" data-role="statusBadge">Extracting metadata...</p>
+                    </div>
+                </div>
+
+                <div data-role="fields" class="hidden flex-col gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase">Address</label>
+                        <input type="text" data-role="address" class="w-full text-sm border border-slate-200 rounded px-2 py-1 mt-1">
+                    </div>
+
+                    <div data-role="mapWrap" class="rounded-lg overflow-hidden border border-slate-200" style="height:160px"></div>
+                    <p class="text-[10px] text-slate-400 font-mono" data-role="coords">--</p>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase">Summary</label>
+                        <input type="text" data-role="summary" class="w-full text-sm border border-slate-200 rounded px-2 py-1 mt-1">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase">Description</label>
+                        <textarea data-role="description" rows="2" class="w-full text-sm border border-slate-200 rounded px-2 py-1 mt-1"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase">Nature of Issue</label>
+                        <select data-role="nature" class="w-full text-sm border border-slate-200 rounded px-2 py-1 mt-1">
+                            <option value="Vehicle parked in bike lane">Vehicle parked in bike lane</option>
+                            <option value="Car traveling in bike lane">Car traveling in bike lane</option>
+                            <option value="__custom__">Custom...</option>
+                        </select>
+                        <input type="text" data-role="natureCustom" placeholder="Describe the issue" class="hidden w-full text-sm border border-slate-200 rounded px-2 py-1 mt-2">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase">Violation Timing</label>
+                        <input type="text" data-role="timing" class="w-full text-sm border border-slate-200 rounded px-2 py-1 mt-1">
+                    </div>
+
+                    <button data-role="submitBtn" class="w-full bg-emerald-600 text-white font-semibold py-3 rounded-lg shadow hover:bg-emerald-700 transition">
+                        Submit to Improve Detroit
+                    </button>
+                    <p data-role="itemMsg" class="text-center text-xs font-medium"></p>
+                </div>
+            `;
+            queueContainer.appendChild(wrapper);
+
+            item.els = {
+                statusBadge: wrapper.querySelector('[data-role="statusBadge"]'),
+                fields: wrapper.querySelector('[data-role="fields"]'),
+                address: wrapper.querySelector('[data-role="address"]'),
+                mapWrap: wrapper.querySelector('[data-role="mapWrap"]'),
+                coords: wrapper.querySelector('[data-role="coords"]'),
+                summary: wrapper.querySelector('[data-role="summary"]'),
+                description: wrapper.querySelector('[data-role="description"]'),
+                nature: wrapper.querySelector('[data-role="nature"]'),
+                natureCustom: wrapper.querySelector('[data-role="natureCustom"]'),
+                timing: wrapper.querySelector('[data-role="timing"]'),
+                submitBtn: wrapper.querySelector('[data-role="submitBtn"]'),
+                itemMsg: wrapper.querySelector('[data-role="itemMsg"]'),
+            };
+
+            item.els.nature.addEventListener('change', () => {
+                item.els.natureCustom.classList.toggle('hidden', item.els.nature.value !== '__custom__');
+            });
+            item.els.submitBtn.addEventListener('click', () => submitItem(item));
+
+            queue.push(item);
+            processQueueItem(item);
+            return item;
+        }
+
+        // Extract EXIF GPS/timestamp and reverse-geocode, then populate the editable fields
+        async function processQueueItem(item) {
             try {
-                logToConsole("Parsing EXIF data...");
-                const exifData = await exifr.parse(file);
-                const gps = await exifr.gps(file);
-                
+                logToConsole(`[${item.file.name}] Parsing EXIF data...`);
+                const exifData = await exifr.parse(item.file);
+                const gps = await exifr.gps(item.file);
+
                 if (!gps) {
                     throw new Error("No GPS data found. Ensure 'Location Tags' are enabled in your camera settings.");
                 }
 
-                currentLat = gps.latitude;
-                currentLng = gps.longitude;
-                logToConsole(`GPS found: ${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}`);
+                item.lat = gps.latitude;
+                item.lng = gps.longitude;
+                logToConsole(`[${item.file.name}] GPS found: ${item.lat.toFixed(5)}, ${item.lng.toFixed(5)}`);
 
-                const rawDate = exifData?.DateTimeOriginal || exifData?.CreateDate || new Date(file.lastModified);
+                const rawDate = exifData?.DateTimeOriginal || exifData?.CreateDate || new Date(item.file.lastModified);
                 const photoDateObj = new Date(rawDate);
-                
                 const datePart = photoDateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
                 const timePart = photoDateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                const photoTimeString = `${datePart} at approximately ${timePart}`;
+                logToConsole(`[${item.file.name}] Timestamp generated: ${photoTimeString}`);
 
-                photoTimeString = `${datePart} at approximately ${timePart}`;
-                timeText.textContent = photoTimeString;
-                logToConsole(`Timestamp generated: ${photoTimeString}`);
-
-                statusMsg.textContent = "Finding address...";
-                logToConsole("Fetching standard address lookup from Google Maps...");
-
-                const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${currentLat},${currentLng}&key=${GOOGLE_MAPS_API_KEY}`;
+                logToConsole(`[${item.file.name}] Fetching address lookup from Google Maps...`);
+                const geoUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${item.lat},${item.lng}&key=${GOOGLE_MAPS_API_KEY}`;
                 const geoRes = await fetch(geoUrl);
-                
                 if (!geoRes.ok) {
                     throw new Error(`Google Maps API HTTP Error: ${geoRes.status}`);
                 }
-                
                 const geoData = await geoRes.json();
 
+                let address;
                 if (geoData.status === 'OK' && geoData.results.length > 0) {
-                    currentAddress = geoData.results[0].formatted_address;
-                    logToConsole(`Address resolved: ${currentAddress}`);
+                    address = geoData.results[0].formatted_address;
+                    logToConsole(`[${item.file.name}] Address resolved: ${address}`);
                 } else {
-                    currentAddress = `${currentLat}, ${currentLng}`;
-                    logToConsole(`Google Maps returned status: ${geoData.status}. Using coordinates as address fallback.`, true);
+                    address = `${item.lat}, ${item.lng}`;
+                    logToConsole(`[${item.file.name}] Google Maps returned status: ${geoData.status}. Using coordinates as address fallback.`, true);
                 }
-                
-                addressText.textContent = currentAddress;
-                statusMsg.textContent = "Ready to submit!";
-                statusMsg.className = "mt-4 text-center text-sm font-medium text-emerald-600";
+
+                // Pre-fill the editor; every field stays fully mutable before submission.
+                item.els.address.value = address;
+                item.els.summary.value = 'Vehicle Blocking Bike Lane';
+                item.els.description.value = `Vehicle parked in bicycle lane at ${address}`;
+                item.els.nature.value = 'Vehicle parked in bike lane';
+                item.els.timing.value = photoTimeString;
+
+                item.els.statusBadge.textContent = 'Ready to submit';
+                item.els.statusBadge.className = 'text-xs font-bold uppercase mt-1 text-emerald-600';
+                item.els.fields.classList.remove('hidden');
+                item.els.fields.classList.add('flex');
+                item.status = 'ready';
+
+                initMiniMap(item);
 
             } catch (err) {
-                addressText.textContent = "Location extraction failed.";
-                timeText.textContent = "--";
-                statusMsg.textContent = "Check debug console for error.";
-                statusMsg.className = "mt-4 text-center text-sm font-medium text-red-600";
-                logToConsole(err, true);
+                item.status = 'failed';
+                item.els.statusBadge.textContent = 'Location extraction failed';
+                item.els.statusBadge.className = 'text-xs font-bold uppercase mt-1 text-red-600';
+                logToConsole(`[${item.file.name}] ${err instanceof Error ? err.message : err}`, true);
             }
+            updateSubmitAllVisibility();
+        }
+
+        // Interactive Map Pin Fine-Tuner: draggable Leaflet/OSM marker to correct GPS drift
+        function initMiniMap(item) {
+            const map = L.map(item.els.mapWrap).setView([item.lat, item.lng], 17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            const marker = L.marker([item.lat, item.lng], { draggable: true }).addTo(map);
+
+            const updateCoordsText = () => {
+                const pos = marker.getLatLng();
+                item.els.coords.textContent = `Pin: ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} (drag to adjust)`;
+            };
+            marker.on('dragend', () => {
+                const pos = marker.getLatLng();
+                logToConsole(`[${item.file.name}] Pin adjusted to ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`);
+                updateCoordsText();
+            });
+            updateCoordsText();
+
+            item.map = map;
+            item.marker = marker;
+        }
+
+        function updateSubmitAllVisibility() {
+            const pendingCount = queue.filter((i) => i.status === 'ready' || i.status === 'error').length;
+            submitAllBar.classList.toggle('hidden', pendingCount === 0);
+            submitAllBtn.textContent = `Submit All Queued Photos (${pendingCount})`;
+        }
+
+        submitAllBtn.addEventListener('click', async () => {
+            submitAllBtn.disabled = true;
+            const pending = queue.filter((i) => i.status === 'ready' || i.status === 'error');
+            logToConsole(`Submitting ${pending.length} queued photo(s)...`);
+            for (const item of pending) {
+                await submitItem(item);
+            }
+            submitAllBtn.disabled = false;
+            updateSubmitAllVisibility();
         });
 
-        // Submit to Improve Detroit (SeeClickFix)
-        async function submitToSeeClickFix() {
-            if (!currentLat || !currentLng || !currentFile) {
-                logToConsole("Submission aborted: Missing location or image data.", true);
-                return;
-            }
+        // Submit a single queued item to Improve Detroit (SeeClickFix)
+        async function submitItem(item) {
+            if (item.status === 'submitting' || item.status === 'success') return;
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Submitting...";
-            submitBtn.classList.replace('bg-emerald-600', 'bg-slate-400');
-            statusMsg.textContent = "Sending to Improve Detroit...";
-            statusMsg.className = "mt-4 text-center text-sm font-medium text-blue-600";
-            
-            logToConsole("Building payload with flat 'answers' map notation...");
+            const pos = item.marker ? item.marker.getLatLng() : { lat: item.lat, lng: item.lng };
+            const address = item.els.address.value.trim();
+            const summary = item.els.summary.value.trim();
+            const description = item.els.description.value.trim();
+            const nature = item.els.nature.value === '__custom__' ? item.els.natureCustom.value.trim() : item.els.nature.value;
+            const timing = item.els.timing.value.trim();
 
+            item.status = 'submitting';
+            item.els.submitBtn.disabled = true;
+            item.els.submitBtn.textContent = 'Submitting...';
+            item.els.submitBtn.classList.replace('bg-emerald-600', 'bg-slate-400');
+            item.els.itemMsg.textContent = 'Sending to Improve Detroit...';
+            item.els.itemMsg.className = 'text-center text-xs font-medium text-blue-600';
+
+            // SeeClickFix v2 nests summary, description, every question's answer,
+            // and the photo (primary_key 'issue_image') inside a single flat
+            // 'answers' map. A top-level 'image' field is silently ignored
+            // (issue_image isn't required, so no validation error) -- that's why
+            // the last submission created a ticket with no attached photo.
             const formData = new FormData();
-            formData.append('lat', currentLat);
-            formData.append('lng', currentLng);
-            formData.append('address', currentAddress);
+            formData.append('lat', pos.lat);
+            formData.append('lng', pos.lng);
+            formData.append('address', address);
             formData.append('request_type_id', DETROIT_REQUEST_TYPE_ID);
-
-            // SeeClickFix v2 nests summary, description, and every question's
-            // answer inside a single flat 'answers' map keyed by question_id
-            // (see dev.seeclickfix.com/v2/issues/reporting) rather than as
-            // top-level fields or an indexed array. Sending them outside that
-            // map is what produced the 422 "can't be blank" errors, since the
-            // server never saw summary/description/answers under the key it
-            // actually validates.
-            formData.append('answers[summary]', 'Vehicle Blocking Bike Lane');
-            formData.append('answers[description]', 'Vehicle blocking active bike lane.');
-            formData.append('answers[32751]', ' Car traveling in bike lane');
-            formData.append('answers[33446]', photoTimeString);
-
-            formData.append('image', currentFile);
+            formData.append('answers[summary]', summary);
+            formData.append('answers[description]', description);
+            formData.append(`answers[${NATURE_QUESTION_ID}]`, nature);
+            formData.append(`answers[${TIMING_QUESTION_ID}]`, timing);
+            formData.append('answers[issue_image]', item.file);
 
             try {
-                logToConsole("Dispatching POST request via CORS proxy...");
-
+                logToConsole(`[${item.file.name}] Dispatching POST request via CORS proxy...`);
                 const targetUrl = 'https://seeclickfix.com/api/v2/issues';
                 const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
                 const response = await fetch(proxyUrl, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${SEECLICKFIX_TOKEN}`
-                    },
+                    headers: { 'Authorization': `Bearer ${SEECLICKFIX_TOKEN}` },
                     body: formData
                 });
 
-                logToConsole(`Response: ${response.status} ${response.statusText} (content-type: ${response.headers.get('content-type')})`);
+                logToConsole(`[${item.file.name}] Response: ${response.status} ${response.statusText} (content-type: ${response.headers.get('content-type')})`);
 
                 if (!response.ok) {
                     const errText = await response.text();
                     throw new Error(`SeeClickFix API Error ${response.status}: ${errText}`);
                 }
 
-                const responseData = await response.json();
-                logToConsole(`Success! Issue ID: ${responseData.id}`);
+                const data = await response.json();
+                logToConsole(`[${item.file.name}] Success! Issue ID: ${data.id}`);
 
-                statusMsg.textContent = "Ticket successfully submitted! 🚴";
-                statusMsg.className = "mt-4 text-center text-sm font-bold text-emerald-600";
-                submitBtn.textContent = "Success";
-                
-                setTimeout(() => {
-                    previewCard.classList.add('hidden');
-                    previewCard.classList.remove('flex');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Submit to Improve Detroit";
-                    submitBtn.classList.replace('bg-slate-400', 'bg-emerald-600');
-                    statusMsg.textContent = "";
-                    photoInput.value = ''; 
-                }, 4000);
+                item.status = 'success';
+                item.issueId = data.id;
+                item.els.itemMsg.textContent = `Submitted — Issue #${data.id}`;
+                item.els.itemMsg.className = 'text-center text-xs font-bold text-emerald-600';
+                item.els.submitBtn.textContent = 'Submitted ✓';
 
-            } catch (error) {
-                statusMsg.textContent = "Failed to submit ticket.";
-                statusMsg.className = "mt-4 text-center text-sm font-medium text-red-600";
-                logToConsole(error, true);
-                
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Try Again";
-                submitBtn.classList.replace('bg-slate-400', 'bg-emerald-600');
+                await addToHistory(item, data.id, address);
+
+            } catch (err) {
+                item.status = 'error';
+                logToConsole(err, true);
+                item.els.itemMsg.textContent = 'Failed — check debug console';
+                item.els.itemMsg.className = 'text-center text-xs font-medium text-red-600';
+                item.els.submitBtn.disabled = false;
+                item.els.submitBtn.textContent = 'Try Again';
+                item.els.submitBtn.classList.replace('bg-slate-400', 'bg-emerald-600');
+            }
+            updateSubmitAllVisibility();
+        }
+
+        // ==========================================
+        // Submission History & Receipt Tracker
+        // ==========================================
+        function loadHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveHistory(list) {
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+        }
+
+        function makeThumbnail(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const size = 96;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    const scale = Math.max(size / img.width, size / img.height);
+                    const w = img.width * scale;
+                    const h = img.height * scale;
+                    ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+                    URL.revokeObjectURL(img.src);
+                    resolve(canvas.toDataURL('image/jpeg', 0.6));
+                };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        async function addToHistory(item, issueId, address) {
+            const thumbnail = await makeThumbnail(item.file);
+            const list = loadHistory();
+            list.unshift({
+                issueId,
+                thumbnail,
+                address,
+                submittedAt: new Date().toISOString(),
+                status: 'Open',
+                link: `https://seeclickfix.com/issues/${issueId}`
+            });
+            saveHistory(list);
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const list = loadHistory();
+            if (list.length === 0) {
+                historyList.innerHTML = '<p class="text-xs text-slate-400 px-1">No submissions yet.</p>';
+                return;
+            }
+            historyList.innerHTML = list.map((entry, idx) => `
+                <div class="bg-white rounded-lg shadow-sm p-3 flex gap-3 items-center">
+                    <img src="${entry.thumbnail}" class="w-12 h-12 object-cover rounded flex-shrink-0" alt="Submitted photo">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-slate-800 truncate">${entry.address}</p>
+                        <p class="text-[10px] text-slate-400">#${entry.issueId} &middot; ${new Date(entry.submittedAt).toLocaleString()}</p>
+                        <p class="text-[10px] font-bold uppercase text-slate-500">${entry.status}</p>
+                    </div>
+                    <div class="flex flex-col gap-1 flex-shrink-0 items-stretch">
+                        <a href="${entry.link}" target="_blank" rel="noopener" class="text-xs text-blue-600 font-semibold text-center">View</a>
+                        <button class="text-xs text-slate-500 hover:text-slate-800" onclick="refreshHistoryStatus(${idx})">Refresh</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function refreshHistoryStatus(idx) {
+            const list = loadHistory();
+            const entry = list[idx];
+            if (!entry) return;
+
+            logToConsole(`Checking status for issue #${entry.issueId}...`);
+            try {
+                const targetUrl = `https://seeclickfix.com/api/v2/issues/${entry.issueId}`;
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+                const response = await fetch(proxyUrl, {
+                    headers: { 'Authorization': `Bearer ${SEECLICKFIX_TOKEN}` }
+                });
+                if (!response.ok) {
+                    throw new Error(`Status check failed: ${response.status}`);
+                }
+                const data = await response.json();
+                entry.status = data.status || entry.status;
+                list[idx] = entry;
+                saveHistory(list);
+                renderHistory();
+                logToConsole(`Issue #${entry.issueId} status: ${entry.status}`);
+            } catch (err) {
+                logToConsole(err, true);
             }
         }
     </script>
