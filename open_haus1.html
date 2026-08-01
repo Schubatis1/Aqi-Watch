@@ -1871,10 +1871,21 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      padding: 6px 0;
+      padding: 10px 0;
     }
     .feature-rating-row-single:not(:last-child) { border-bottom: 1px dashed var(--border); }
     .feature-rating-row-single .feature-rating-label { font-size: 0.85rem; }
+    /* These stars are tapped directly (including half-star precision) —
+       the base 1.1rem size is too small to hit accurately on a phone.
+       Sized up by default (mobile-first); desktop reverts to the
+       original smaller size below, since a mouse doesn't need the
+       bigger target (this override must stay AFTER the base rule above
+       in source order — same specificity, so cascade order decides). */
+    .feature-rating-row-single .rating-stars .star-wrap { font-size: 1.7rem; }
+    @media (min-width: 900px) {
+      .feature-rating-row-single { padding: 6px 0; }
+      .feature-rating-row-single .rating-stars .star-wrap { font-size: 1.1rem; }
+    }
 
     .hidden { display: none; }
 
