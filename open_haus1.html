@@ -2425,6 +2425,19 @@
     </div>
 
     <div class="sidebar-section">
+      <span class="sidebar-label">Account</span>
+      <div id="accountStatus" style="font-size:0.85rem; color:var(--muted); margin-bottom:6px;">Viewing only — sign in to edit</div>
+      <button class="sidebar-nav-btn" id="accountSignInBtn" onclick="signInWithGoogle();">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.89c2.27-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.91l-3.89-3c-1.08.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.72-4.96H1.27v3.1A11.996 11.996 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.28 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.28v-3.1H1.27A11.996 11.996 0 0 0 0 12c0 1.94.46 3.77 1.27 5.38l4.01-3.1z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.62l4.01 3.1C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
+        Sign in with Google
+      </button>
+      <button class="sidebar-nav-btn hidden" id="accountSignOutBtn" onclick="signOutUser();">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+
+    <div class="sidebar-section">
       <span class="sidebar-label">Sync</span>
       <div class="sync-status" id="syncStatusIndicator" title="Whether this device is receiving cross-device updates (loved/watchlist/homes added elsewhere) right now.">
         <span class="sync-status-dot"></span>
@@ -3223,6 +3236,7 @@
   <script src="properties.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
 
   <script>
@@ -3233,6 +3247,14 @@
       { key: 'adam', label: 'Adam' },
       { key: 'lauren', label: 'Lauren' }
     ];
+
+    // Anyone can view this page; only these two Google accounts can edit
+    // anything (ratings, notes, hide/loved/watchlist, Manage Homes, import).
+    // This client-side check is UX only — the real lock is the Firestore
+    // Security Rules on the "openHaus" collection, which must mirror this
+    // same allowlist server-side or the "view only" boundary isn't real.
+    const ALLOWED_EDITOR_EMAILS = ['aschubatis@gmail.com', 'laurenealliston@gmail.com'];
+    const EDITOR_EMAIL_TO_PERSON = { 'aschubatis@gmail.com': 'Adam', 'laurenealliston@gmail.com': 'Lauren' };
 
     const SOURCE_LABELS = {
       hardcoded: 'Hardcoded',
@@ -3391,6 +3413,77 @@
       console.warn('Firebase init failed - falling back to localStorage only.', err);
     }
 
+    // --- Google Sign-In (view-for-anyone, edit-for-allowlisted-accounts) ---
+    let currentUser = null;
+    let backgroundSyncStarted = false;
+
+    function isEditor() {
+      return !!(currentUser && currentUser.emailVerified &&
+        ALLOWED_EDITOR_EMAILS.includes((currentUser.email || '').toLowerCase()));
+    }
+
+    function promptSignInToEdit() {
+      if (currentUser) {
+        showToast('This Google account is not authorized to edit — view only.');
+      } else {
+        showToast('Sign in with an authorized Google account to edit.');
+      }
+    }
+
+    function signInWithGoogle() {
+      if (!firebaseReady) { showToast('Sign-in unavailable — Firebase is not configured.'); return; }
+      firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .catch(err => {
+          console.warn('Google sign-in failed', err);
+          showToast(`Sign-in failed: ${err.message || err.code || 'unknown error'}`);
+        });
+    }
+
+    function signOutUser() {
+      if (!firebaseReady) return;
+      firebase.auth().signOut().catch(err => console.warn('Sign-out failed', err));
+    }
+
+    function updateAccountUi() {
+      const statusEl = document.getElementById('accountStatus');
+      const signInBtn = document.getElementById('accountSignInBtn');
+      const signOutBtn = document.getElementById('accountSignOutBtn');
+      if (!statusEl || !signInBtn || !signOutBtn) return;
+
+      if (!currentUser) {
+        statusEl.textContent = 'Viewing only — sign in to edit';
+        signInBtn.classList.remove('hidden');
+        signOutBtn.classList.add('hidden');
+      } else if (isEditor()) {
+        const person = EDITOR_EMAIL_TO_PERSON[currentUser.email.toLowerCase()] || currentUser.email;
+        statusEl.textContent = `Editing as ${person}`;
+        signInBtn.classList.add('hidden');
+        signOutBtn.classList.remove('hidden');
+      } else {
+        statusEl.textContent = `Signed in as ${currentUser.email} — view only`;
+        signInBtn.classList.add('hidden');
+        signOutBtn.classList.remove('hidden');
+      }
+    }
+
+    if (firebaseReady) {
+      firebase.auth().onAuthStateChanged(user => {
+        currentUser = user;
+        updateAccountUi();
+        // Background writers (OneHome auto-sync, drive-time/commute-time
+        // caching) only make sense for a signed-in editor — anonymous
+        // viewers can't persist the results anyway, so skip the API calls
+        // and Firestore write attempts entirely rather than let them fail.
+        if (isEditor() && !backgroundSyncStarted) {
+          backgroundSyncStarted = true;
+          autoSyncOneHomeInBackground();
+          syncDriveTimesInBackground();
+          if (typeof syncPmCommuteTimesInBackground === 'function') syncPmCommuteTimesInBackground();
+          if (typeof syncActiveTravelTimesInBackground === 'function') syncActiveTravelTimesInBackground();
+        }
+      });
+    }
+
     function applyRemotePropertyData(id, data) {
       if (!data) return;
       let property = properties.find(p => p.id === id);
@@ -3480,6 +3573,7 @@
 
     function syncPropertyToFirestore(id, patch) {
       if (!firebaseReady) return;
+      if (!isEditor()) { console.warn('Firestore sync skipped — not signed in as an authorized editor.'); return; }
       db.collection('openHaus').doc(id).set(patch, { merge: true })
         .catch(err => console.warn('Firestore sync failed', err));
     }
@@ -5750,6 +5844,7 @@
     // Renumbers the active list 1..n and persists, in whatever order the
     // cards currently sit in — used by both arrow-button moves and drops.
     function persistReorderOrder(orderedProperties) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const { orderField } = REORDER_LIST_CONFIG[reorderActiveList];
       orderedProperties.forEach((p, idx) => {
         p[orderField] = idx + 1;
@@ -5818,6 +5913,7 @@
     }
 
     function saveMatchTierCutoffs() {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const top = parseFloat(document.getElementById('matchTierTopInput').value);
       const good = parseFloat(document.getElementById('matchTierGoodInput').value);
       if (isNaN(top) || isNaN(good) || good > top) {
@@ -5944,6 +6040,7 @@
     }
 
     function toggleWeekendForProperty(id, weekendId) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.weekends = property.weekends || [];
@@ -5958,6 +6055,7 @@
     // Soft-delete: hidden homes drop out of every weekend dashboard but stay in
     // Manage Homes (and keep their ratings/notes) so they can be restored later.
     function toggleHiddenForProperty(id) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.hidden = !property.hidden;
@@ -5967,6 +6065,7 @@
     }
 
     function toggleLovedForProperty(id) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.loved = !property.loved;
@@ -5983,6 +6082,7 @@
     // shared realtor-view.html sort. Adam's and Lauren's watch lists below
     // are personal/private and never shown to the realtor.
     function toggleWatchlistForProperty(id) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.watchlist = !property.watchlist;
@@ -5995,6 +6095,7 @@
     }
 
     function toggleWatchlistAdamForProperty(id) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.watchlistAdam = !property.watchlistAdam;
@@ -6007,6 +6108,7 @@
     }
 
     function toggleWatchlistLaurenForProperty(id) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.watchlistLauren = !property.watchlistLauren;
@@ -6036,6 +6138,7 @@
     // off clears the date. The exact date can be corrected afterward from
     // the fly-in panel.
     function toggleTouredForProperty(id) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.toured = !property.toured;
@@ -6049,6 +6152,7 @@
     }
 
     function setTouredDate(id, dateStr) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.touredDate = dateStr;
@@ -6067,6 +6171,7 @@
     }
 
     function toggleTouredForPanel(checked) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       if (!activeEvalId) return;
       const property = properties.find(p => p.id === activeEvalId);
       if (!property) return;
@@ -6128,6 +6233,7 @@
     }
 
     function savePropertyEdits() {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const address = document.getElementById('editAddress').value.trim();
       if (!address) {
         document.getElementById('editPropertyStatus').innerText = 'Address is required.';
@@ -7275,6 +7381,7 @@
     }
 
     async function importOneHomeListing(result, selectedWeekends, addToWatchlist, sourceType = 'onehome') {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const p = result.property;
       const mlsKey = p.OriginatingSystemKey || p.ListingId;
       const sourceLabel = sourceType === 'zillowHar' ? 'Zillow' : 'OneHome';
@@ -7609,6 +7716,7 @@
     }
 
     function setRating(id, person, ratingValue) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (property) {
         property.ratings[person] = ratingValue;
@@ -7623,6 +7731,7 @@
     }
 
     function setFeatureRating(id, person, featureKey, ratingValue) {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === id);
       if (!property) return;
 
@@ -7921,6 +8030,7 @@
     }
 
     function saveEvaluation() {
+      if (!isEditor()) { promptSignInToEdit(); return; }
       const property = properties.find(p => p.id === activeEvalId);
       if (property) {
         const notesPatch = {};
@@ -7979,10 +8089,18 @@
     updateTourButtonBadge();
     openSharedPropertyFromUrl();
     initFirebaseSync();
-    autoSyncOneHomeInBackground();
-    syncDriveTimesInBackground();
-    syncPmCommuteTimesInBackground();
-    syncActiveTravelTimesInBackground();
+    // autoSyncOneHomeInBackground/syncDriveTimesInBackground/etc. are
+    // started from onAuthStateChanged above, once we know the viewer is a
+    // signed-in editor — anonymous viewers never trigger these API calls
+    // or Firestore write attempts.
+    if (!firebaseReady) {
+      // No Firebase Auth available (misconfigured project) — fall back to
+      // the old unconditional behavior rather than never syncing at all.
+      autoSyncOneHomeInBackground();
+      syncDriveTimesInBackground();
+      if (typeof syncPmCommuteTimesInBackground === 'function') syncPmCommuteTimesInBackground();
+      if (typeof syncActiveTravelTimesInBackground === 'function') syncActiveTravelTimesInBackground();
+    }
   </script>
 </body>
 </html>
