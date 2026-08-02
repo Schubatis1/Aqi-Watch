@@ -313,7 +313,7 @@
   <div class="toolbar" id="scopeToolbar">
     <button class="scope-pill active" data-scope="all" onclick="setScope('all')">All</button>
     <button class="scope-pill" data-scope="loved" onclick="setScope('loved')">Loved ♥</button>
-    <button class="scope-pill" data-scope="watchlist" onclick="setScope('watchlist')">Watchlist 🔭</button>
+    <button class="scope-pill" data-scope="watchlist" onclick="setScope('watchlist')">Main Watch List 🔭</button>
   </div>
 
   <div id="cardsGrid" class="cards-grid"></div>
@@ -777,12 +777,23 @@
   }
 
   function visibleProperties() {
-    return properties.filter(p => {
+    const list = properties.filter(p => {
       if (p.hidden) return false;
       if (scope === 'loved') return !!p.loved;
       if (scope === 'watchlist') return !!p.watchlist;
       return !!p.loved || !!p.watchlist;
     });
+    // The Main Watch List's order is set from the Reorder Watch Lists panel
+    // in open_haus1.html (watchlistOrder) — this is the one view meant to
+    // be shared with the realtor, so it's the only one that respects it.
+    if (scope === 'watchlist') {
+      list.sort((a, b) => {
+        const ao = a.watchlistOrder == null ? Infinity : a.watchlistOrder;
+        const bo = b.watchlistOrder == null ? Infinity : b.watchlistOrder;
+        return ao - bo;
+      });
+    }
+    return list;
   }
 
   function render() {

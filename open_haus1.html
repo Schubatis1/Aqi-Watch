@@ -7,8 +7,52 @@
     (function() {
       try {
         var t = localStorage.getItem('appTheme');
-        if (t === 'house-hunters') document.documentElement.setAttribute('data-theme', t);
+        if (t === 'house-hunters' || t === 'matrix') document.documentElement.setAttribute('data-theme', t);
       } catch (e) {}
+    })();
+
+    // ---- Debug log capture (Menu > Debug > View Debug Log) ----
+    // Runs before every other script on the page (Leaflet, Firebase, the
+    // main app script) so nothing that happens during load is missed —
+    // this is the only way to see what actually happened on a phone, where
+    // there's no attached devtools console. Wraps console.log/warn/error/
+    // info (real console output is untouched, just mirrored into a buffer)
+    // and also catches uncaught errors, unhandled promise rejections, and
+    // failed resource loads (blocked/offline CDN scripts, etc.) via a
+    // capturing-phase window 'error' listener.
+    (function () {
+      window.__debugLog = [];
+      var MAX_LINES = 500;
+      function stringifyArg(a) {
+        if (a instanceof Error) return a.stack || a.message;
+        if (typeof a === 'object' && a !== null) {
+          try { return JSON.stringify(a); } catch (e) { return String(a); }
+        }
+        return String(a);
+      }
+      function push(level, args) {
+        var line = Array.prototype.map.call(args, stringifyArg).join(' ');
+        window.__debugLog.push({ time: new Date().toISOString(), level: level, line: line });
+        if (window.__debugLog.length > MAX_LINES) window.__debugLog.shift();
+        if (typeof window.__onDebugLogUpdate === 'function') window.__onDebugLogUpdate();
+      }
+      ['log', 'warn', 'error', 'info'].forEach(function (level) {
+        var original = console[level] ? console[level].bind(console) : function () {};
+        console[level] = function () {
+          original.apply(console, arguments);
+          push(level, arguments);
+        };
+      });
+      window.addEventListener('error', function (e) {
+        if (e.target && e.target !== window && e.target.tagName) {
+          push('error', ['Resource failed to load:', e.target.tagName, e.target.src || e.target.href || '']);
+        } else {
+          push('error', ['Uncaught error:', e.message, 'at ' + e.filename + ':' + e.lineno + ':' + e.colno]);
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function (e) {
+        push('error', ['Unhandled promise rejection:', e.reason]);
+      });
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +69,7 @@
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Oswald:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -199,6 +243,78 @@
       flex-shrink: 0;
     }
     [data-theme="house-hunters"] .panel-address-badge svg { width: 18px; height: 18px; }
+
+    /* Matrix theme — black/green terminal aesthetic, monospace everywhere,
+       plus an animated digital-rain canvas behind the page content. */
+    [data-theme="matrix"] {
+      --navy: #001a03;
+      --navy-dark: #000d01;
+      --navy-light: #00ff41;
+      --coral: #00ff41;
+      --coral-dark: #00cc34;
+      --coral-light: #003b0d;
+      --bg: #000000;
+      --card: #050d05;
+      --text: #baffc9;
+      --muted: #4fae62;
+      --border: #0c3a17;
+      --gray-light: #071c0a;
+      --gold: #00ff41;
+
+      --font-display: 'Share Tech Mono', 'Courier New', monospace;
+      --font-sans: 'Share Tech Mono', 'Courier New', monospace;
+      --font-caps: 'Share Tech Mono', 'Courier New', monospace;
+      --shadow-soft: 0 0 24px rgba(0,255,65,0.12);
+      --shadow-hover: 0 0 34px rgba(0,255,65,0.22);
+      --shadow-sm: 0 0 12px rgba(0,255,65,0.1);
+    }
+
+    [data-theme="matrix"] body { text-shadow: 0 0 1px rgba(0,255,65,0.35); }
+    [data-theme="matrix"] .header-titles p { color: var(--muted); }
+    [data-theme="matrix"] .header { border: 1px solid var(--border); }
+    [data-theme="matrix"] .property-card,
+    [data-theme="matrix"] .slide-panel,
+    [data-theme="matrix"] .compare-panel,
+    [data-theme="matrix"] .settings-modal,
+    [data-theme="matrix"] .map-panel,
+    [data-theme="matrix"] .cards-panel { border: 1px solid var(--border); }
+    [data-theme="matrix"] .btn-primary,
+    [data-theme="matrix"] .btn-outline-primary { color: #001a03; text-shadow: none; }
+    [data-theme="matrix"] ::selection { background: var(--coral); color: #001a03; }
+    [data-theme="matrix"] input,
+    [data-theme="matrix"] select,
+    [data-theme="matrix"] textarea { caret-color: var(--coral); }
+
+    /* A handful of elements use --navy as a dark-text-on-light-surface
+       color, or sit on a hardcoded light background — both assumptions
+       that break once the surface underneath turns black. Re-point just
+       those to the bright green accent (or a legible dark-on-light pair)
+       instead of changing --navy globally, which doubles as the header/
+       button backgrounds paired with hardcoded white text and looks right
+       as-is. */
+    [data-theme="matrix"] .card-price,
+    [data-theme="matrix"] .sortable-th.sort-active,
+    [data-theme="matrix"] .import-progress-text,
+    [data-theme="matrix"] .btn-link:hover,
+    [data-theme="matrix"] .description-toggle:hover { color: var(--coral); }
+    [data-theme="matrix"] .map-header { background: var(--gray-light); }
+    [data-theme="matrix"] .badge-good { background-color: var(--gray-light); color: var(--coral); border-color: var(--border); }
+
+    /* Digital rain — fixed full-viewport canvas, drawn behind everything at
+       low opacity so page content stays fully readable on top of it. Only
+       present/animated while the Matrix theme is active; see matrixRain.js
+       logic further down for the start/stop/reduced-motion handling. */
+    #matrixRainCanvas {
+      display: none;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.16;
+      pointer-events: none;
+    }
+    [data-theme="matrix"] #matrixRainCanvas { display: block; }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -404,6 +520,89 @@
       padding: 0 30px 30px;
     }
 
+    /* Reorder Watch Lists panel */
+    .reorder-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .reorder-tab {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .reorder-tab.active { background: var(--navy); border-color: var(--navy); color: #ffffff; }
+    .reorder-tab:hover:not(.active) { border-color: var(--text); color: var(--text); }
+
+    .reorder-list { display: flex; flex-direction: column; gap: 8px; }
+    .reorder-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      cursor: grab;
+    }
+    .reorder-card.dragging { opacity: 0.4; }
+    .reorder-handle { color: var(--muted); flex-shrink: 0; display: flex; cursor: grab; }
+    .reorder-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .reorder-info { flex: 1; min-width: 0; }
+    .reorder-address {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .reorder-price { font-size: 0.8rem; color: var(--muted); }
+    .reorder-arrows { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+    .reorder-arrow-btn {
+      background: var(--bg);
+      border: none;
+      border-radius: 6px;
+      width: 26px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .reorder-arrow-btn:hover:not(:disabled) { color: var(--text); background: var(--gray-light); }
+    .reorder-arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Debug Console panel */
+    .debug-log {
+      background: #12161c;
+      color: #d8dee6;
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+    .debug-log-line { display: block; }
+    .debug-log-line .debug-log-time { color: #6b7280; margin-right: 8px; }
+    .debug-log-line.warn { color: #ffce54; }
+    .debug-log-line.error { color: #ff6b6b; }
+    .debug-log-empty { color: #6b7280; font-style: italic; }
+
     .compare-table {
       width: 100%;
       border-collapse: collapse;
@@ -506,6 +705,8 @@
       font-size: 0.85rem;
     }
     .match-tier-controls-hint { color: var(--muted); font-size: 0.78rem; }
+
+    .manage-status-filter-row { margin-bottom: 14px; }
 
     .manage-table { width: 100%; border-collapse: collapse; min-width: 900px; }
     .manage-table th, .manage-table td {
@@ -1258,6 +1459,34 @@
     .sidebar-nav-btn:hover { background: var(--gray-light); }
     .sidebar .select-pill { width: 100%; }
     .sidebar .card-density-toggle { width: 100%; }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: help;
+    }
+    .sync-status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #9ca3af;
+      flex-shrink: 0;
+    }
+    .sync-status.synced .sync-status-dot { background: #2f9e44; }
+    .sync-status.synced .sync-status-text { color: #2f9e44; }
+    .sync-status.error .sync-status-dot { background: var(--coral); }
+    .sync-status.error .sync-status-text { color: var(--coral-dark); }
+    .sync-status.disabled .sync-status-dot { background: #9ca3af; }
+    .sync-status.stalled .sync-status-dot { background: #f0a500; }
+    .sync-status.stalled .sync-status-text { color: #b3790a; }
     .sidebar .card-density-toggle .density-btn { flex: 1; }
 
     .sidebar-backdrop {
@@ -1390,6 +1619,7 @@
     .theme-swatch { width: 32px; height: 32px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(0,0,0,0.08); }
     .theme-swatch-royal-oak { background: linear-gradient(135deg, #2c3e50 50%, #e0603f 50%); }
     .theme-swatch-hh { background: linear-gradient(135deg, #595959 50%, #fec70c 50%); }
+    .theme-swatch-matrix { background: linear-gradient(135deg, #000000 50%, #00ff41 50%); }
 
     .settings-modal-footer {
       padding: 18px 26px 24px;
@@ -1546,6 +1776,30 @@
     .badge-good { background-color: #eef1f4; color: var(--navy-light); border: 1px solid rgba(44,62,80,0.15); }
     .badge-verify { background-color: var(--gray-light); color: var(--muted); }
 
+    /* Listing status badges */
+    .badge-status-onmarket { background-color: #2f9e44; color: #ffffff; }
+    .badge-status-pending { background-color: #f0a500; color: #ffffff; }
+    .badge-status-comingsoon { background-color: #3b82f6; color: #ffffff; }
+    .badge-status-sold { background-color: #6b7280; color: #ffffff; }
+    .badge-status-offmarket { background-color: #9ca3af; color: #ffffff; }
+    .badge-status-other { background-color: var(--gray-light); color: var(--muted); }
+
+    /* Card-grid status ribbon — only shown for a non-"On Market" status, so
+       it reads as an exception worth noticing rather than routine clutter. */
+    .card-status-ribbon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      z-index: 2;
+    }
+
     /* Interactive Gold Stars (layered glyphs so a star can be half-filled) */
     .rating-stars { display: inline-flex; gap: 2px; user-select: none; }
     .rating-stars .star-wrap { position: relative; display: inline-block; font-size: 1.1rem; line-height: 1; cursor: pointer; transition: transform 0.15s ease; }
@@ -1617,10 +1871,21 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      padding: 6px 0;
+      padding: 10px 0;
     }
     .feature-rating-row-single:not(:last-child) { border-bottom: 1px dashed var(--border); }
     .feature-rating-row-single .feature-rating-label { font-size: 0.85rem; }
+    /* These stars are tapped directly (including half-star precision) —
+       the base 1.1rem size is too small to hit accurately on a phone.
+       Sized up by default (mobile-first); desktop reverts to the
+       original smaller size below, since a mouse doesn't need the
+       bigger target (this override must stay AFTER the base rule above
+       in source order — same specificity, so cascade order decides). */
+    .feature-rating-row-single .rating-stars .star-wrap { font-size: 1.7rem; }
+    @media (min-width: 900px) {
+      .feature-rating-row-single { padding: 6px 0; }
+      .feature-rating-row-single .rating-stars .star-wrap { font-size: 1.1rem; }
+    }
 
     .hidden { display: none; }
 
@@ -1796,6 +2061,43 @@
     .panel-share-btn:hover { background: var(--gray-light); color: var(--text); }
     .panel-share-btn svg { width: 17px; height: 17px; }
 
+    .panel-quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 30px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .quick-action-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .quick-action-pill svg { width: 15px; height: 15px; }
+    .quick-action-pill:hover { border-color: var(--text); color: var(--text); }
+    .quick-action-pill.quick-action-love.active { background: var(--coral); border-color: var(--coral); color: #ffffff; }
+    .quick-action-pill.quick-action-watchlist.active { background: #3b82f6; border-color: #3b82f6; color: #ffffff; }
+    .quick-action-pill.quick-action-adam.active { background: #f59e0b; border-color: #f59e0b; color: #ffffff; }
+    .quick-action-pill.quick-action-lauren.active { background: #8b5cf6; border-color: #8b5cf6; color: #ffffff; }
+    .quick-action-pill.quick-action-toured.active { background: #2f9e44; border-color: #2f9e44; color: #ffffff; }
+    .quick-action-pill.active svg[fill="none"] { fill: none; }
+    .quick-action-pill.quick-action-love.active svg { fill: currentColor; }
+
+    @media (max-width: 640px) {
+      .panel-quick-actions { padding: 0 20px 16px; }
+      .quick-action-pill span { display: none; }
+      .quick-action-pill { padding: 8px; }
+    }
+
     .share-modal {
       max-width: 460px;
     }
@@ -1843,6 +2145,32 @@
     }
 
     .panel-section-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+
+    .schedule-style-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      column-gap: 24px;
+    }
+    .schedule-style-grid p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+    @media (min-width: 900px) {
+      .schedule-style-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .schedule-recompute-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .schedule-recompute-actions .btn-secondary {
+      flex: 1;
+      min-width: 200px;
+      font-size: 0.82rem;
+      padding: 9px 12px;
+    }
 
     .panel-description {
       font-size: 0.9rem;
@@ -2040,6 +2368,9 @@
 </head>
 <body>
 
+  <!-- Matrix theme's digital-rain background; hidden/inert unless that theme is active -->
+  <canvas id="matrixRainCanvas" aria-hidden="true"></canvas>
+
   <!-- Left-hand settings menu (weekend/view controls + Manage Homes / Import / Settings) -->
   <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
   <nav class="sidebar" id="sidebar">
@@ -2067,6 +2398,10 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Manage Homes
       </button>
+      <button class="sidebar-nav-btn" onclick="closeSidebar(); openReorderPanel();">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><polyline points="17 15 20 18 17 21"/></svg>
+        Reorder Watch Lists
+      </button>
       <button class="sidebar-nav-btn" onclick="closeSidebar(); openOneHomeImportModal();">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Import
@@ -2086,6 +2421,22 @@
       <button class="sidebar-nav-btn" onclick="closeSidebar(); openPreferences();">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2Z"/></svg>
         Preferences
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-label">Sync</span>
+      <div class="sync-status" id="syncStatusIndicator" title="Whether this device is receiving cross-device updates (loved/watchlist/homes added elsewhere) right now.">
+        <span class="sync-status-dot"></span>
+        <span class="sync-status-text">Checking…</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <span class="sidebar-label">Debug</span>
+      <button class="sidebar-nav-btn" onclick="closeSidebar(); openDebugConsole();">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        View Debug Log
       </button>
     </div>
   </nav>
@@ -2223,6 +2574,7 @@
       <div class="panel-header">
         <div>
           <span class="badge" id="panelBadge">Top Match</span>
+          <span class="badge hidden" id="panelStatusBadge" style="margin-left:6px;">On Market</span>
         </div>
         <div class="panel-header-actions">
           <button class="panel-share-btn" onclick="shareProperty()" title="Share a link to this home">
@@ -2230,6 +2582,34 @@
           </button>
           <button class="panel-close" onclick="closeModal()">&times;</button>
         </div>
+      </div>
+
+      <div class="panel-quick-actions" id="panelQuickActions">
+        <button type="button" id="panelQuickAction-love" class="quick-action-pill quick-action-love" onclick="toggleLovedForProperty(activeEvalId)" title="Mark as Loved">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
+          <span>Love</span>
+        </button>
+        <button type="button" id="panelQuickAction-watchlist" class="quick-action-pill quick-action-watchlist" onclick="toggleWatchlistForProperty(activeEvalId)" title="Add to Main Watch List (share with realtor)">
+          <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
+          <span>Main Watch</span>
+        </button>
+        <button type="button" id="panelQuickAction-watchlistAdam" class="quick-action-pill quick-action-adam" onclick="toggleWatchlistAdamForProperty(activeEvalId)" title="Add to Adam's Watch List">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          <span>Adam's Watch</span>
+        </button>
+        <button type="button" id="panelQuickAction-watchlistLauren" class="quick-action-pill quick-action-lauren" onclick="toggleWatchlistLaurenForProperty(activeEvalId)" title="Add to Lauren's Watch List">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+          <span>Lauren's Watch</span>
+        </button>
+        <button type="button" id="panelQuickAction-toured" class="quick-action-pill quick-action-toured" onclick="toggleTouredForProperty(activeEvalId)" title="Mark as Toured">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="14.5" cy="15" r="8"/>
+            <path d="M14.5 7c-2.7 3.3-2.7 12.7 0 16M14.5 7c2.7 3.3 2.7 12.7 0 16"/>
+            <path d="M6 15h17"/>
+            <path d="M1 9 22 1l-6 9-4-1-3 5-1-4-8-1z" fill="currentColor" stroke="none"/>
+          </svg>
+          <span>Toured</span>
+        </button>
       </div>
 
       <div class="panel-body">
@@ -2291,11 +2671,23 @@
         <div>
           <div class="panel-section-title">Schedule & Style</div>
           <p style="font-size:0.9rem; color:var(--text); margin-bottom: 4px;" id="panelOpenHouse"><strong>Open House:</strong> Sun 1:00–3:00 PM</p>
-          <p style="font-size:0.9rem; color:var(--muted);" id="panelStyle"><strong>Architectural Style:</strong> Craftsman</p>
-          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelHeating"><strong>Heating:</strong> —</p>
-          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelCooling"><strong>Cooling:</strong> —</p>
-          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelDriveTimeAdam"><strong>Drive to Adam's work:</strong> —</p>
-          <p style="font-size:0.9rem; color:var(--muted); margin-top:4px;" id="panelDriveTimeLauren"><strong>Drive to Lauren's work:</strong> —</p>
+          <p style="font-size:0.9rem; color:var(--muted); margin-bottom:4px;" id="panelStyle"><strong>Architectural Style:</strong> Craftsman</p>
+          <div class="schedule-style-grid">
+            <p id="panelHeating"><strong>Heating:</strong> —</p>
+            <p id="panelCooling"><strong>Cooling:</strong> —</p>
+            <p id="panelDriveTimeAdam"><strong>Drive to Adam's work:</strong> —</p>
+            <p id="panelDriveTimeLauren"><strong>Drive to Lauren's work:</strong> —</p>
+            <p id="panelCommuteAdamPm"><strong>Return from Adam's work:</strong> —</p>
+            <p id="panelCommuteLaurenPm"><strong>Return from Lauren's work:</strong> —</p>
+            <p id="panelWalkDowntown"><strong>Walk to Downtown Royal Oak:</strong> —</p>
+            <p id="panelBikeDowntown"><strong>Bike to Downtown Royal Oak:</strong> —</p>
+            <p id="panelWalkMilesBabyRo"><strong>Walk to Miles' and Baby Ro's House:</strong> —</p>
+            <p id="panelBikeMilesBabyRo"><strong>Bike to Miles' and Baby Ro's House:</strong> —</p>
+          </div>
+          <div class="schedule-recompute-actions">
+            <button type="button" id="panelRecomputeMorningBtn" class="btn-secondary" onclick="forceRecomputeMorningCommute(activeEvalId)">Recompute Morning Commute</button>
+            <button type="button" id="panelRecomputeEveningBtn" class="btn-secondary" onclick="forceRecomputeEveningCommute(activeEvalId)">Recompute Evening Commute</button>
+          </div>
         </div>
 
         <div>
@@ -2445,6 +2837,10 @@
             <span class="theme-swatch theme-swatch-hh"></span>
             House Hunters
           </button>
+          <button type="button" class="theme-option" data-theme="matrix" onclick="setTheme('matrix')">
+            <span class="theme-swatch theme-swatch-matrix"></span>
+            Matrix
+          </button>
         </div>
       </div>
       <div class="settings-modal-footer">
@@ -2491,6 +2887,13 @@
           <button class="btn-secondary" onclick="resetMatchTierCutoffsToDefault()">Reset to Default Split (~20/40/40)</button>
           <span class="match-tier-controls-hint">Score range: 0–36. Homes with a manually-set Match Tier aren't affected.</span>
         </div>
+        <div class="manage-status-filter-row">
+          <label class="toggle-pill">
+            <input type="checkbox" id="manageNotOnMarketFilter" onchange="renderManageHomesList()">
+            <span class="toggle-switch"></span>
+            Not on Market Only
+          </label>
+        </div>
         <table class="manage-table">
           <thead>
             <tr>
@@ -2500,14 +2903,57 @@
               <th class="sortable-th" data-field="sqft" onclick="sortManageHomesBy('sqft')">Sq Ft<span class="sort-arrow"></span></th>
               <th class="sortable-th" data-field="built" onclick="sortManageHomesBy('built')">Built<span class="sort-arrow"></span></th>
               <th class="sortable-th" data-field="match" onclick="sortManageHomesBy('match')">Match<span class="sort-arrow"></span></th>
+              <th class="sortable-th" data-field="status" onclick="sortManageHomesBy('status')">Listing Status<span class="sort-arrow"></span></th>
               <th>Weekends</th>
               <th class="sortable-th" data-field="source" onclick="sortManageHomesBy('source')">Source<span class="sort-arrow"></span></th>
-              <th>Status</th>
+              <th>Visibility</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="manageHomesTableBody"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reorder Watch Lists Panel -->
+  <div class="compare-backdrop" id="reorderBackdrop" onclick="closeReorderPanel()">
+    <div class="compare-panel" onclick="event.stopPropagation()" style="max-width:720px;">
+      <div class="compare-header">
+        <div>
+          <h2>Reorder Watch Lists</h2>
+          <p id="reorderSubtitle">Drag to reorder, or use the arrows</p>
+        </div>
+        <button class="panel-close" onclick="closeReorderPanel()">&times;</button>
+      </div>
+      <div class="compare-body">
+        <div class="reorder-tabs" id="reorderTabs">
+          <button type="button" class="reorder-tab active" data-list="watchlist" onclick="setReorderTab('watchlist')">Main</button>
+          <button type="button" class="reorder-tab" data-list="watchlistAdam" onclick="setReorderTab('watchlistAdam')">Adam</button>
+          <button type="button" class="reorder-tab" data-list="watchlistLauren" onclick="setReorderTab('watchlistLauren')">Lauren</button>
+        </div>
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:16px;">Only the Main Watch List's order is shared with the realtor.</p>
+        <div class="reorder-list" id="reorderList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug Console Panel -->
+  <div class="compare-backdrop" id="debugConsoleBackdrop" onclick="closeDebugConsole()">
+    <div class="compare-panel" onclick="event.stopPropagation()" style="max-width:900px;">
+      <div class="compare-header">
+        <div>
+          <h2>Debug Log</h2>
+          <p id="debugConsoleSubtitle">Mirrors this browser's console — share this if something isn't syncing right.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn-secondary" onclick="copyDebugLog()" id="debugConsoleCopyBtn">Copy Log</button>
+          <button class="btn-secondary" onclick="clearDebugLog()">Clear</button>
+          <button class="panel-close" onclick="closeDebugConsole()">&times;</button>
+        </div>
+      </div>
+      <div class="compare-body">
+        <pre class="debug-log" id="debugConsoleOutput"></pre>
       </div>
     </div>
   </div>
@@ -2524,13 +2970,27 @@
           <label>Address</label>
           <input type="text" id="editAddress" placeholder="123 Main St">
         </div>
-        <div class="form-group">
-          <label>Match Tier</label>
-          <select id="editPriority">
-            <option value="">— None —</option>
-            <option value="Top">Top Match</option>
-            <option value="Good">Good Match</option>
-          </select>
+        <div style="display:flex; gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>Match Tier</label>
+            <select id="editPriority">
+              <option value="">— None —</option>
+              <option value="Top">Top Match</option>
+              <option value="Good">Good Match</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Listing Status</label>
+            <select id="editStatus">
+              <option value="">— Unknown —</option>
+              <option value="On Market">On Market</option>
+              <option value="Coming Soon">Coming Soon</option>
+              <option value="Pending">Pending</option>
+              <option value="Under Contract">Under Contract</option>
+              <option value="Sold">Sold</option>
+              <option value="Off Market">Off Market</option>
+            </select>
+          </div>
         </div>
         <div style="display:flex; gap:10px;">
           <div class="form-group" style="flex:1;">
@@ -2887,18 +3347,20 @@
       select.innerHTML = `
         <option value="all">View All</option>
         <option value="loved">View Loved ♥</option>
-        <option value="watchlist">View Watchlist 🔭</option>
+        <option value="watchlist">View Main Watch List 🔭</option>
+        <option value="watchlistAdam">View Adam's Watch List</option>
+        <option value="watchlistLauren">View Lauren's Watch List</option>
         ${weekendOptions}
       `;
 
       const savedWeekendId = localStorage.getItem('selectedWeekendId');
-      const validIds = ['all', 'loved', 'watchlist', ...WEEKENDS.map(w => w.id)];
+      const validIds = ['all', 'loved', 'watchlist', 'watchlistAdam', 'watchlistLauren', ...WEEKENDS.map(w => w.id)];
       select.value = validIds.includes(savedWeekendId) ? savedWeekendId : WEEKENDS[0].id;
     }
     initWeekendFilter();
 
     function setCardDensity(mode) {
-      localStorage.setItem('cardDensity', mode);
+      safeLocalStorageSet('cardDensity', mode);
       document.getElementById('cardsGrid').classList.toggle('compact', mode === 'compact');
       document.getElementById('densityFullBtn').classList.toggle('active', mode === 'full');
       document.getElementById('densityCompactBtn').classList.toggle('active', mode === 'compact');
@@ -2906,18 +3368,22 @@
     setCardDensity(localStorage.getItem('cardDensity') || 'full');
 
     function selectWeekend(weekendId) {
-      localStorage.setItem('selectedWeekendId', weekendId);
+      safeLocalStorageSet('selectedWeekendId', weekendId);
       applyFilters();
     }
 
     // --- Firebase Firestore sync (cross-device ratings/notes) ---
     let db = null;
     let firebaseReady = false;
+    console.log('Firebase: checking config...');
     try {
-      if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
+      if (typeof firebase === 'undefined') {
+        console.warn('Firebase: SDK script never loaded (firebase-app-compat.js / firebase-firestore-compat.js) — check network/ad-blocker. Using localStorage only.');
+      } else if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         firebaseReady = true;
+        console.log('Firebase: initializeApp + firestore() succeeded, project =', firebaseConfig.projectId);
       } else {
         console.warn('Firebase not configured - fill in firebase-config.js to enable cross-device sync. Using localStorage only.');
       }
@@ -2940,9 +3406,9 @@
         try { ids = JSON.parse(localStorage.getItem('customPropertyIds') || '[]'); } catch (e) { ids = []; }
         if (!ids.includes(id)) {
           ids.push(id);
-          localStorage.setItem('customPropertyIds', JSON.stringify(ids));
+          safeLocalStorageSet('customPropertyIds', JSON.stringify(ids));
         }
-        localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
+        safeLocalStorageSet(`customProperty_${id}`, JSON.stringify(property));
       }
 
       if (!property) return;
@@ -2953,44 +3419,44 @@
           try { return (JSON.parse(localStorage.getItem('customPropertyIds') || '[]')).includes(id); } catch (e) { return false; }
         })();
         if (isCustom) {
-          localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
+          safeLocalStorageSet(`customProperty_${id}`, JSON.stringify(property));
         } else {
-          localStorage.setItem(`override_${id}`, JSON.stringify(data.core));
+          safeLocalStorageSet(`override_${id}`, JSON.stringify(data.core));
         }
       }
       if (data.weekends !== undefined) {
         property.weekends = data.weekends;
-        localStorage.setItem(`weekends_${id}`, JSON.stringify(data.weekends));
+        safeLocalStorageSet(`weekends_${id}`, JSON.stringify(data.weekends));
       }
       if (data.hidden !== undefined) {
         property.hidden = data.hidden;
-        localStorage.setItem(`hidden_${id}`, data.hidden ? '1' : '0');
+        safeLocalStorageSet(`hidden_${id}`, data.hidden ? '1' : '0');
       }
       if (data.loved !== undefined) {
         property.loved = data.loved;
-        localStorage.setItem(`loved_${id}`, data.loved ? '1' : '0');
+        safeLocalStorageSet(`loved_${id}`, data.loved ? '1' : '0');
       }
       if (data.watchlist !== undefined) {
         property.watchlist = data.watchlist;
-        localStorage.setItem(`watchlist_${id}`, data.watchlist ? '1' : '0');
+        safeLocalStorageSet(`watchlist_${id}`, data.watchlist ? '1' : '0');
       }
       if (data.toured !== undefined) {
         property.toured = data.toured;
-        localStorage.setItem(`toured_${id}`, data.toured ? '1' : '0');
+        safeLocalStorageSet(`toured_${id}`, data.toured ? '1' : '0');
       }
       if (data.touredDate !== undefined) {
         property.touredDate = data.touredDate;
-        localStorage.setItem(`touredDate_${id}`, data.touredDate || '');
+        safeLocalStorageSet(`touredDate_${id}`, data.touredDate || '');
       }
 
       PEOPLE.forEach(({ key: person }) => {
         if (data.ratings && data.ratings[person] !== undefined) {
           property.ratings[person] = data.ratings[person];
-          localStorage.setItem(`rating_${person}_${id}`, data.ratings[person]);
+          safeLocalStorageSet(`rating_${person}_${id}`, data.ratings[person]);
         }
         if (data.notes && data.notes[person] !== undefined) {
           property.evalNotes[person] = data.notes[person];
-          localStorage.setItem(`notes_${person}_${id}`, data.notes[person]);
+          safeLocalStorageSet(`notes_${person}_${id}`, data.notes[person]);
           const textarea = document.getElementById(`evalNotes-${person}`);
           if (activeEvalId === id && textarea && document.activeElement !== textarea) {
             textarea.value = data.notes[person];
@@ -3001,7 +3467,7 @@
             const value = data.features[person][featureKey];
             if (value !== undefined) {
               property.features[person][featureKey] = value;
-              localStorage.setItem(`feat_${person}_${featureKey}_${id}`, value);
+              safeLocalStorageSet(`feat_${person}_${featureKey}_${id}`, value);
             }
           });
         }
@@ -3018,17 +3484,71 @@
         .catch(err => console.warn('Firestore sync failed', err));
     }
 
+    // Small visible indicator (Menu > Sync) for whether this device is
+    // actually receiving cross-device updates right now. Firestore sync
+    // failures (blocked CDN, network policy, offline) were previously
+    // silent — a device stuck on localStorage-only would just quietly show
+    // a partial home list and stale loved/watchlist state with no sign
+    // anything was wrong. This doesn't fix connectivity, but at least makes
+    // a stuck device obvious instead of invisible.
+    function setSyncStatus(state, text) {
+      const el = document.getElementById('syncStatusIndicator');
+      if (!el) return;
+      el.classList.remove('synced', 'error', 'disabled', 'stalled');
+      el.classList.add(state);
+      el.querySelector('.sync-status-text').innerText = text;
+    }
+
+    // How long to wait for onSnapshot's first callback (success OR error)
+    // before assuming the connection is stuck rather than just slow. Plain
+    // "Connecting…" forever, with nothing logged, was the whole problem —
+    // this turns a silent hang into a visible, timestamped log line.
+    const FIRESTORE_CONNECT_TIMEOUT_MS = 12000;
+
     function initFirebaseSync() {
-      if (!firebaseReady) return;
+      if (!firebaseReady) {
+        setSyncStatus('disabled', 'Local only (not configured)');
+        return;
+      }
+      setSyncStatus('disabled', 'Connecting…');
+      console.log('Firestore: attaching realtime listener to "openHaus"...');
+
+      let firstResponseReceived = false;
+      const stallTimer = setTimeout(() => {
+        if (firstResponseReceived) return;
+        console.warn(`Firestore: no response after ${FIRESTORE_CONNECT_TIMEOUT_MS / 1000}s — connection appears stuck (check network/firewall/VPN). Still listening in case it recovers.`);
+        setSyncStatus('stalled', 'Stalled — check network');
+      }, FIRESTORE_CONNECT_TIMEOUT_MS);
+
       db.collection('openHaus').onSnapshot(snapshot => {
+        if (!firstResponseReceived) {
+          firstResponseReceived = true;
+          clearTimeout(stallTimer);
+          console.log(`Firestore: first snapshot received (${snapshot.docChanges().length} change(s), ${snapshot.size} doc(s) total, fromCache=${snapshot.metadata.fromCache}).`);
+        }
         snapshot.docChanges().forEach(change => {
           if (change.type !== 'removed') {
-            applyRemotePropertyData(change.doc.id, change.doc.data());
+            // Defense-in-depth: safeLocalStorageSet already stops a storage
+            // failure from throwing, but this still guards against any
+            // other unexpected error in a single doc's update — one bad
+            // doc should never again be able to skip applyFilters()/
+            // setSyncStatus('synced') for the rest of the batch.
+            try {
+              applyRemotePropertyData(change.doc.id, change.doc.data());
+            } catch (err) {
+              console.warn(`Failed to apply remote update for ${change.doc.id}`, err);
+            }
           }
         });
         applyFilters();
         retryOpenSharedProperty();
-      }, err => console.warn('Firestore listener error', err));
+        setSyncStatus('synced', `Synced ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+      }, err => {
+        firstResponseReceived = true;
+        clearTimeout(stallTimer);
+        console.warn('Firestore listener error', err);
+        setSyncStatus('error', 'Sync error — local only');
+      });
     }
 
     // Initialize Leaflet Map
@@ -3093,13 +3613,66 @@
       return { getBestMatch, getAllForAddress };
     })();
 
+    // A single bad localStorage.setItem() call (almost always
+    // QuotaExceededError — this device's storage is full, usually from
+    // accumulated cached photos) used to be able to crash whatever code
+    // path it happened in, uncaught. That was the actual cause behind the
+    // app "freezing" — a write failing partway through processing a
+    // Firestore snapshot would abort that whole handler, silently skipping
+    // both the card-list refresh (applyFilters()) and the Sync status
+    // update, permanently stuck on "Connecting…" even though sync had
+    // actually succeeded. Every localStorage.setItem() call in this file
+    // now goes through here instead: on failure, it evicts the oldest
+    // cached photos (by far the largest thing stored — base64 images from
+    // OneHome imports) to try to free enough room, retries once, and
+    // otherwise just logs a warning and moves on rather than throwing.
+    const PHOTO_CACHE_PREFIX = 'housephoto_';
+
+    function evictOldestPhotoCacheEntries(count) {
+      try {
+        const entries = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith(PHOTO_CACHE_PREFIX)) continue;
+          let timestamp = 0;
+          try { timestamp = JSON.parse(localStorage.getItem(key)).timestamp || 0; } catch (e) { /* corrupt entry — still evictable */ }
+          entries.push({ key, timestamp });
+        }
+        if (!entries.length) return false;
+        entries.sort((a, b) => a.timestamp - b.timestamp);
+        entries.slice(0, count).forEach(e => localStorage.removeItem(e.key));
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function safeLocalStorageSet(key, value) {
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (err) {
+        if (evictOldestPhotoCacheEntries(5)) {
+          try {
+            localStorage.setItem(key, value);
+            return true;
+          } catch (err2) {
+            console.warn(`localStorage.setItem('${key}') failed even after evicting cached photos — this device's local cache may be incomplete, but the app keeps running.`, err2);
+            return false;
+          }
+        }
+        console.warn(`localStorage.setItem('${key}') failed and there was nothing cached to evict — this device's local cache may be incomplete, but the app keeps running.`, err);
+        return false;
+      }
+    }
+
     // =====================================================================
     // HousePhotoService — provider-based photo abstraction
     // UI never talks to Street View / MLS / etc directly, only this service.
     // =====================================================================
 
     const HousePhotoService = (function () {
-      const CACHE_PREFIX = 'housephoto_';
+      const CACHE_PREFIX = PHOTO_CACHE_PREFIX;
       const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
       function cacheKey(address) {
@@ -3122,13 +3695,9 @@
       }
 
       function setCached(address, provider, image) {
-        try {
-          localStorage.setItem(cacheKey(address), JSON.stringify({
-            provider, image, timestamp: Date.now()
-          }));
-        } catch (e) {
-          // localStorage full or unavailable — fail silently, not critical
-        }
+        safeLocalStorageSet(cacheKey(address), JSON.stringify({
+          provider, image, timestamp: Date.now()
+        }));
       }
 
       // Default key, used until the user saves their own in Settings.
@@ -3375,7 +3944,7 @@
     }
 
     function applyTheme(theme) {
-      if (theme === 'house-hunters') {
+      if (theme === 'house-hunters' || theme === 'matrix') {
         document.documentElement.setAttribute('data-theme', theme);
       } else {
         document.documentElement.removeAttribute('data-theme');
@@ -3383,12 +3952,69 @@
       document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
       });
+      if (theme === 'matrix') startMatrixRain(); else stopMatrixRain();
     }
 
     function setTheme(theme) {
-      localStorage.setItem('appTheme', theme);
+      safeLocalStorageSet('appTheme', theme);
       applyTheme(theme);
       if (typeof map !== 'undefined' && map) applyFilters();
+    }
+
+    // ---- Matrix theme: falling-code canvas background ----
+    // Fixed full-viewport canvas drawn behind all page content (z-index -1,
+    // low opacity) so text stays fully readable on top of it. Only runs
+    // while the Matrix theme is active, and skipped entirely for
+    // prefers-reduced-motion — the theme's colors/font still apply either way.
+    let matrixRainState = null;
+
+    function startMatrixRain() {
+      if (matrixRainState) return;
+      const canvas = document.getElementById('matrixRainCanvas');
+      if (!canvas) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const ctx = canvas.getContext('2d');
+      const glyphs = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789';
+      const fontSize = 16;
+      let columns, drops;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        columns = Math.max(1, Math.floor(canvas.width / fontSize));
+        drops = new Array(columns).fill(0).map(() => Math.random() * -50);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00ff41';
+        ctx.font = `${fontSize}px "Share Tech Mono", monospace`;
+        for (let i = 0; i < columns; i++) {
+          const glyph = glyphs[Math.floor(Math.random() * glyphs.length)];
+          ctx.fillText(glyph, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+          drops[i]++;
+        }
+      }
+
+      const intervalId = setInterval(draw, 60);
+      matrixRainState = { intervalId, resize };
+    }
+
+    function stopMatrixRain() {
+      if (!matrixRainState) return;
+      clearInterval(matrixRainState.intervalId);
+      window.removeEventListener('resize', matrixRainState.resize);
+      matrixRainState = null;
+      const canvas = document.getElementById('matrixRainCanvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     }
 
     // ---- Left-hand settings menu (mobile slide-out drawer) ----
@@ -3429,7 +4055,7 @@
       const value = input.value.trim();
 
       if (value) {
-        localStorage.setItem('googleMapsKey', value);
+        safeLocalStorageSet('googleMapsKey', value);
         status.innerText = 'Key saved locally. Reopen a listing to load its photo.';
       } else {
         localStorage.removeItem('googleMapsKey');
@@ -3494,7 +4120,7 @@
         p.day = '—';
         p.openHouse = 'Not yet scheduled';
         p.openHouses = [];
-        persistPropertyState(p);
+        persistPropertyState(p, ['day', 'openHouse', 'openHouses']);
       });
 
       applyFilters();
@@ -3509,8 +4135,9 @@
 
       let changedCount = 0;
       properties.forEach(p => {
+        const wasManuallyLocked = p.priorityAuto === false;
         if (applyAutoMatchTier(p, properties)) changedCount++;
-        persistPropertyState(p);
+        if (!wasManuallyLocked) persistPropertyState(p, ['priority', 'priorityGroup', 'priorityClass', 'priorityAuto']);
       });
 
       applyFilters();
@@ -3587,6 +4214,52 @@
       return '';
     }
 
+    // ---- Listing status (On Market / Pending / Coming Soon / Sold / etc.) ----
+    // Maps a raw MLS "StandardStatus" (RESO Data Dictionary field, what
+    // OneHome's GraphQL API reports) to one of this app's clean display
+    // labels. Different MLS boards use slightly different raw strings, so
+    // unrecognized values pass through title-cased rather than being
+    // silently dropped — better to show something unexpected than nothing.
+    const LISTING_STATUS_MAP = {
+      'active': 'On Market',
+      'coming soon': 'Coming Soon',
+      'active under contract': 'Under Contract',
+      'pending': 'Pending',
+      'closed': 'Sold',
+      'withdrawn': 'Off Market',
+      'canceled': 'Off Market',
+      'cancelled': 'Off Market',
+      'expired': 'Off Market',
+      'hold': 'Off Market',
+    };
+
+    function normalizeListingStatus(rawStatus) {
+      if (!rawStatus) return null;
+      const key = String(rawStatus).trim().toLowerCase();
+      if (LISTING_STATUS_MAP[key]) return LISTING_STATUS_MAP[key];
+      return String(rawStatus).trim();
+    }
+
+    const LISTING_STATUS_BADGE_CLASSES = {
+      'On Market': 'badge-status-onmarket',
+      'Pending': 'badge-status-pending',
+      'Under Contract': 'badge-status-pending',
+      'Coming Soon': 'badge-status-comingsoon',
+      'Sold': 'badge-status-sold',
+      'Off Market': 'badge-status-offmarket',
+    };
+
+    function getListingStatusBadgeClass(status) {
+      return LISTING_STATUS_BADGE_CLASSES[status] || 'badge-status-other';
+    }
+
+    // Only a deviation from "on the market" (the assumed default for
+    // anything without a known status) is worth calling out on the card
+    // grid — the fly-in panel shows whatever status is known regardless.
+    function isNotableListingStatus(status) {
+      return !!status && status !== 'On Market';
+    }
+
     // =====================================================================
     // Match Tier auto-scoring — six gates, each worth points toward
     // Top Match (4+), Good Match (2+), or blank (everything else). The
@@ -3643,6 +4316,36 @@
     function formatDriveTimeDisplay(minutes, isRushHourSample) {
       if (minutes == null) return 'Not yet computed';
       return `${minutes} min${isRushHourSample ? ' (rush hour)' : ' (off-peak estimate)'}`;
+    }
+
+    // Walk/bike times aren't traffic-dependent, so there's no rush-hour label.
+    function formatTravelTimeDisplay(minutes) {
+      if (minutes == null) return 'Not yet computed';
+      return `${minutes} min`;
+    }
+
+    // Renders every commute/travel-time row in the fly-in's Schedule & Style
+    // section — shared by openModal() and the two force-recompute buttons.
+    function refreshPanelCommuteView(property) {
+      document.getElementById('panelDriveTimeAdam').innerHTML = `<strong>Drive to Adam's work:</strong> ${formatDriveTimeDisplay(property.driveTimeAdamMinutes, property.driveTimeAdamRushHourSample)}`;
+      document.getElementById('panelDriveTimeLauren').innerHTML = `<strong>Drive to Lauren's work:</strong> ${formatDriveTimeDisplay(property.driveTimeLaurenMinutes, property.driveTimeLaurenRushHourSample)}`;
+      document.getElementById('panelCommuteAdamPm').innerHTML = `<strong>Return from Adam's work:</strong> ${formatDriveTimeDisplay(property.commuteAdamPmMinutes, property.commuteAdamPmRushHourSample)}`;
+      document.getElementById('panelCommuteLaurenPm').innerHTML = `<strong>Return from Lauren's work:</strong> ${formatDriveTimeDisplay(property.commuteLaurenPmMinutes, property.commuteLaurenPmRushHourSample)}`;
+      document.getElementById('panelWalkDowntown').innerHTML = `<strong>Walk to Downtown Royal Oak:</strong> ${formatTravelTimeDisplay(property.walkTimeDowntownMinutes)}`;
+      document.getElementById('panelBikeDowntown').innerHTML = `<strong>Bike to Downtown Royal Oak:</strong> ${formatTravelTimeDisplay(property.bikeTimeDowntownMinutes)}`;
+      document.getElementById('panelWalkMilesBabyRo').innerHTML = `<strong>Walk to Miles' and Baby Ro's House:</strong> ${formatTravelTimeDisplay(property.walkTimeMilesBabyRoMinutes)}`;
+      document.getElementById('panelBikeMilesBabyRo').innerHTML = `<strong>Bike to Miles' and Baby Ro's House:</strong> ${formatTravelTimeDisplay(property.bikeTimeMilesBabyRoMinutes)}`;
+    }
+
+    // Called by the background commute/travel-time syncs once they finish a
+    // pass. None of that data appears on the card grid (only in the fly-in
+    // panel), so there's no need to call applyFilters() and rebuild every
+    // card — which would tear down and re-fetch every visible photo, and is
+    // the root cause of photos flashing repeatedly shortly after page load.
+    function refreshOpenPanelCommuteViewIfShowing() {
+      if (!activeEvalId) return;
+      const property = properties.find(p => p.id === activeEvalId);
+      if (property) refreshPanelCommuteView(property);
     }
 
     // Converts a drive time in minutes to points: <10min is 6, then -1
@@ -3734,7 +4437,7 @@
             const newAdamMin = adamEl && adamEl.status === 'OK' ? Math.round(adamEl.duration.value / 60) : null;
             const newLaurenMin = laurenEl && laurenEl.status === 'OK' ? Math.round(laurenEl.duration.value / 60) : null;
 
-            let changed = false;
+            const changedFields = [];
 
             if (newAdamMin != null) {
               const isJump = rushHourNow && p.driveTimeAdamRushHourSample && p.driveTimeAdamMinutes != null
@@ -3743,7 +4446,7 @@
                 p.driveTimeAdamMinutes = newAdamMin;
                 p.driveTimeAdamComputedAt = Date.now();
                 p.driveTimeAdamRushHourSample = rushHourNow;
-                changed = true;
+                changedFields.push('driveTimeAdamMinutes', 'driveTimeAdamComputedAt', 'driveTimeAdamRushHourSample');
               }
             }
 
@@ -3754,17 +4457,263 @@
                 p.driveTimeLaurenMinutes = newLaurenMin;
                 p.driveTimeLaurenComputedAt = Date.now();
                 p.driveTimeLaurenRushHourSample = rushHourNow;
-                changed = true;
+                changedFields.push('driveTimeLaurenMinutes', 'driveTimeLaurenComputedAt', 'driveTimeLaurenRushHourSample');
               }
             }
 
-            if (changed) persistPropertyState(p);
+            if (changedFields.length) persistPropertyState(p, changedFields);
           });
         }
 
-        applyFilters();
+        // Drive time isn't shown on the card grid, only in the fly-in panel
+        // — refresh that in place instead of rebuilding the whole grid
+        // (which would tear down and re-fetch every visible photo).
+        refreshOpenPanelCommuteViewIfShowing();
       } catch (err) {
         console.warn('Drive time sync failed', err);
+      }
+    }
+
+    // ---- Evening reverse commute (work -> home) + walk/bike travel times ----
+    // Adam and Lauren leave work at different times, so each reverse leg is
+    // only treated as a "real" rush-hour sample during its own window;
+    // outside that window a fetch still happens if the value is missing,
+    // it's just labeled an off-peak estimate (same convention as the AM legs).
+    const DOWNTOWN_ROYAL_OAK_ADDRESS = '430 S Main St, Royal Oak, MI 48067';
+    const MILES_BABY_RO_ADDRESS = '1203 N Maple, Royal Oak, MI';
+
+    function isEveningRushHourAdamNow() {
+      const now = new Date();
+      const day = now.getDay();
+      if (day < 2 || day > 4) return false; // Tue/Wed/Thu, same commute days as the AM gate
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+      return totalMin >= 16 * 60 + 30 && totalMin < 17 * 60 + 30; // 4:30-5:30pm
+    }
+
+    function isEveningRushHourLaurenNow() {
+      const now = new Date();
+      const day = now.getDay();
+      if (day < 2 || day > 4) return false;
+      const totalMin = now.getHours() * 60 + now.getMinutes();
+      return totalMin >= 15 * 60 + 30 && totalMin < 16 * 60 + 30; // 3:30-4:30pm
+    }
+
+    function fetchDistanceMatrixMode(origins, destinations, travelMode) {
+      return new Promise((resolve, reject) => {
+        const service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix({ origins, destinations, travelMode }, (response, status) => {
+          if (status === 'OK') resolve(response);
+          else reject(new Error(`Distance Matrix request failed: ${status}`));
+        });
+      });
+    }
+
+    // One origin (a work address), many destinations (homes) — the mirror
+    // image of the AM batch shape, which is many origins/one pair of
+    // destinations.
+    function fetchReverseCommuteBatch(originAddress, destinationAddresses) {
+      return new Promise((resolve, reject) => {
+        const service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix({
+          origins: [originAddress],
+          destinations: destinationAddresses,
+          travelMode: google.maps.TravelMode.DRIVING,
+          drivingOptions: { departureTime: new Date(), trafficModel: google.maps.TrafficModel.BEST_GUESS }
+        }, (response, status) => {
+          if (status === 'OK') resolve(response.rows[0].elements);
+          else reject(new Error(`Distance Matrix request failed: ${status}`));
+        });
+      });
+    }
+
+    async function syncPmCommuteTimesInBackground() {
+      try {
+        const adamRushNow = isEveningRushHourAdamNow();
+        const laurenRushNow = isEveningRushHourLaurenNow();
+
+        function needsFetch(p, minutesField, rushField, computedAtField, rushNow) {
+          if (p[minutesField] == null) return true;
+          if (!rushNow) return false;
+          return !p[rushField] || (Date.now() - (p[computedAtField] || 0)) >= DRIVE_TIME_REFRESH_INTERVAL_MS;
+        }
+
+        const adamCandidates = properties.filter(p => p.address && !p.hidden &&
+          needsFetch(p, 'commuteAdamPmMinutes', 'commuteAdamPmRushHourSample', 'commuteAdamPmComputedAt', adamRushNow));
+        const laurenCandidates = properties.filter(p => p.address && !p.hidden &&
+          needsFetch(p, 'commuteLaurenPmMinutes', 'commuteLaurenPmRushHourSample', 'commuteLaurenPmComputedAt', laurenRushNow));
+
+        if (!adamCandidates.length && !laurenCandidates.length) return;
+
+        await loadGoogleMapsSdk();
+
+        async function runLeg(candidates, workAddress, rushNow, minutesField, computedAtField, rushField) {
+          for (let i = 0; i < candidates.length; i += DRIVE_TIME_BATCH_SIZE) {
+            const batch = candidates.slice(i, i + DRIVE_TIME_BATCH_SIZE);
+            const destinations = batch.map(p => `${p.address}, ${p.city} ${p.zip}`);
+            let elements;
+            try {
+              elements = await fetchReverseCommuteBatch(workAddress, destinations);
+            } catch (err) {
+              console.warn('PM commute batch failed', err);
+              continue;
+            }
+            elements.forEach((el, idx) => {
+              const p = batch[idx];
+              const newMin = el && el.status === 'OK' ? Math.round(el.duration.value / 60) : null;
+              if (newMin == null) return;
+              const isJump = rushNow && p[rushField] && p[minutesField] != null
+                && newMin > p[minutesField] * DRIVE_TIME_JUMP_DISCARD_RATIO;
+              if (isJump) return;
+              p[minutesField] = newMin;
+              p[computedAtField] = Date.now();
+              p[rushField] = rushNow;
+              persistPropertyState(p, [minutesField, computedAtField, rushField]);
+            });
+          }
+        }
+
+        if (adamCandidates.length) {
+          await runLeg(adamCandidates, WORK_ADDRESSES.adam, adamRushNow, 'commuteAdamPmMinutes', 'commuteAdamPmComputedAt', 'commuteAdamPmRushHourSample');
+        }
+        if (laurenCandidates.length) {
+          await runLeg(laurenCandidates, WORK_ADDRESSES.lauren, laurenRushNow, 'commuteLaurenPmMinutes', 'commuteLaurenPmComputedAt', 'commuteLaurenPmRushHourSample');
+        }
+
+        // Not shown on the card grid — see the comment in
+        // syncDriveTimesInBackground for why this doesn't call applyFilters().
+        refreshOpenPanelCommuteViewIfShowing();
+      } catch (err) {
+        console.warn('PM commute sync failed', err);
+      }
+    }
+
+    // Walk/bike times to two fixed landmarks. These aren't traffic-dependent,
+    // so they're just computed once (whenever missing) rather than refreshed
+    // on an interval like the driving commutes above.
+    async function syncActiveTravelTimesInBackground() {
+      try {
+        function needsFetch(p) {
+          return p.walkTimeDowntownMinutes == null || p.bikeTimeDowntownMinutes == null ||
+            p.walkTimeMilesBabyRoMinutes == null || p.bikeTimeMilesBabyRoMinutes == null;
+        }
+
+        const candidates = properties.filter(p => p.address && !p.hidden && needsFetch(p));
+        if (!candidates.length) return;
+
+        await loadGoogleMapsSdk();
+        const destinations = [DOWNTOWN_ROYAL_OAK_ADDRESS, MILES_BABY_RO_ADDRESS];
+
+        for (let i = 0; i < candidates.length; i += DRIVE_TIME_BATCH_SIZE) {
+          const batch = candidates.slice(i, i + DRIVE_TIME_BATCH_SIZE);
+          const origins = batch.map(p => `${p.address}, ${p.city} ${p.zip}`);
+
+          let walkResponse = null, bikeResponse = null;
+          try {
+            walkResponse = await fetchDistanceMatrixMode(origins, destinations, google.maps.TravelMode.WALKING);
+          } catch (err) { console.warn('Walk time batch failed', err); }
+          try {
+            bikeResponse = await fetchDistanceMatrixMode(origins, destinations, google.maps.TravelMode.BICYCLING);
+          } catch (err) { console.warn('Bike time batch failed', err); }
+
+          batch.forEach((p, idx) => {
+            const changedFields = [];
+            if (walkResponse) {
+              const row = walkResponse.rows[idx];
+              const downtownEl = row.elements[0], milesEl = row.elements[1];
+              if (downtownEl && downtownEl.status === 'OK') { p.walkTimeDowntownMinutes = Math.round(downtownEl.duration.value / 60); changedFields.push('walkTimeDowntownMinutes'); }
+              if (milesEl && milesEl.status === 'OK') { p.walkTimeMilesBabyRoMinutes = Math.round(milesEl.duration.value / 60); changedFields.push('walkTimeMilesBabyRoMinutes'); }
+            }
+            if (bikeResponse) {
+              const row = bikeResponse.rows[idx];
+              const downtownEl = row.elements[0], milesEl = row.elements[1];
+              if (downtownEl && downtownEl.status === 'OK') { p.bikeTimeDowntownMinutes = Math.round(downtownEl.duration.value / 60); changedFields.push('bikeTimeDowntownMinutes'); }
+              if (milesEl && milesEl.status === 'OK') { p.bikeTimeMilesBabyRoMinutes = Math.round(milesEl.duration.value / 60); changedFields.push('bikeTimeMilesBabyRoMinutes'); }
+            }
+            if (changedFields.length) persistPropertyState(p, changedFields);
+          });
+        }
+
+        // Not shown on the card grid — see the comment in
+        // syncDriveTimesInBackground for why this doesn't call applyFilters().
+        refreshOpenPanelCommuteViewIfShowing();
+      } catch (err) {
+        console.warn('Active travel time sync failed', err);
+      }
+    }
+
+    // ---- Force-recompute buttons (fly-in panel) — bypass the staleness/
+    // rush-hour gating above and refresh right now for just this property.
+    async function forceRecomputeMorningCommute(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      const btn = document.getElementById('panelRecomputeMorningBtn');
+      if (btn) { btn.disabled = true; btn.innerText = 'Recomputing…'; }
+      try {
+        await loadGoogleMapsSdk();
+        const origin = `${property.address}, ${property.city} ${property.zip}`;
+        const response = await fetchDistanceMatrix([origin], [WORK_ADDRESSES.adam, WORK_ADDRESSES.lauren]);
+        const row = response.rows[0];
+        const adamEl = row.elements[0];
+        const laurenEl = row.elements[1];
+        const rushHourNow = isMorningRushHourNow();
+        const changedFields = [];
+        if (adamEl && adamEl.status === 'OK') {
+          property.driveTimeAdamMinutes = Math.round(adamEl.duration.value / 60);
+          property.driveTimeAdamComputedAt = Date.now();
+          property.driveTimeAdamRushHourSample = rushHourNow;
+          changedFields.push('driveTimeAdamMinutes', 'driveTimeAdamComputedAt', 'driveTimeAdamRushHourSample');
+        }
+        if (laurenEl && laurenEl.status === 'OK') {
+          property.driveTimeLaurenMinutes = Math.round(laurenEl.duration.value / 60);
+          property.driveTimeLaurenComputedAt = Date.now();
+          property.driveTimeLaurenRushHourSample = rushHourNow;
+          changedFields.push('driveTimeLaurenMinutes', 'driveTimeLaurenComputedAt', 'driveTimeLaurenRushHourSample');
+        }
+        if (changedFields.length) persistPropertyState(property, changedFields);
+        // Not shown on the card grid — no need to rebuild it (see
+        // syncDriveTimesInBackground for why that would also re-fetch every
+        // visible photo). Guard against the panel having moved on to a
+        // different property while this request was in flight.
+        if (activeEvalId === id) refreshPanelCommuteView(property);
+      } catch (err) {
+        alert(`Could not recompute morning commute: ${err.message}`);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = 'Recompute Morning Commute'; }
+      }
+    }
+
+    async function forceRecomputeEveningCommute(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      const btn = document.getElementById('panelRecomputeEveningBtn');
+      if (btn) { btn.disabled = true; btn.innerText = 'Recomputing…'; }
+      try {
+        await loadGoogleMapsSdk();
+        const dest = `${property.address}, ${property.city} ${property.zip}`;
+        const response = await fetchDistanceMatrix([WORK_ADDRESSES.adam, WORK_ADDRESSES.lauren], [dest]);
+        const adamEl = response.rows[0].elements[0];
+        const laurenEl = response.rows[1].elements[0];
+        const changedFields = [];
+        if (adamEl && adamEl.status === 'OK') {
+          property.commuteAdamPmMinutes = Math.round(adamEl.duration.value / 60);
+          property.commuteAdamPmComputedAt = Date.now();
+          property.commuteAdamPmRushHourSample = isEveningRushHourAdamNow();
+          changedFields.push('commuteAdamPmMinutes', 'commuteAdamPmComputedAt', 'commuteAdamPmRushHourSample');
+        }
+        if (laurenEl && laurenEl.status === 'OK') {
+          property.commuteLaurenPmMinutes = Math.round(laurenEl.duration.value / 60);
+          property.commuteLaurenPmComputedAt = Date.now();
+          property.commuteLaurenPmRushHourSample = isEveningRushHourLaurenNow();
+          changedFields.push('commuteLaurenPmMinutes', 'commuteLaurenPmComputedAt', 'commuteLaurenPmRushHourSample');
+        }
+        if (changedFields.length) persistPropertyState(property, changedFields);
+        // Not shown on the card grid; guard against the panel having moved
+        // on to a different property while this request was in flight.
+        if (activeEvalId === id) refreshPanelCommuteView(property);
+      } catch (err) {
+        alert(`Could not recompute evening commute: ${err.message}`);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = 'Recompute Evening Commute'; }
       }
     }
 
@@ -3923,16 +4872,16 @@
         matchTierCutoffs = { top: savedTop, good: savedGood };
       } else {
         matchTierCutoffs = computeDefaultMatchTierCutoffs(allProperties);
-        localStorage.setItem('matchTierTopCutoff', String(matchTierCutoffs.top));
-        localStorage.setItem('matchTierGoodCutoff', String(matchTierCutoffs.good));
+        safeLocalStorageSet('matchTierTopCutoff', String(matchTierCutoffs.top));
+        safeLocalStorageSet('matchTierGoodCutoff', String(matchTierCutoffs.good));
       }
       return matchTierCutoffs;
     }
 
     function setMatchTierCutoffs(top, good) {
       matchTierCutoffs = { top, good };
-      localStorage.setItem('matchTierTopCutoff', String(top));
-      localStorage.setItem('matchTierGoodCutoff', String(good));
+      safeLocalStorageSet('matchTierTopCutoff', String(top));
+      safeLocalStorageSet('matchTierGoodCutoff', String(good));
     }
 
     function matchScoreToTier(score) {
@@ -3962,8 +4911,9 @@
     function retierAllFromCurrentCutoffs(forceOverrides) {
       let changedCount = 0;
       properties.forEach(p => {
+        const wasSkipped = !forceOverrides && p.priorityAuto === false;
         if (applyAutoMatchTier(p, properties, forceOverrides)) changedCount++;
-        persistPropertyState(p);
+        if (!wasSkipped) persistPropertyState(p, ['priority', 'priorityGroup', 'priorityClass', 'priorityAuto']);
       });
       applyFilters();
       return changedCount;
@@ -4206,6 +5156,7 @@
                 <span>No Photo Available</span>
               </div>
               <img id="photo-img-${item.id}" alt="${item.address}">
+              ${isNotableListingStatus(item.status) ? `<span class="card-status-ribbon ${getListingStatusBadgeClass(item.status)}">${item.status}</span>` : ''}
             </div>
 
             <div class="card-top">
@@ -4214,7 +5165,7 @@
                 <button type="button" class="heart-btn ${item.loved ? 'loved' : ''}" onclick="event.stopPropagation(); toggleLovedForProperty('${item.id}')" title="${item.loved ? 'Remove from Loved' : 'Mark as Loved'}">
                   <svg viewBox="0 0 24 24" fill="${item.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
                 </button>
-                <button type="button" class="binoculars-btn ${item.watchlist ? 'watching' : ''}" onclick="event.stopPropagation(); toggleWatchlistForProperty('${item.id}')" title="${item.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
+                <button type="button" class="binoculars-btn ${item.watchlist ? 'watching' : ''}" onclick="event.stopPropagation(); toggleWatchlistForProperty('${item.id}')" title="${item.watchlist ? 'Remove from Main Watch List' : 'Add to Main Watch List (share with realtor)'}">
                   <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
                 </button>
                 <button type="button" id="toured-btn-${item.id}" class="toured-btn ${item.toured ? 'toured' : ''}" onclick="event.stopPropagation(); toggleTouredForProperty('${item.id}')" title="${item.toured ? `Toured${item.touredDate ? ' ' + item.touredDate : ''} — click to unmark` : 'Mark as Toured'}">
@@ -4356,6 +5307,8 @@
         const matchesWeekend = weekendId === 'all' ? true
           : weekendId === 'loved' ? !!item.loved
           : weekendId === 'watchlist' ? !!item.watchlist
+          : weekendId === 'watchlistAdam' ? !!item.watchlistAdam
+          : weekendId === 'watchlistLauren' ? !!item.watchlistLauren
           : (item.weekends || []).includes(weekendId);
         const matchesSearch = item.address.toLowerCase().includes(search) ||
                               item.notes.toLowerCase().includes(search) ||
@@ -4375,6 +5328,21 @@
 
         return matchesWeekend && matchesSearch && matchesDay && matchesPriority && matchesBungalow && matchesNextWeekend;
       });
+
+      // Each watch list has its own manual order (set from the Reorder
+      // Watch Lists panel) — the main list's order is what drives
+      // realtor-view.html, so keep all three views following it too.
+      const orderField = weekendId === 'watchlist' ? 'watchlistOrder'
+        : weekendId === 'watchlistAdam' ? 'watchlistAdamOrder'
+        : weekendId === 'watchlistLauren' ? 'watchlistLaurenOrder'
+        : null;
+      if (orderField) {
+        filtered.sort((a, b) => {
+          const ao = a[orderField] == null ? Infinity : a[orderField];
+          const bo = b[orderField] == null ? Infinity : b[orderField];
+          return ao - bo;
+        });
+      }
 
       renderDashboard(filtered);
     }
@@ -4560,28 +5528,68 @@
       try { ids = JSON.parse(localStorage.getItem('customPropertyIds') || '[]'); } catch (e) { ids = []; }
       if (!ids.includes(property.id)) {
         ids.push(property.id);
-        localStorage.setItem('customPropertyIds', JSON.stringify(ids));
+        safeLocalStorageSet('customPropertyIds', JSON.stringify(ids));
       }
     }
 
-    function persistPropertyState(property) {
+    // Top-level (not nested under `core`) Firestore fields on each openHaus
+    // doc — kept separate from `core` for historical reasons, but they're
+    // still subject to the same staleness risk described below.
+    const TOP_LEVEL_FIRESTORE_FIELDS = ['weekends', 'hidden', 'loved', 'watchlist', 'toured', 'touredDate'];
+
+    // changedFields: optional array of property key names this specific call
+    // actually intends to change. localStorage always gets the property's
+    // full current snapshot (that's fine — it's this device's own state, no
+    // race possible). But Firestore is shared across every device/tab, and
+    // by default this function used to resend the ENTIRE property (every
+    // field this device currently knows about) on every single call. Since
+    // background jobs (drive time, PM commute, walk/bike, OneHome refresh)
+    // run automatically and update all sorts of unrelated properties, any
+    // device whose in-memory copy of a field was even slightly stale (very
+    // common — Firestore sync is async, multiple tabs/devices can be open at
+    // once) would silently overwrite another device's more recent edit to
+    // that field the next time it saved anything for that property at all —
+    // this is why loved/watchlist/toured changes sometimes didn't stick.
+    // Passing changedFields restricts the Firestore write to just those
+    // keys; omit it only for genuinely-bulk operations (editing a home's
+    // full details, importing/re-importing a listing) where overwriting
+    // everything really is the intent.
+    function persistPropertyState(property, changedFields) {
       const id = property.id;
       const isCustom = isCustomPropertyId(id);
 
       if (isCustom) {
-        localStorage.setItem(`customProperty_${id}`, JSON.stringify(property));
-        syncPropertyToFirestore(id, { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' });
+        safeLocalStorageSet(`customProperty_${id}`, JSON.stringify(property));
       } else {
         const { ratings, evalNotes, features, pricePerSqFt, ...corePatch } = property;
-        localStorage.setItem(`override_${id}`, JSON.stringify(corePatch));
-        syncPropertyToFirestore(id, { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' });
+        safeLocalStorageSet(`override_${id}`, JSON.stringify(corePatch));
       }
-      localStorage.setItem(`weekends_${id}`, JSON.stringify(property.weekends || []));
-      localStorage.setItem(`hidden_${id}`, property.hidden ? '1' : '0');
-      localStorage.setItem(`loved_${id}`, property.loved ? '1' : '0');
-      localStorage.setItem(`watchlist_${id}`, property.watchlist ? '1' : '0');
-      localStorage.setItem(`toured_${id}`, property.toured ? '1' : '0');
-      localStorage.setItem(`touredDate_${id}`, property.touredDate || '');
+      safeLocalStorageSet(`weekends_${id}`, JSON.stringify(property.weekends || []));
+      safeLocalStorageSet(`hidden_${id}`, property.hidden ? '1' : '0');
+      safeLocalStorageSet(`loved_${id}`, property.loved ? '1' : '0');
+      safeLocalStorageSet(`watchlist_${id}`, property.watchlist ? '1' : '0');
+      safeLocalStorageSet(`toured_${id}`, property.toured ? '1' : '0');
+      safeLocalStorageSet(`touredDate_${id}`, property.touredDate || '');
+
+      let patch;
+      if (changedFields && changedFields.length) {
+        patch = {};
+        const corePatchFields = {};
+        changedFields.forEach(key => {
+          if (TOP_LEVEL_FIRESTORE_FIELDS.includes(key)) {
+            patch[key] = property[key];
+          } else {
+            corePatchFields[key] = property[key];
+          }
+        });
+        if (Object.keys(corePatchFields).length) patch.core = corePatchFields;
+      } else if (isCustom) {
+        patch = { core: property, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' };
+      } else {
+        const { ratings, evalNotes, features, pricePerSqFt, ...corePatch } = property;
+        patch = { core: corePatch, weekends: property.weekends, hidden: !!property.hidden, loved: !!property.loved, watchlist: !!property.watchlist, toured: !!property.toured, touredDate: property.touredDate || '' };
+      }
+      syncPropertyToFirestore(id, patch);
     }
 
     function openManageHomes() {
@@ -4594,6 +5602,219 @@
 
     function closeManageHomes() {
       document.getElementById('manageBackdrop').classList.remove('open');
+    }
+
+    // ---- Reorder Watch Lists panel ----
+    // Main/Adam/Lauren each get their own order field. Main's order is the
+    // one that also feeds realtor-view.html's sort.
+    const REORDER_LIST_CONFIG = {
+      watchlist: { flagField: 'watchlist', orderField: 'watchlistOrder', label: 'Main Watch List' },
+      watchlistAdam: { flagField: 'watchlistAdam', orderField: 'watchlistAdamOrder', label: "Adam's Watch List" },
+      watchlistLauren: { flagField: 'watchlistLauren', orderField: 'watchlistLaurenOrder', label: "Lauren's Watch List" }
+    };
+    let reorderActiveList = 'watchlist';
+    let reorderDragId = null;
+
+    function openReorderPanel() {
+      reorderActiveList = 'watchlist';
+      document.querySelectorAll('.reorder-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.list === reorderActiveList));
+      renderReorderList();
+      document.getElementById('reorderBackdrop').classList.add('open');
+    }
+
+    function closeReorderPanel() {
+      document.getElementById('reorderBackdrop').classList.remove('open');
+    }
+
+    // ---- Debug Console (Menu > Debug > View Debug Log) ----
+    // Renders window.__debugLog (captured by the head script's console
+    // wrapper) — the point is to give a way to see what's happening on a
+    // phone, where there's no attached devtools. Escapes text content since
+    // logged values (URLs, error messages) are untrusted-ish and this is
+    // rendered as innerHTML for the per-line color coding.
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderDebugLog() {
+      const out = document.getElementById('debugConsoleOutput');
+      if (!out) return;
+      const log = window.__debugLog || [];
+      if (!log.length) {
+        out.innerHTML = '<span class="debug-log-empty">Nothing logged yet.</span>';
+        return;
+      }
+      const wasScrolledToBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 4;
+      out.innerHTML = log.map(entry => {
+        const time = entry.time.slice(11, 19); // HH:MM:SS
+        return `<span class="debug-log-line ${entry.level}"><span class="debug-log-time">${time}</span>${escapeHtml(entry.line)}</span>`;
+      }).join('\n');
+      if (wasScrolledToBottom) out.scrollTop = out.scrollHeight;
+    }
+
+    function openDebugConsole() {
+      renderDebugLog();
+      window.__onDebugLogUpdate = renderDebugLog;
+      document.getElementById('debugConsoleBackdrop').classList.add('open');
+      const out = document.getElementById('debugConsoleOutput');
+      out.scrollTop = out.scrollHeight;
+    }
+
+    function closeDebugConsole() {
+      document.getElementById('debugConsoleBackdrop').classList.remove('open');
+      window.__onDebugLogUpdate = null;
+    }
+
+    function clearDebugLog() {
+      window.__debugLog = [];
+      renderDebugLog();
+    }
+
+    async function copyDebugLog() {
+      const log = window.__debugLog || [];
+      const text = log.map(e => `[${e.time}] ${e.level.toUpperCase()}: ${e.line}`).join('\n');
+      const btn = document.getElementById('debugConsoleCopyBtn');
+      try {
+        await navigator.clipboard.writeText(text || '(empty)');
+        if (btn) {
+          const original = btn.innerText;
+          btn.innerText = 'Copied!';
+          setTimeout(() => { btn.innerText = original; }, 1500);
+        }
+      } catch (err) {
+        alert('Could not copy automatically — select the log text manually instead.');
+      }
+    }
+
+    function setReorderTab(listKey) {
+      reorderActiveList = listKey;
+      document.querySelectorAll('.reorder-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.list === listKey));
+      renderReorderList();
+    }
+
+    function getReorderedList() {
+      const { flagField, orderField } = REORDER_LIST_CONFIG[reorderActiveList];
+      return properties
+        .filter(p => !p.hidden && p[flagField])
+        .sort((a, b) => {
+          const ao = a[orderField] == null ? Infinity : a[orderField];
+          const bo = b[orderField] == null ? Infinity : b[orderField];
+          return ao - bo;
+        });
+    }
+
+    function renderReorderList() {
+      const { label } = REORDER_LIST_CONFIG[reorderActiveList];
+      document.getElementById('reorderSubtitle').innerText = `${label} — drag to reorder, or use the arrows`;
+      const list = getReorderedList();
+      const container = document.getElementById('reorderList');
+      if (!list.length) {
+        container.innerHTML = `<p style="color:var(--muted); padding:20px 0;">No homes on this list yet.</p>`;
+        return;
+      }
+      container.innerHTML = list.map((p, idx) => `
+        <div class="reorder-card" draggable="true" data-id="${p.id}"
+             ondragstart="onReorderDragStart(event, '${p.id}')"
+             ondragover="onReorderDragOver(event)"
+             ondrop="onReorderDrop(event)"
+             ondragend="onReorderDragEnd(event)">
+          <span class="reorder-handle" title="Drag to reorder">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="8" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="6" r="1.5"/><circle cx="16" cy="12" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>
+          </span>
+          <img class="reorder-thumb" id="reorder-thumb-${p.id}" alt="">
+          <div class="reorder-info">
+            <div class="reorder-address">${p.address}</div>
+            <div class="reorder-price">${p.price || ''}</div>
+          </div>
+          <div class="reorder-arrows">
+            <button type="button" class="reorder-arrow-btn" ${idx === 0 ? 'disabled' : ''} onclick="moveReorderItem('${p.id}', -1)" title="Move up">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <button type="button" class="reorder-arrow-btn" ${idx === list.length - 1 ? 'disabled' : ''} onclick="moveReorderItem('${p.id}', 1)" title="Move down">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      list.forEach(p => loadReorderThumb(p));
+    }
+
+    async function loadReorderThumb(p) {
+      const img = document.getElementById(`reorder-thumb-${p.id}`);
+      if (!img) return;
+      const fullAddress = `${p.address}, ${p.city} ${p.zip}`;
+      const result = await HousePhotoService.get(fullAddress);
+      if (result && result.image) img.src = result.image;
+    }
+
+    // Renumbers the active list 1..n and persists, in whatever order the
+    // cards currently sit in — used by both arrow-button moves and drops.
+    function persistReorderOrder(orderedProperties) {
+      const { orderField } = REORDER_LIST_CONFIG[reorderActiveList];
+      orderedProperties.forEach((p, idx) => {
+        p[orderField] = idx + 1;
+        persistPropertyState(p, [orderField]);
+      });
+      applyFilters();
+    }
+
+    function moveReorderItem(id, direction) {
+      const list = getReorderedList();
+      const idx = list.findIndex(p => p.id === id);
+      const newIdx = idx + direction;
+      if (idx === -1 || newIdx < 0 || newIdx >= list.length) return;
+      const tmp = list[idx];
+      list[idx] = list[newIdx];
+      list[newIdx] = tmp;
+      persistReorderOrder(list);
+      renderReorderList();
+    }
+
+    function onReorderDragStart(e, id) {
+      reorderDragId = id;
+      e.dataTransfer.effectAllowed = 'move';
+      e.target.classList.add('dragging');
+    }
+
+    // Reference implementation of the classic "find the element the
+    // dragged card should land before" pattern for vanilla drag-and-drop
+    // reordering (no library — this file has no build step).
+    function getReorderDragAfterElement(container, y) {
+      const cards = [...container.querySelectorAll('.reorder-card:not(.dragging)')];
+      return cards.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset, element: child };
+        }
+        return closest;
+      }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+    }
+
+    function onReorderDragOver(e) {
+      e.preventDefault();
+      const container = document.getElementById('reorderList');
+      const dragging = container.querySelector('.reorder-card.dragging');
+      if (!dragging) return;
+      const afterElement = getReorderDragAfterElement(container, e.clientY);
+      if (afterElement == null) {
+        container.appendChild(dragging);
+      } else {
+        container.insertBefore(dragging, afterElement);
+      }
+    }
+
+    function onReorderDrop(e) {
+      e.preventDefault();
+    }
+
+    function onReorderDragEnd(e) {
+      e.target.classList.remove('dragging');
+      reorderDragId = null;
+      const ids = Array.from(document.querySelectorAll('#reorderList .reorder-card')).map(el => el.dataset.id);
+      const ordered = ids.map(id => properties.find(p => p.id === id)).filter(Boolean);
+      persistReorderOrder(ordered);
+      renderReorderList();
     }
 
     function saveMatchTierCutoffs() {
@@ -4628,6 +5849,7 @@
         case 'sqft': return p.rawSqft || 0;
         case 'built': return p.yearBuilt || 0;
         case 'match': return computeMatchScore(p, properties);
+        case 'status': return (p.status || '').toLowerCase();
         case 'source': return (SOURCE_LABELS[p.source] || p.source || '').toLowerCase();
         default: return 0;
       }
@@ -4648,7 +5870,9 @@
 
     function renderManageHomesList() {
       const tbody = document.getElementById('manageHomesTableBody');
-      const sorted = properties.slice().sort((a, b) => {
+      const notOnMarketOnly = document.getElementById('manageNotOnMarketFilter').checked;
+      const filtered = notOnMarketOnly ? properties.filter(p => isNotableListingStatus(p.status)) : properties;
+      const sorted = filtered.slice().sort((a, b) => {
         const va = getManageSortValue(a, manageSortField);
         const vb = getManageSortValue(b, manageSortField);
         const cmp = typeof va === 'string' ? va.localeCompare(vb) : va - vb;
@@ -4681,7 +5905,7 @@
                 <button type="button" class="heart-btn ${p.loved ? 'loved' : ''}" onclick="toggleLovedForProperty('${p.id}')" title="${p.loved ? 'Remove from Loved' : 'Mark as Loved'}">
                   <svg viewBox="0 0 24 24" fill="${p.loved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
                 </button>
-                <button type="button" class="binoculars-btn ${p.watchlist ? 'watching' : ''}" onclick="toggleWatchlistForProperty('${p.id}')" title="${p.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist (share with realtor)'}">
+                <button type="button" class="binoculars-btn ${p.watchlist ? 'watching' : ''}" onclick="toggleWatchlistForProperty('${p.id}')" title="${p.watchlist ? 'Remove from Main Watch List' : 'Add to Main Watch List (share with realtor)'}">
                   <svg viewBox="0 0 122.88 78.5" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M50.57,17.2C40.73,10.31,31,8.79,20.94,11.42c2.2-5.29,5.51-8.76,9.4-10.39c5.51-2.31,14.53-0.67,18.08,4.27 C50.24,7.82,51.15,11.56,50.57,17.2L50.57,17.2z M83.52,55.32c-0.27-1.12,0.43-2.24,1.55-2.51c1.12-0.27,2.24,0.43,2.51,1.55 c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44c-0.22,1.13-1.31,1.86-2.44,1.64 c-2.76-0.55-5.13-1.76-7-3.67C85.54,60.75,84.24,58.35,83.52,55.32L83.52,55.32z M13.54,55.32c-0.27-1.12,0.43-2.24,1.55-2.51 c1.12-0.27,2.24,0.43,2.51,1.55c0.54,2.27,1.47,4.03,2.71,5.3c1.27,1.29,2.9,2.12,4.84,2.5c1.13,0.22,1.86,1.31,1.64,2.44 c-0.22,1.13-1.31,1.86-2.44,1.64c-2.76-0.55-5.13-1.76-7-3.67C15.56,60.75,14.26,58.35,13.54,55.32L13.54,55.32z M61.3,47.71 c2.8,0,5.07,2.21,5.07,4.93c0,2.72-2.27,4.93-5.07,4.93c-2.8,0-5.07-2.21-5.07-4.93C56.23,49.92,58.5,47.71,61.3,47.71L61.3,47.71z M26.66,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61c-10,0-18.11-7.88-18.11-17.61 C8.55,42.45,16.65,34.57,26.66,34.57L26.66,34.57z M96.64,34.57c10,0,18.11,7.88,18.11,17.61c0,9.72-8.11,17.61-18.11,17.61 c-10,0-18.11-7.88-18.11-17.61C78.53,42.45,86.63,34.57,96.64,34.57L96.64,34.57z M72.31,17.2c9.84-6.89,19.57-8.41,29.62-5.78 c-2.2-5.29-5.51-8.76-9.4-10.39C87.02-1.28,78,0.36,74.46,5.3C72.64,7.82,71.73,11.56,72.31,17.2L72.31,17.2z M107.57,17.4 c-3.42-3.52-8.96-5.11-16.63-4.77c-8.69,0.43-17.87,4.06-20.82,12.29c-2.47-5.42-14.89-5.42-17.35,0 c-2.95-8.23-12.13-11.87-20.82-12.29c-7.67-0.34-13.2,1.26-16.63,4.77C10.5,23.86,0.96,40.74,0.16,48.99 C-3.1,82.47,44.92,90.87,52.62,56.3c4.37,7.75,13.27,7.75,17.64,0c7.7,34.58,55.72,26.17,52.46-7.31 C121.92,40.74,112.38,23.86,107.57,17.4L107.57,17.4z"/></svg>
                 </button>
                 <div>
@@ -4698,6 +5922,7 @@
               ${p.priorityGroup ? `<span class="badge ${p.priorityClass}" style="padding:3px 8px; font-size:0.65rem;">${getCleanPriorityLabel(p.priorityGroup)}</span>` : '<span style="color:var(--muted);">—</span>'}
               <div style="font-size:0.72rem; color:var(--muted); margin-top:2px;">${breakdown.score}/${MAX_MATCH_SCORE}</div>
             </td>
+            <td>${p.status ? `<span class="badge ${getListingStatusBadgeClass(p.status)}" style="padding:3px 8px; font-size:0.65rem;">${p.status}</span>` : '<span style="color:var(--muted);">—</span>'}</td>
             <td><div class="manage-weekend-chips">${weekendChips}${unassignedTag}</div></td>
             <td style="font-size:0.78rem; color:var(--muted);">
               ${SOURCE_LABELS[p.source] || p.source || '—'}${p.dateAdded ? `<br>${p.dateAdded}` : ''}
@@ -4713,8 +5938,9 @@
         `;
       }).join('');
 
-      document.getElementById('manageSubtitle').innerText =
-        `${properties.length} home${properties.length === 1 ? '' : 's'} total`;
+      document.getElementById('manageSubtitle').innerText = notOnMarketOnly
+        ? `${filtered.length} of ${properties.length} home${properties.length === 1 ? '' : 's'} — not on market`
+        : `${properties.length} home${properties.length === 1 ? '' : 's'} total`;
     }
 
     function toggleWeekendForProperty(id, weekendId) {
@@ -4724,7 +5950,7 @@
       const idx = property.weekends.indexOf(weekendId);
       if (idx >= 0) property.weekends.splice(idx, 1);
       else property.weekends.push(weekendId);
-      persistPropertyState(property);
+      persistPropertyState(property, ['weekends']);
       renderManageHomesList();
       applyFilters();
     }
@@ -4735,7 +5961,7 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.hidden = !property.hidden;
-      persistPropertyState(property);
+      persistPropertyState(property, ['hidden']);
       renderManageHomesList();
       applyFilters();
     }
@@ -4744,23 +5970,65 @@
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.loved = !property.loved;
-      persistPropertyState(property);
+      persistPropertyState(property, ['loved']);
       applyFilters();
+      refreshQuickActionsView(property);
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
         renderManageHomesList();
       }
     }
 
     // Homes to flag for the realtor that nobody has toured in person yet.
+    // This is the "main" watch list — its order (watchlistOrder) drives the
+    // shared realtor-view.html sort. Adam's and Lauren's watch lists below
+    // are personal/private and never shown to the realtor.
     function toggleWatchlistForProperty(id) {
       const property = properties.find(p => p.id === id);
       if (!property) return;
       property.watchlist = !property.watchlist;
-      persistPropertyState(property);
+      persistPropertyState(property, ['watchlist']);
       applyFilters();
+      refreshQuickActionsView(property);
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
         renderManageHomesList();
       }
+    }
+
+    function toggleWatchlistAdamForProperty(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.watchlistAdam = !property.watchlistAdam;
+      persistPropertyState(property, ['watchlistAdam']);
+      applyFilters();
+      refreshQuickActionsView(property);
+      if (document.getElementById('manageBackdrop').classList.contains('open')) {
+        renderManageHomesList();
+      }
+    }
+
+    function toggleWatchlistLaurenForProperty(id) {
+      const property = properties.find(p => p.id === id);
+      if (!property) return;
+      property.watchlistLauren = !property.watchlistLauren;
+      persistPropertyState(property, ['watchlistLauren']);
+      applyFilters();
+      refreshQuickActionsView(property);
+      if (document.getElementById('manageBackdrop').classList.contains('open')) {
+        renderManageHomesList();
+      }
+    }
+
+    // Reflects the current loved/watchlist*/toured state onto the pill
+    // buttons near the top of the fly-in panel.
+    function refreshQuickActionsView(property) {
+      if (activeEvalId !== property.id) return;
+      const btn = (name) => document.getElementById(`panelQuickAction-${name}`);
+      const set = (name, active) => { const el = btn(name); if (el) el.classList.toggle('active', !!active); };
+      set('love', property.loved);
+      set('watchlist', property.watchlist);
+      set('watchlistAdam', property.watchlistAdam);
+      set('watchlistLauren', property.watchlistLauren);
+      set('toured', property.toured);
     }
 
     // Marks a home as already toured (open house or private showing with
@@ -4772,9 +6040,9 @@
       if (!property) return;
       property.toured = !property.toured;
       property.touredDate = property.toured ? (property.touredDate || new Date().toISOString().slice(0, 10)) : '';
-      persistPropertyState(property);
+      persistPropertyState(property, ['toured', 'touredDate']);
       applyFilters();
-      if (activeEvalId === id) refreshTouredView(property);
+      if (activeEvalId === id) { refreshTouredView(property); refreshQuickActionsView(property); }
       if (document.getElementById('manageBackdrop').classList.contains('open')) {
         renderManageHomesList();
       }
@@ -4785,7 +6053,7 @@
       if (!property) return;
       property.touredDate = dateStr;
       property.toured = !!dateStr;
-      persistPropertyState(property);
+      persistPropertyState(property, ['toured', 'touredDate']);
       applyFilters();
     }
 
@@ -4804,9 +6072,10 @@
       if (!property) return;
       property.toured = checked;
       property.touredDate = checked ? (property.touredDate || new Date().toISOString().slice(0, 10)) : '';
-      persistPropertyState(property);
+      persistPropertyState(property, ['toured', 'touredDate']);
       applyFilters();
       refreshTouredView(property);
+      refreshQuickActionsView(property);
       const card = document.getElementById(`toured-btn-${property.id}`);
       if (card) card.classList.toggle('toured', checked);
     }
@@ -4834,6 +6103,7 @@
       // changes this field before saving — merely re-saving the form with
       // it untouched shouldn't block future auto-scoring on import.
       editPriorityOriginalValue = document.getElementById('editPriority').value;
+      document.getElementById('editStatus').value = property ? (property.status || '') : '';
       document.getElementById('editCity').value = property ? property.city : '';
       document.getElementById('editZip').value = property ? property.zip : '';
       document.getElementById('editPrice').value = property ? property.rawPrice : '';
@@ -4875,6 +6145,7 @@
         address,
         priority: priorityGroup, priorityGroup, priorityClass,
         ...(priorityManuallyChanged ? { priorityAuto: false } : {}),
+        status: document.getElementById('editStatus').value || null,
         city: document.getElementById('editCity').value.trim(),
         zip: document.getElementById('editZip').value.trim(),
         rawPrice,
@@ -5261,15 +6532,20 @@
           const detail = await fetchOneHomeListingDetail(groupId, link.searchId, link.onehomeId, sessionToken);
           if (!detail || !detail.property) return;
           const dp = detail.property;
-          let changed = false;
+          const changedFields = [];
+
+          if (dp.StandardStatus) {
+            const status = normalizeListingStatus(dp.StandardStatus);
+            if (status !== p.status) { p.status = status; changedFields.push('status'); }
+          }
 
           if (dp.ListPrice != null) {
             const rawPrice = Math.round(dp.ListPrice);
             if (p.rawPrice !== rawPrice) {
               p.rawPrice = rawPrice;
               p.price = `$${rawPrice.toLocaleString()}`;
-              if (p.rawSqft) p.pricePerSqFt = Math.round(rawPrice / p.rawSqft);
-              changed = true;
+              changedFields.push('rawPrice', 'price');
+              if (p.rawSqft) { p.pricePerSqFt = Math.round(rawPrice / p.rawSqft); changedFields.push('pricePerSqFt'); }
             }
           }
           if (dp.LivingArea != null) {
@@ -5277,40 +6553,40 @@
             if (p.rawSqft !== rawSqft) {
               p.rawSqft = rawSqft;
               p.sqft = rawSqft.toLocaleString();
-              if (p.rawPrice) p.pricePerSqFt = Math.round(p.rawPrice / rawSqft);
-              changed = true;
+              changedFields.push('rawSqft', 'sqft');
+              if (p.rawPrice) { p.pricePerSqFt = Math.round(p.rawPrice / rawSqft); changedFields.push('pricePerSqFt'); }
             }
           }
-          if (dp.BedroomsTotal != null && p.beds !== dp.BedroomsTotal) { p.beds = dp.BedroomsTotal; changed = true; }
+          if (dp.BedroomsTotal != null && p.beds !== dp.BedroomsTotal) { p.beds = dp.BedroomsTotal; changedFields.push('beds'); }
           const baths = dp.BathroomsFull != null
             ? dp.BathroomsFull + (dp.BathroomsHalf ? dp.BathroomsHalf * 0.5 : 0)
             : (dp.BathroomsTotalInteger != null ? dp.BathroomsTotalInteger : null);
-          if (baths != null && p.baths !== baths) { p.baths = baths; changed = true; }
+          if (baths != null && p.baths !== baths) { p.baths = baths; changedFields.push('baths'); }
           if (dp.Latitude != null && dp.Longitude != null && (p.lat !== dp.Latitude || p.lng !== dp.Longitude)) {
-            p.lat = dp.Latitude; p.lng = dp.Longitude; changed = true;
+            p.lat = dp.Latitude; p.lng = dp.Longitude; changedFields.push('lat', 'lng');
           }
-          if (dp.YearBuilt && p.yearBuilt !== dp.YearBuilt) { p.yearBuilt = dp.YearBuilt; changed = true; }
+          if (dp.YearBuilt && p.yearBuilt !== dp.YearBuilt) { p.yearBuilt = dp.YearBuilt; changedFields.push('yearBuilt'); }
           if (dp.ArchitecturalStyle && dp.ArchitecturalStyle[0] && p.style !== dp.ArchitecturalStyle[0]) {
             p.style = dp.ArchitecturalStyle[0];
             p.isBungalow = /bungalow/i.test(p.style);
-            changed = true;
+            changedFields.push('style', 'isBungalow');
           }
-          if (dp.PublicRemarks && p.description !== dp.PublicRemarks) { p.description = dp.PublicRemarks; changed = true; }
-          if (dp.ListingContractDate && p.listingDate !== dp.ListingContractDate) { p.listingDate = dp.ListingContractDate; changed = true; }
+          if (dp.PublicRemarks && p.description !== dp.PublicRemarks) { p.description = dp.PublicRemarks; changedFields.push('description'); }
+          if (dp.ListingContractDate && p.listingDate !== dp.ListingContractDate) { p.listingDate = dp.ListingContractDate; changedFields.push('listingDate'); }
           if (dp.Heating && dp.Heating.length) {
             const heating = dp.Heating.map(splitCamelCase);
-            if (JSON.stringify(p.heating || []) !== JSON.stringify(heating)) { p.heating = heating; changed = true; }
+            if (JSON.stringify(p.heating || []) !== JSON.stringify(heating)) { p.heating = heating; changedFields.push('heating'); }
           }
           if (dp.Cooling && dp.Cooling.length) {
             const cooling = dp.Cooling.map(splitCamelCase);
-            if (JSON.stringify(p.cooling || []) !== JSON.stringify(cooling)) { p.cooling = cooling; changed = true; }
+            if (JSON.stringify(p.cooling || []) !== JSON.stringify(cooling)) { p.cooling = cooling; changedFields.push('cooling'); }
           }
 
           const ohDisplay = buildOpenHouseDisplay(detail.openHouse);
           const entriesChanged = JSON.stringify(p.openHouses || []) !== JSON.stringify(ohDisplay.entries);
           if (p.day !== ohDisplay.day || p.openHouse !== ohDisplay.openHouse || entriesChanged) {
             p.day = ohDisplay.day; p.openHouse = ohDisplay.openHouse; p.openHouses = ohDisplay.entries;
-            changed = true;
+            changedFields.push('day', 'openHouse', 'openHouses');
           }
 
           // Photos are the expensive part (dozens of full-size images per
@@ -5332,7 +6608,7 @@
             }
           }
 
-          if (changed) persistPropertyState(p);
+          if (changedFields.length) persistPropertyState(p, changedFields);
         } catch (err) {
           console.warn('Direct OneHome link sync failed for', p.address, err);
         }
@@ -5395,7 +6671,7 @@
 
       try {
         await loadOneHomeResultsFromUrl(DEFAULT_ONEHOME_URL);
-        localStorage.setItem('oneHomeAutoSyncAt', String(Date.now()));
+        safeLocalStorageSet('oneHomeAutoSyncAt', String(Date.now()));
         await backfillPhotosForExistingMatches();
       } catch (err) {
         console.warn('OneHome background sync failed', err);
@@ -5429,7 +6705,7 @@
     function refreshLocationScheduleAndPriceForExistingMatches() {
       const status = document.getElementById('oneHomeStatus');
       const matches = oneHomeResults.filter(r => r.existing);
-      if (!matches.length) return { locationsFixed: 0, schedulesFixed: 0, pricesFixed: 0 };
+      if (!matches.length) return { locationsFixed: 0, schedulesFixed: 0, pricesFixed: 0, statusesFixed: 0 };
 
       // Location correction: OneHome's own Latitude/Longitude is
       // authoritative and free here (already in the loaded summary data),
@@ -5446,9 +6722,19 @@
       let locationsFixed = 0;
       let schedulesFixed = 0;
       let pricesFixed = 0;
+      let statusesFixed = 0;
       matches.forEach(r => {
         const existing = r.existing;
-        let changed = false;
+        const changedFields = [];
+
+        if (r.property.StandardStatus) {
+          const newStatus = normalizeListingStatus(r.property.StandardStatus);
+          if (newStatus !== existing.status) {
+            existing.status = newStatus;
+            statusesFixed++;
+            changedFields.push('status');
+          }
+        }
 
         const lat = r.property.Latitude;
         const lng = r.property.Longitude;
@@ -5456,7 +6742,7 @@
           existing.lat = lat;
           existing.lng = lng;
           locationsFixed++;
-          changed = true;
+          changedFields.push('lat', 'lng');
         }
 
         // Syncs in both directions: picks up new/changed open house dates,
@@ -5471,7 +6757,7 @@
             existing.openHouse = ohDisplay.openHouse;
             existing.openHouses = ohDisplay.entries;
             schedulesFixed++;
-            changed = true;
+            changedFields.push('day', 'openHouse', 'openHouses');
           }
         }
 
@@ -5480,9 +6766,9 @@
           if (existing.rawPrice !== rawPrice) {
             existing.rawPrice = rawPrice;
             existing.price = `$${rawPrice.toLocaleString()}`;
-            if (existing.rawSqft) existing.pricePerSqFt = Math.round(rawPrice / existing.rawSqft);
+            changedFields.push('rawPrice', 'price');
+            if (existing.rawSqft) { existing.pricePerSqFt = Math.round(rawPrice / existing.rawSqft); changedFields.push('pricePerSqFt'); }
             pricesFixed++;
-            changed = true;
           }
         }
 
@@ -5490,34 +6776,35 @@
         // actually has the value — never clobbered back to unknown.
         if (r.property.ListingContractDate && existing.listingDate !== r.property.ListingContractDate) {
           existing.listingDate = r.property.ListingContractDate;
-          changed = true;
+          changedFields.push('listingDate');
         }
         if (r.property.Heating && r.property.Heating.length) {
           const heating = r.property.Heating.map(splitCamelCase);
           if (JSON.stringify(existing.heating || []) !== JSON.stringify(heating)) {
             existing.heating = heating;
-            changed = true;
+            changedFields.push('heating');
           }
         }
         if (r.property.Cooling && r.property.Cooling.length) {
           const cooling = r.property.Cooling.map(splitCamelCase);
           if (JSON.stringify(existing.cooling || []) !== JSON.stringify(cooling)) {
             existing.cooling = cooling;
-            changed = true;
+            changedFields.push('cooling');
           }
         }
 
-        if (changed) persistPropertyState(existing);
+        if (changedFields.length) persistPropertyState(existing, changedFields);
       });
-      if (locationsFixed > 0 || schedulesFixed > 0 || pricesFixed > 0) applyFilters();
+      if (locationsFixed > 0 || schedulesFixed > 0 || pricesFixed > 0 || statusesFixed > 0) applyFilters();
 
       const fixParts = [];
       if (locationsFixed > 0) fixParts.push(`map location for ${locationsFixed}`);
       if (schedulesFixed > 0) fixParts.push(`open house time for ${schedulesFixed}`);
       if (pricesFixed > 0) fixParts.push(`price for ${pricesFixed}`);
-      if (fixParts.length) status.innerText = `Fixed ${fixParts.join(', ')} existing home${(locationsFixed + schedulesFixed + pricesFixed) === 1 ? '' : 's'}.`;
+      if (statusesFixed > 0) fixParts.push(`listing status for ${statusesFixed}`);
+      if (fixParts.length) status.innerText = `Fixed ${fixParts.join(', ')} existing home${(locationsFixed + schedulesFixed + pricesFixed + statusesFixed) === 1 ? '' : 's'}.`;
 
-      return { locationsFixed, schedulesFixed, pricesFixed };
+      return { locationsFixed, schedulesFixed, pricesFixed, statusesFixed };
     }
 
     // Runs automatically after loading results (either mode), including
@@ -6047,6 +7334,9 @@
       // doesn't clobber what an earlier OneHome import already found.
       if (sourceType !== 'zillowHar' && p.Heating && p.Heating.length) record.heating = p.Heating.map(splitCamelCase);
       if (sourceType !== 'zillowHar' && p.Cooling && p.Cooling.length) record.cooling = p.Cooling.map(splitCamelCase);
+      if (sourceType !== 'zillowHar' && (dp.StandardStatus || p.StandardStatus)) {
+        record.status = normalizeListingStatus(dp.StandardStatus || p.StandardStatus);
+      }
       if (sourceType === 'zillowHar') {
         record.url = result.zillowUrl;
       } else if (oneHomeSession.token && oneHomeSession.savedSearchId && result.onehomeId) {
@@ -6322,7 +7612,7 @@
       const property = properties.find(p => p.id === id);
       if (property) {
         property.ratings[person] = ratingValue;
-        localStorage.setItem(`rating_${person}_${id}`, ratingValue);
+        safeLocalStorageSet(`rating_${person}_${id}`, ratingValue);
         syncPropertyToFirestore(id, { ratings: { [person]: ratingValue } });
         showToast(`${person === 'adam' ? 'Adam' : 'Lauren'}'s rating updated to ${ratingValue} stars`);
         applyFilters();
@@ -6337,7 +7627,7 @@
       if (!property) return;
 
       property.features[person][featureKey] = ratingValue;
-      localStorage.setItem(`feat_${person}_${featureKey}_${id}`, ratingValue);
+      safeLocalStorageSet(`feat_${person}_${featureKey}_${id}`, ratingValue);
       syncPropertyToFirestore(id, { features: { [person]: { [featureKey]: ratingValue } } });
 
       if (activeEvalId === id) {
@@ -6386,6 +7676,7 @@
       document.getElementById('panelPrice').innerText = property.price;
       updatePanelMiniMap(property);
       refreshTouredView(property);
+      refreshQuickActionsView(property);
       document.getElementById('panelBeds').innerText = property.beds;
       document.getElementById('panelBaths').innerText = property.baths;
       document.getElementById('panelSqft').innerText = property.sqft;
@@ -6399,8 +7690,7 @@
       document.getElementById('panelStyle').innerHTML = `<strong>Style:</strong> ${property.style}`;
       document.getElementById('panelHeating').innerHTML = `<strong>Heating:</strong> ${(property.heating && property.heating.length) ? property.heating.join(', ') : 'Unknown'}`;
       document.getElementById('panelCooling').innerHTML = `<strong>Cooling:</strong> ${(property.cooling && property.cooling.length) ? property.cooling.join(', ') : 'Unknown'}`;
-      document.getElementById('panelDriveTimeAdam').innerHTML = `<strong>Drive to Adam's work:</strong> ${formatDriveTimeDisplay(property.driveTimeAdamMinutes, property.driveTimeAdamRushHourSample)}`;
-      document.getElementById('panelDriveTimeLauren').innerHTML = `<strong>Drive to Lauren's work:</strong> ${formatDriveTimeDisplay(property.driveTimeLaurenMinutes, property.driveTimeLaurenRushHourSample)}`;
+      refreshPanelCommuteView(property);
 
       const descriptionEl = document.getElementById('panelDescription');
       const toggleEl = document.getElementById('descriptionToggle');
@@ -6415,6 +7705,11 @@
       panelBadgeEl.innerText = getCleanPriorityLabel(property.priorityGroup);
       panelBadgeEl.className = `badge ${property.priorityClass}`;
       panelBadgeEl.classList.toggle('hidden', !property.priorityGroup);
+
+      const panelStatusBadgeEl = document.getElementById('panelStatusBadge');
+      panelStatusBadgeEl.innerText = property.status || '';
+      panelStatusBadgeEl.className = `badge ${getListingStatusBadgeClass(property.status)}`;
+      panelStatusBadgeEl.classList.toggle('hidden', !property.status);
 
       PEOPLE.forEach(({ key: person }) => {
         document.getElementById(`evalNotes-${person}`).value = property.evalNotes[person] || '';
@@ -6632,7 +7927,7 @@
         PEOPLE.forEach(({ key: person }) => {
           const value = document.getElementById(`evalNotes-${person}`).value;
           property.evalNotes[person] = value;
-          localStorage.setItem(`notes_${person}_${activeEvalId}`, value);
+          safeLocalStorageSet(`notes_${person}_${activeEvalId}`, value);
           notesPatch[person] = value;
         });
         syncPropertyToFirestore(activeEvalId, { notes: notesPatch });
@@ -6686,6 +7981,8 @@
     initFirebaseSync();
     autoSyncOneHomeInBackground();
     syncDriveTimesInBackground();
+    syncPmCommuteTimesInBackground();
+    syncActiveTravelTimesInBackground();
   </script>
 </body>
 </html>
