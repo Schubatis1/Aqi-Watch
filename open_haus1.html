@@ -2542,6 +2542,14 @@
             <option value="NONE">Unclassified Only</option>
           </select>
 
+          <select id="listedWithinFilter" class="select-pill" onchange="applyFilters()">
+            <option value="ALL">Listed: Any Time</option>
+            <option value="7">Listed in Last 7 Days</option>
+            <option value="14">Listed in Last 14 Days</option>
+            <option value="30">Listed in Last 30 Days</option>
+            <option value="60">Listed in Last 60 Days</option>
+          </select>
+
           <select id="sortSelect" class="select-pill" onchange="handleSortChange(this.value)">
             <option value="default">Sort by: Best Match</option>
             <option value="price-asc">Price: Low to High</option>
@@ -5409,6 +5417,7 @@
       const weekendId = document.getElementById('weekendFilter').value;
       const nextWeekendOnly = document.getElementById('openHouseNextWeekendOnly').checked;
       const nextWeekendRange = nextWeekendOnly ? getNextWeekendRange() : null;
+      const listedWithin = document.getElementById('listedWithinFilter').value;
 
       updateFilterToggleState();
 
@@ -5435,8 +5444,9 @@
             ? item.openHouses.some(e => e.date >= nextWeekendRange.start && e.date <= nextWeekendRange.end)
             : (item.day !== '—' && (item.weekends || []).includes(nextWeekendRange.id))
         ));
+        const matchesListedWithin = listedWithin === 'ALL' || isListedWithinPastDays(item.listingDate, Number(listedWithin));
 
-        return matchesWeekend && matchesSearch && matchesDay && matchesPriority && matchesBungalow && matchesNextWeekend;
+        return matchesWeekend && matchesSearch && matchesDay && matchesPriority && matchesBungalow && matchesNextWeekend && matchesListedWithin;
       });
 
       // Each watch list has its own manual order (set from the Reorder
@@ -5462,10 +5472,11 @@
       const priority = document.getElementById('priorityFilter').value;
       const hideBungalows = document.getElementById('hideBungalows').checked;
       const nextWeekendOnly = document.getElementById('openHouseNextWeekendOnly').checked;
+      const listedWithin = document.getElementById('listedWithinFilter').value;
       const sort = document.getElementById('sortSelect').value;
       const btn = document.getElementById('filterToggleBtn');
 
-      const isActive = day !== 'ALL' || priority !== 'ALL' || hideBungalows || nextWeekendOnly || sort !== 'default';
+      const isActive = day !== 'ALL' || priority !== 'ALL' || hideBungalows || nextWeekendOnly || listedWithin !== 'ALL' || sort !== 'default';
       btn.classList.toggle('has-active', isActive);
     }
 
@@ -5488,6 +5499,7 @@
       document.getElementById('searchInput').value = '';
       document.getElementById('dayFilter').value = 'ALL';
       document.getElementById('priorityFilter').value = 'ALL';
+      document.getElementById('listedWithinFilter').value = 'ALL';
       document.getElementById('sortSelect').value = 'default';
       document.getElementById('hideBungalows').checked = false;
       document.getElementById('openHouseNextWeekendOnly').checked = false;
