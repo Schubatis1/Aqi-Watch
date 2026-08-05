@@ -2466,7 +2466,7 @@
       </button>
     </div>
 
-    <div class="sidebar-version" id="sidebarVersion">v1.4.0</div>
+    <div class="sidebar-version" id="sidebarVersion">v1.5.0</div>
   </nav>
 
   <div class="app-container">
@@ -2847,10 +2847,27 @@
         <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Match Tier</label>
         <p style="margin-top:4px;">Recomputes Top Match / Good Match / blank for every home from price, style, size, freshness, and location. Any home whose Match Tier you've manually set yourself keeps that choice. Cutoffs are set from Manage Homes.</p>
         <button class="btn-secondary" style="width:100%;" onclick="recomputeAllMatchTiers()">Recompute Match Tiers</button>
+
+        <label style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); display:block; margin-top:20px;">Version History</label>
+        <div id="versionHistoryList" style="display:flex; flex-direction:column; gap:14px; margin-top:4px;"></div>
       </div>
       <div class="settings-modal-footer">
         <button class="btn-secondary" style="flex:1;" onclick="clearApiKey()">Clear Key</button>
         <button class="btn-primary" style="flex:1; justify-content:center;" onclick="saveApiKey()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- What's New Modal (shown once per version, on the first load after an update) -->
+  <div class="settings-backdrop" id="whatsNewBackdrop" onclick="closeWhatsNew()">
+    <div class="settings-modal" onclick="event.stopPropagation()" style="max-width:460px;">
+      <div class="settings-modal-header">
+        <h2>What's new</h2>
+        <button class="panel-close" onclick="closeWhatsNew()">&times;</button>
+      </div>
+      <div class="settings-modal-body" id="whatsNewBody"></div>
+      <div class="settings-modal-footer">
+        <button class="btn-primary" style="flex:1; justify-content:center;" onclick="closeWhatsNew()">Got it</button>
       </div>
     </div>
   </div>
@@ -3305,6 +3322,25 @@
       onehome: 'OneHome',
       zillow: 'Zillow',
     };
+
+    // Version history for the Settings panel and the "What's New" popup.
+    // Newest first. Bump alongside VERSIONING.md and #sidebarVersion —
+    // CURRENT_VERSION and the sidebar badge are kept in sync from this list.
+    const VERSION_HISTORY = [
+      { version: '1.5.0', date: '2026-08-05', notes: [
+        'Added a Version History list to Settings.',
+        'Added a "What\'s New" popup that shows what changed since your last visit.',
+      ] },
+      { version: '1.4.0', date: '2026-08-05', notes: [
+        'Added an Aug 7–9 open house weekend list.',
+      ] },
+      { version: '1.3.1', date: '2026-08-03', notes: [
+        'Added the "Listed in last X days" filter to the main filter bar.',
+        'Added a centered Google sign-in prompt the first time an edit is blocked each day.',
+        'Added the version number display in the sidebar (you are here).',
+      ] },
+    ];
+    const CURRENT_VERSION = VERSION_HISTORY[0].version;
 
     const FEATURES = [
       { key: 'kitchen', label: 'Kitchen', group: 'Interior' },
@@ -4185,11 +4221,57 @@
       input.value = HousePhotoService.getApiKey();
       document.getElementById('settingsStatus').innerText = '';
       document.getElementById('settingsStatus').classList.remove('saved');
+      renderVersionHistory();
       document.getElementById('settingsBackdrop').classList.add('open');
     }
 
     function closeSettings() {
       document.getElementById('settingsBackdrop').classList.remove('open');
+    }
+
+    function versionHistoryEntryHtml(entry) {
+      return `
+        <div>
+          <div style="display:flex; align-items:baseline; gap:8px;">
+            <strong style="font-size:0.9rem;">v${entry.version}</strong>
+            <span style="font-size:0.75rem; color:var(--muted);">${entry.date}</span>
+          </div>
+          <ul style="margin:4px 0 0; padding-left:18px; font-size:0.82rem; color:var(--muted); line-height:1.5;">
+            ${entry.notes.map(note => `<li>${note}</li>`).join('')}
+          </ul>
+        </div>`;
+    }
+
+    function renderVersionHistory() {
+      document.getElementById('versionHistoryList').innerHTML =
+        VERSION_HISTORY.map(versionHistoryEntryHtml).join('');
+    }
+
+    // Shows a "What's New" popup the first time a returning visitor loads
+    // the app on a version newer than the last one they saw. Skipped for
+    // brand-new visitors (nothing to compare against) — they just start
+    // tracking from CURRENT_VERSION.
+    function checkForVersionUpdate() {
+      document.getElementById('sidebarVersion').textContent = `v${CURRENT_VERSION}`;
+      const lastSeen = localStorage.getItem('lastSeenVersion');
+      if (!lastSeen) {
+        safeLocalStorageSet('lastSeenVersion', CURRENT_VERSION);
+        return;
+      }
+      if (lastSeen === CURRENT_VERSION) return;
+      const lastSeenIdx = VERSION_HISTORY.findIndex(entry => entry.version === lastSeen);
+      const newEntries = lastSeenIdx === -1 ? [VERSION_HISTORY[0]] : VERSION_HISTORY.slice(0, lastSeenIdx);
+      if (newEntries.length) openWhatsNew(newEntries);
+    }
+
+    function openWhatsNew(entries) {
+      document.getElementById('whatsNewBody').innerHTML = entries.map(versionHistoryEntryHtml).join('');
+      document.getElementById('whatsNewBackdrop').classList.add('open');
+    }
+
+    function closeWhatsNew() {
+      document.getElementById('whatsNewBackdrop').classList.remove('open');
+      safeLocalStorageSet('lastSeenVersion', CURRENT_VERSION);
     }
 
     function openPreferences() {
@@ -8163,6 +8245,7 @@
     handleSortChange('default'); // best Match Tier score first
     updateTourButtonBadge();
     openSharedPropertyFromUrl();
+    checkForVersionUpdate();
     initFirebaseSync();
     // autoSyncOneHomeInBackground/syncDriveTimesInBackground/etc. are
     // started from onAuthStateChanged above, once we know the viewer is a
