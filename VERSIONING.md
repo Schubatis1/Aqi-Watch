@@ -5,7 +5,7 @@ The app displays its version number at the bottom of the sidebar menu in
 
 **Every time changes are pushed to this repo, bump that version number.**
 
-Current version: **1.3.1**
+Current version: **1.4.0**
 
 ## How to bump
 

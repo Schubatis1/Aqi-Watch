@@ -321,6 +321,7 @@ This move-in-ready, turnkey home perfectly blends classic bungalow charm with mo
 // start/end (ISO dates, inclusive) let the "open house next weekend"
 // filter figure out which of these is the upcoming one relative to today.
 const WEEKENDS = [
+  { id: "aug7", label: "Aug 7–9", start: "2026-08-07", end: "2026-08-09" },
   { id: "jul31", label: "July 31–Aug 2", start: "2026-07-31", end: "2026-08-02" },
   { id: "jul24", label: "July 24–26", start: "2026-07-24", end: "2026-07-26" },
   { id: "jul10", label: "July 10–12", start: "2026-07-10", end: "2026-07-12" },
