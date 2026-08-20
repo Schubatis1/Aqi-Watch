@@ -8140,6 +8140,16 @@
       }
     }
 
+    // Default view: land on 629 Houstonia instead of the full list until
+    // the visitor changes the search/weekend filters themselves. A
+    // ?addr=/?property= share link (handled right after this call) still
+    // overrides it, same as any other search.
+    function applyDefaultAddressView() {
+      document.getElementById('weekendFilter').value = 'all';
+      document.getElementById('searchInput').value = '629 Houstonia';
+      applyFilters();
+    }
+
     // A ?property=<id>&addr=<address> link (from the Share button):
     // - The address goes into the search bar and the weekend filter is
     //   forced to "all", so the grid narrows to just that one home no
@@ -8242,6 +8252,7 @@
     applyTheme(localStorage.getItem('appTheme') || 'royal-oak');
     handleSortChange('default'); // best Match Tier score first
     updateTourButtonBadge();
+    applyDefaultAddressView();
     openSharedPropertyFromUrl();
     checkForVersionUpdate();
     initFirebaseSync();
