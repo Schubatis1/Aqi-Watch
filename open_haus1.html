@@ -8140,13 +8140,13 @@
       }
     }
 
-    // Default view: land on 629 Houstonia instead of the full list until
+    // Default view: land on 629 W Houstonia instead of the full list until
     // the visitor changes the search/weekend filters themselves. A
     // ?addr=/?property= share link (handled right after this call) still
     // overrides it, same as any other search.
     function applyDefaultAddressView() {
       document.getElementById('weekendFilter').value = 'all';
-      document.getElementById('searchInput').value = '629 Houstonia';
+      document.getElementById('searchInput').value = '629 W Houstonia';
       applyFilters();
     }
 
