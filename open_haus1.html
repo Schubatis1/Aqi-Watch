@@ -3258,7 +3258,7 @@
       <div class="gallery-header">
         <span id="galleryCounter">1 / 1</span>
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-          <button type="button" class="btn-secondary hidden" id="galleryCastBtn" onclick="toggleCast()">Cast to TV</button>
+          <button type="button" class="btn-secondary" id="galleryCastBtn" onclick="toggleCast()">Cast to TV</button>
           <button type="button" class="btn-secondary" id="galleryDownloadAllBtn" onclick="downloadAllPhotos()">Download All</button>
           <button type="button" class="btn-secondary" id="galleryViewToggleBtn" onclick="toggleGalleryView()">Grid View</button>
           <button class="panel-close" onclick="closePhotoGallery()">&times;</button>
@@ -7857,7 +7857,12 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        // iOS Safari hands the blob off to its own async Save-to-Files/Drive
+        // sheet instead of reading it synchronously like desktop browsers —
+        // revoking the URL right away (as most download snippets do) yanks
+        // the data out from under that sheet mid-save and it reports
+        // "Couldn't download". Give it time to actually finish reading it.
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
       } catch (err) {
         console.warn('downloadAllPhotos failed', err);
         alert('Could not build the photo zip. Check the console for details.');
@@ -7899,7 +7904,6 @@
         }
       );
       castApiReady = true;
-      document.getElementById('galleryCastBtn').classList.remove('hidden');
     };
 
     function updateCastButtonState() {
@@ -7952,7 +7956,14 @@
     }
 
     async function toggleCast() {
-      if (!castApiReady) return;
+      if (!castApiReady) {
+        const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        alert(isIOS
+          ? 'Chromecast casting needs Google’s Cast SDK, which iPhone/iPad browsers don’t support (Apple requires them all to use Safari’s engine).\n\nTo show these photos on a TV from this phone, use Screen Mirroring from Control Center instead — it works directly with Chromecast with Google TV, or with AirPlay-capable TVs.'
+          : 'Chromecast casting isn’t available in this browser. Try desktop Chrome or Android Chrome instead.');
+        return;
+      }
       const context = cast.framework.CastContext.getInstance();
       if (castSessionActive && context.getCurrentSession()) {
         context.endCurrentSession(true);
