@@ -3257,7 +3257,9 @@
     <div class="gallery-modal" onclick="event.stopPropagation()">
       <div class="gallery-header">
         <span id="galleryCounter">1 / 1</span>
-        <div style="display:flex; gap:8px; align-items:center;">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+          <button type="button" class="btn-secondary hidden" id="galleryCastBtn" onclick="toggleCast()">Cast to TV</button>
+          <button type="button" class="btn-secondary" id="galleryDownloadAllBtn" onclick="downloadAllPhotos()">Download All</button>
           <button type="button" class="btn-secondary" id="galleryViewToggleBtn" onclick="toggleGalleryView()">Grid View</button>
           <button class="panel-close" onclick="closePhotoGallery()">&times;</button>
         </div>
@@ -3298,6 +3300,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <!-- JSZip — bundles the photo gallery into a single .zip for "Download All" -->
+  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+  <!-- Google Cast Sender SDK — powers "Cast to TV" in the photo gallery -->
+  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
   <script>
     // Complete Property Dataset (19 Listings)
@@ -7722,6 +7728,7 @@
     let galleryPhotos = [];
     let galleryIndex = 0;
     let galleryViewMode = 'carousel';
+    let galleryPropertyLabel = 'Open Haus Photos';
 
     // Combines every known photo source for a property, in priority order:
     // OneHome (local IndexedDB gallery) first, then Zillow, then
@@ -7746,6 +7753,7 @@
       galleryPhotos = photos;
       galleryIndex = 0;
       galleryViewMode = 'carousel';
+      galleryPropertyLabel = property.address || 'Open Haus Photos';
       document.getElementById('galleryCarouselView').classList.remove('hidden');
       document.getElementById('galleryThumbStrip').classList.remove('hidden');
       document.getElementById('galleryGridView').classList.add('hidden');
@@ -7754,6 +7762,7 @@
       renderGalleryCarousel();
       renderGalleryThumbStrip();
       document.getElementById('galleryBackdrop').classList.add('open');
+      syncCastIfActive();
     }
 
     function closePhotoGallery() {
@@ -7789,16 +7798,19 @@
       } else {
         renderGalleryCarousel();
       }
+      syncCastIfActive();
     }
 
     function nextPhoto() {
       galleryIndex = (galleryIndex + 1) % galleryPhotos.length;
       renderGalleryCarousel();
+      syncCastIfActive();
     }
 
     function prevPhoto() {
       galleryIndex = (galleryIndex - 1 + galleryPhotos.length) % galleryPhotos.length;
       renderGalleryCarousel();
+      syncCastIfActive();
     }
 
     function toggleGalleryView() {
@@ -7813,6 +7825,166 @@
       } else {
         renderGalleryCarousel();
         renderGalleryThumbStrip();
+      }
+    }
+
+    // ===== Download All (zips the open gallery client-side, no server) =====
+
+    function addressSlug(label) {
+      return (label || 'photos').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'photos';
+    }
+
+    async function downloadAllPhotos() {
+      if (!galleryPhotos.length) return;
+      const btn = document.getElementById('galleryDownloadAllBtn');
+      const originalText = btn.innerText;
+      btn.innerText = 'Zipping…';
+      btn.disabled = true;
+      try {
+        const zip = new JSZip();
+        const slug = addressSlug(galleryPropertyLabel);
+        galleryPhotos.forEach((src, i) => {
+          const match = /^data:([^;]+);base64,(.*)$/.exec(src);
+          if (!match) return;
+          const ext = (match[1].split('/')[1] || 'jpg').split('+')[0];
+          zip.file(`${slug}-${String(i + 1).padStart(2, '0')}.${ext}`, match[2], { base64: true, compression: 'STORE' });
+        });
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${slug}-photos.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.warn('downloadAllPhotos failed', err);
+        alert('Could not build the photo zip. Check the console for details.');
+      } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // ===== Cast to TV (Google Cast) =====
+    //
+    // Every gallery photo lives only as a base64 data URI (never uploaded
+    // anywhere — see HousePhotoService/GalleryStore above), but a physical
+    // Chromecast fetches media itself and can't reach a data: URI once it
+    // exceeds the Cast protocol's per-message size budget. So before
+    // casting we downscale/recompress oversized photos client-side (still
+    // 100% local) until they fit, trading a little quality for photos that
+    // actually load on the TV.
+
+    const CAST_MAX_BYTES = 60000;
+    const CAST_MAX_DIMENSION = 1280;
+
+    let castApiReady = false;
+    let castSessionActive = false;
+    const castImageCache = new Map();
+
+    window.__onGCastApiAvailable = function (isAvailable) {
+      if (!isAvailable) return;
+      cast.framework.CastContext.getInstance().setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+      });
+      cast.framework.CastContext.getInstance().addEventListener(
+        cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+        (e) => {
+          castSessionActive = e.sessionState === cast.framework.SessionState.SESSION_STARTED ||
+            e.sessionState === cast.framework.SessionState.SESSION_RESUMED;
+          updateCastButtonState();
+        }
+      );
+      castApiReady = true;
+      document.getElementById('galleryCastBtn').classList.remove('hidden');
+    };
+
+    function updateCastButtonState() {
+      const btn = document.getElementById('galleryCastBtn');
+      if (!btn) return;
+      btn.innerText = castSessionActive ? 'Stop Casting' : 'Cast to TV';
+    }
+
+    function dataUriByteLength(dataUri) {
+      const b64 = dataUri.slice(dataUri.indexOf(',') + 1);
+      return Math.ceil(b64.length * 3 / 4);
+    }
+
+    function loadImageFromDataUri(dataUri) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = dataUri;
+      });
+    }
+
+    // Downscales/recompresses a photo until it fits under the Cast
+    // message size budget. Result is cached per source photo so paging
+    // back and forth in the gallery doesn't redo the work.
+    async function prepareCastImage(dataUri) {
+      if (castImageCache.has(dataUri)) return castImageCache.get(dataUri);
+      let result = dataUri;
+      if (dataUriByteLength(dataUri) > CAST_MAX_BYTES) {
+        const img = await loadImageFromDataUri(dataUri);
+        let scale = Math.min(1, CAST_MAX_DIMENSION / Math.max(img.width, img.height));
+        for (let attempt = 0; attempt < 6; attempt++) {
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const quality = attempt < 3 ? 0.7 : 0.5;
+          const out = canvas.toDataURL('image/jpeg', quality);
+          if (dataUriByteLength(out) <= CAST_MAX_BYTES || attempt === 5) {
+            result = out;
+            break;
+          }
+          scale *= 0.7;
+        }
+      }
+      castImageCache.set(dataUri, result);
+      return result;
+    }
+
+    async function toggleCast() {
+      if (!castApiReady) return;
+      const context = cast.framework.CastContext.getInstance();
+      if (castSessionActive && context.getCurrentSession()) {
+        context.endCurrentSession(true);
+        castSessionActive = false;
+        updateCastButtonState();
+        return;
+      }
+      try {
+        await context.requestSession();
+      } catch (err) {
+        if (err !== 'cancel') console.warn('Cast session request failed', err);
+        return;
+      }
+      castSessionActive = !!context.getCurrentSession();
+      updateCastButtonState();
+      syncCastIfActive();
+    }
+
+    async function syncCastIfActive() {
+      if (!castApiReady || !castSessionActive) return;
+      const session = cast.framework.CastContext.getInstance().getCurrentSession();
+      if (!session || !galleryPhotos.length) return;
+      const src = await prepareCastImage(galleryPhotos[galleryIndex]);
+      const mimeMatch = /^data:([^;]+);/.exec(src);
+      const mediaInfo = new chrome.cast.media.MediaInfo(src, mimeMatch ? mimeMatch[1] : 'image/jpeg');
+      mediaInfo.streamType = chrome.cast.media.StreamType.NONE;
+      mediaInfo.metadata = new chrome.cast.media.PhotoMediaMetadata();
+      mediaInfo.metadata.title = `${galleryPropertyLabel} — Photo ${galleryIndex + 1} of ${galleryPhotos.length}`;
+      try {
+        await session.loadMedia(new chrome.cast.media.LoadRequest(mediaInfo));
+      } catch (err) {
+        console.warn('Cast loadMedia failed', err);
       }
     }
 
