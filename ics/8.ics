@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-8@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T211500
+DTEND;TZID=America/Detroit:20260905T223000
+SUMMARY:Kurt Elling & Yellowjackets Celebrate Weather Report
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Grammy-winning vocalist Kurt Elling joins the long-running fusion band Yellowjackets for a tribute to Weather Report\, the influential jazz-fusion group co-led by Joe Zawinul and Wayne Shorter in the 1970s and '80s.
+END:VEVENT
+END:VCALENDAR

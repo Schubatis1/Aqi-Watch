@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-36@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T224500
+DTEND;TZID=America/Detroit:20260906T235900
+SUMMARY:Nduduzo Makhathini
+LOCATION:Gretchen C. Valade Jazz Center - Detroit Jazz Hall (Midtown After Hours)
+DESCRIPTION:Detroit Jazz Fest 2026. South African pianist Nduduzo Makhathini\, signed to the storied Blue Note label\, blends Zulu spiritual and healing traditions with jazz piano in the lineage of countryman Abdullah Ibrahim.
+END:VEVENT
+END:VCALENDAR

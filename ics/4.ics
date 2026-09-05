@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-4@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T131500
+DTEND;TZID=America/Detroit:20260905T141500
+SUMMARY:Collegiate Combo Winner: LoEnd Quintet
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Winner of the festival's annual Collegiate Combo Competition\, which showcases the best small jazz groups from college and university programs around the country.
+END:VEVENT
+END:VCALENDAR

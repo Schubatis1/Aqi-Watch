@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-11@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T184500
+DTEND;TZID=America/Detroit:20260905T200000
+SUMMARY:Jill Opal & The Bill Meyer Group
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A Detroit Signature Series vocal jazz set pairing singer Jill Opal with the Bill Meyer Group.
+END:VEVENT
+END:VCALENDAR

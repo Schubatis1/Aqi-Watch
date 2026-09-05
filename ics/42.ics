@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-42@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260907T153000
+DTEND;TZID=America/Detroit:20260907T164500
+SUMMARY:Roberta Gambarini and the Detroit Jazz Festival Orchestra
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Italian-born vocalist Roberta Gambarini is celebrated for her fluent bebop phrasing and was mentored by pianist Hank Jones\; here she fronts the festival's own house big band\, the Detroit Jazz Festival Orchestra.
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-45@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260907T150000
+DTEND;TZID=America/Detroit:20260907T161500
+SUMMARY:The Django Festival Allstars
+LOCATION:Hart Plaza - Waterfront Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A group carrying on the gypsy-jazz tradition pioneered by Django Reinhardt\; guitarist Samson Schmitt is Reinhardt's great-grandson. They're joined by special guest Grace Kelly on this set.
+END:VEVENT
+END:VCALENDAR

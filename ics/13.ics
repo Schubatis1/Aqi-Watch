@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-13@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T143000
+DTEND;TZID=America/Detroit:20260905T154500
+SUMMARY:University of Michigan Jazz Ensemble & Jazz Trombone Ensemble
+LOCATION:Hart Plaza - Waterfront Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Two large student ensembles from the University of Michigan's jazz program\, back to back: a full jazz big band and a trombone-choir ensemble.
+END:VEVENT
+END:VCALENDAR

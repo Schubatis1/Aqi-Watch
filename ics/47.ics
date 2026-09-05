@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-47@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260907T113000
+DTEND;TZID=America/Detroit:20260907T143000
+SUMMARY:Detroit Public Schools Community District Jazz Showcase + Tottori Jazz Mission International Jam
+LOCATION:Gretchen C. Valade Jazz Center - Detroit Jazz Hall
+DESCRIPTION:Detroit Jazz Fest 2026. A closing showcase pairing Detroit Public Schools jazz students with the visiting Tottori\, Japan jazz delegation for an international jam session.
+END:VEVENT
+END:VCALENDAR

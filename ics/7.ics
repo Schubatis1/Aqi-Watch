@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-7@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T190000
+DTEND;TZID=America/Detroit:20260905T201500
+SUMMARY:Ravi Coltrane Quartet: Centennial Celebration
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Saxophonist Ravi Coltrane — son of John Coltrane and Alice Coltrane — leads his quartet in a set marking the 100th anniversary of his father's birth in 1926\, one of several Coltrane centennial tributes across the weekend.
+END:VEVENT
+END:VCALENDAR

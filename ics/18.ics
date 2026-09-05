@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-18@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T224500
+DTEND;TZID=America/Detroit:20260905T235900
+SUMMARY:Delvon Lamarr Organ Trio
+LOCATION:Gretchen C. Valade Jazz Center - Detroit Jazz Hall (Midtown After Hours)
+DESCRIPTION:Detroit Jazz Fest 2026. A Seattle-based instrumental trio built around Delvon Lamarr's Hammond organ\, known for deep-pocket\, funky grooves in the classic soul-jazz organ-trio tradition.
+END:VEVENT
+END:VCALENDAR

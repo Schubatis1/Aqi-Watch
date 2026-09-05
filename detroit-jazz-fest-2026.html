@@ -715,32 +715,6 @@ function renderMain() {
   });
 }
 
-function icsDate(dateStr, timeStr) {
-  const [y,mo,d] = dateStr.split("-");
-  const [h,mi] = timeStr.split(":");
-  return `${y}${mo}${d}T${h}${mi}00`;
-}
-
-function buildIcs(e) {
-  let endDate = e.date, endTime = e.end;
-  if (e.end === "24:00") { endTime = "23:59"; }
-  const lines = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN",
-    "BEGIN:VEVENT",
-    "UID:" + Math.random().toString(36).slice(2) + "@detroitjazzfest",
-    "DTSTART;TZID=America/Detroit:" + icsDate(e.date, e.start),
-    "DTEND;TZID=America/Detroit:" + icsDate(endDate, endTime),
-    "SUMMARY:" + e.title.replace(/,/g, "\\,"),
-    "LOCATION:" + (e.venue + " - " + e.stage).replace(/,/g, "\\,"),
-    "DESCRIPTION:" + ("Detroit Jazz Fest 2026. " + (e.bio || e.notes || "")).replace(/,/g, "\\,").replace(/\n/g, "\\n"),
-    "END:VEVENT",
-    "END:VCALENDAR"
-  ];
-  return lines.join("\r\n");
-}
-
 function spotifySearchName(title) {
   return title
     .replace(/^\d{4}\s+Artist-In-Residence\s+/i, "")
@@ -755,8 +729,8 @@ function spotifySearchName(title) {
 function openModal(e) {
   const overlay = document.getElementById("overlay");
   const modal = document.getElementById("modal");
-  const ics = buildIcs(e);
-  const icsHref = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
+  const idx = DATA.indexOf(e);
+  const icsHref = "ics/" + idx + ".ics";
   const tags = (e.genres||[]).map(g => `<span class="tag ${g==='Big Band'?'bigband':''}">${g}</span>`).join("");
 
   const artist = e.slug ? ARTISTS[e.slug] : null;

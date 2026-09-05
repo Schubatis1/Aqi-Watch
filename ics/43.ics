@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-43@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260907T171500
+DTEND;TZID=America/Detroit:20260907T183000
+SUMMARY:Joey Alexander Trio
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Indonesian-born pianist Joey Alexander first drew attention as a child prodigy and has grown into a Grammy-nominated jazz pianist in his own right\, leading his trio through original compositions and standards.
+END:VEVENT
+END:VCALENDAR

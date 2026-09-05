@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-41@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260907T134500
+DTEND;TZID=America/Detroit:20260907T144500
+SUMMARY:Teiku
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A Detroit Signature Series act closing out the JPMorganChase Stage lineup for the festival.
+END:VEVENT
+END:VCALENDAR

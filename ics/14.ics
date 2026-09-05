@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-14@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T164500
+DTEND;TZID=America/Detroit:20260905T180000
+SUMMARY:Vermilion Field
+LOCATION:Hart Plaza - Waterfront Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A visiting band representing Takatsuki\, Japan's own jazz street festival — part of a long-standing sister-festival exchange with Detroit.
+END:VEVENT
+END:VCALENDAR

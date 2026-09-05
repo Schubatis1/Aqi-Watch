@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-3@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260904T224500
+DTEND;TZID=America/Detroit:20260904T235900
+SUMMARY:Tia Fuller featuring Shamie Fuller-Royston
+LOCATION:Gretchen C. Valade Jazz Center - Detroit Jazz Hall (Midtown After Hours)
+DESCRIPTION:Detroit Jazz Fest 2026. Saxophonist Tia Fuller is known both for her acclaimed solo jazz albums and for years spent as a member of Beyoncé's touring band\, bringing a soulful\, groove-forward edge to her late-night set.
+END:VEVENT
+END:VCALENDAR

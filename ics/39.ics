@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-39@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260907T160000
+DTEND;TZID=America/Detroit:20260907T171000
+SUMMARY:Cindy Blackman Santana
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A powerhouse drummer known for years touring with Lenny Kravitz as well as her own jazz and fusion projects\; she is married to guitarist Carlos Santana.
+END:VEVENT
+END:VCALENDAR

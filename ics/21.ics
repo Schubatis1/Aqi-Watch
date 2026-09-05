@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-21@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T150000
+DTEND;TZID=America/Detroit:20260906T160000
+SUMMARY:The Search: Echoes of the Fallen
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A Detroit Signature Series performance conceived as a memorial tribute to Karim Gideon.
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-29@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T204500
+DTEND;TZID=America/Detroit:20260906T220000
+SUMMARY:Dee Dee Bridgewater with Bill Charlap
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Dee Dee Bridgewater is a Grammy- and Tony-winning jazz vocalist with a career spanning decades\; pianist Bill Charlap is one of the most celebrated interpreters of the Great American Songbook working today.
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-25@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T131500
+DTEND;TZID=America/Detroit:20260906T141500
+SUMMARY:J.C. Heard JazzWeek All Stars
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Named for Detroit drummer J.C. Heard\, this set is tied to the festival's JazzWeek education program and features the winner of this year's Youth Jazz Vocal Competition.
+END:VEVENT
+END:VCALENDAR

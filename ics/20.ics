@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-20@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T131500
+DTEND;TZID=America/Detroit:20260906T141500
+SUMMARY:Downbeat Blindfold Test with Special Guest Joe Lovano
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. DownBeat magazine's signature live "Blindfold Test" segment: Joe Lovano listens to unidentified recordings on the spot and reacts\, guesses the artists\, and discusses the music — a listening-and-conversation format rather than a live performance.
+END:VEVENT
+END:VCALENDAR

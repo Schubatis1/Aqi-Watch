@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-9@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T151500
+DTEND;TZID=America/Detroit:20260905T161500
+SUMMARY:Borderland Ensemble
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A Detroit Signature Series act\; the group's name points to music that sits at the crossing point of jazz and Latin American traditions.
+END:VEVENT
+END:VCALENDAR

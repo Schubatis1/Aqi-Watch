@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-44@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260907T130000
+DTEND;TZID=America/Detroit:20260907T140000
+SUMMARY:Michigan State University Jazz Orchestral "The Bebop Spartans"
+LOCATION:Hart Plaza - Waterfront Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Michigan State University's student jazz orchestra\, led by bassist and educator Rodney Whitaker.
+END:VEVENT
+END:VCALENDAR

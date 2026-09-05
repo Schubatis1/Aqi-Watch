@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-30@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T134500
+DTEND;TZID=America/Detroit:20260906T144500
+SUMMARY:Wayne State University "Jazz Warriors" Big Band & Advanced Vocal Jazz Quartet
+LOCATION:Hart Plaza - Waterfront Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Wayne State University's own student jazz big band and vocal jazz quartet\, performing on the festival's home turf near the Jazz Center.
+END:VEVENT
+END:VCALENDAR

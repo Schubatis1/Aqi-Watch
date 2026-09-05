@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-40@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260907T180000
+DTEND;TZID=America/Detroit:20260907T193000
+SUMMARY:Coltrane 100: Both Directions at Once
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. An all-star band assembled to mark the John Coltrane centennial\, pairing Joe Lovano with Melissa Aldana (Grammy winner and first woman to win the Thelonious Monk Competition on saxophone)\, pianist Nduduzo Makhathini\, bassist Linda May Han Oh\, and drummer Jeff "Tain" Watts\, a longtime Branford and Wynton Marsalis collaborator.
+END:VEVENT
+END:VCALENDAR

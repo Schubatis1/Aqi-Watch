@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-6@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T164500
+DTEND;TZID=America/Detroit:20260905T180000
+SUMMARY:African Rhythms Alumni Quintet
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. This band of longtime collaborators of pianist/composer Randy Weston (1926–2018) marks the centennial of his birth. Weston spent decades exploring the African roots of jazz\, and his "African Rhythms" group was the vehicle for that lifelong project.
+END:VEVENT
+END:VCALENDAR

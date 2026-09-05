@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-24@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T211500
+DTEND;TZID=America/Detroit:20260906T223000
+SUMMARY:Take 6
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A ten-time Grammy-winning a cappella vocal group blending jazz harmony with gospel and R&B roots — one of the most decorated vocal groups in American music.
+END:VEVENT
+END:VCALENDAR

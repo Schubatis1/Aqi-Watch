@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-0@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260904T181500
+DTEND;TZID=America/Detroit:20260904T182500
+SUMMARY:Dr. Valade's Brass Band featuring Shannon Powell
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A New Orleans-style brass band assembled to kick off the festival each year in honor of Gretchen C. Valade\, the philanthropist and festival patron the Jazz Center is named for. Shannon Powell is a veteran New Orleans drummer who has played with Harry Connick Jr.\, Wynton Marsalis\, and Dr. John.
+END:VEVENT
+END:VCALENDAR

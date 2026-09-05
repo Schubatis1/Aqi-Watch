@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-28@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T184500
+DTEND;TZID=America/Detroit:20260906T200000
+SUMMARY:Sequoia "REDWOOD" Snyder and INNER KNOWING
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A Detroit Signature Series project led by Sequoia "Redwood" Snyder.
+END:VEVENT
+END:VCALENDAR

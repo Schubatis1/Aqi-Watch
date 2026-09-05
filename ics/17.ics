@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-17@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T113000
+DTEND;TZID=America/Detroit:20260905T143000
+SUMMARY:High School Showcase
+LOCATION:Gretchen C. Valade Jazz Center - Detroit Jazz Hall — High School Showcase
+DESCRIPTION:Detroit Jazz Fest 2026. Back-to-back sets from five Michigan high school jazz bands and orchestras\, part of the festival's education programming.
+END:VEVENT
+END:VCALENDAR

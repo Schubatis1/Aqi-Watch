@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-37@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T224500
+DTEND;TZID=America/Detroit:20260906T235900
+SUMMARY:LoEnd Quintet featuring guest vocalists
+LOCATION:Gretchen C. Valade Jazz Center - Dee Dee Bridgewater's
+DESCRIPTION:Detroit Jazz Fest 2026. A second late-night appearance from the Collegiate Combo Competition-winning quintet\, again joined by guest vocalists.
+END:VEVENT
+END:VCALENDAR

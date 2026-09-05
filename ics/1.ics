@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-1@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260904T190000
+DTEND;TZID=America/Detroit:20260904T201500
+SUMMARY:Miles Electric Band
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Led by Vince Wilburn Jr. — Miles Davis's nephew and a member of Davis's 1980s bands — the Miles Electric Band keeps the electric\, funk-driven fusion era of Miles Davis (the Bitches Brew/On the Corner years) alive on stage.
+END:VEVENT
+END:VCALENDAR

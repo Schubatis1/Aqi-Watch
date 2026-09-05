@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-34@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T211000
+DTEND;TZID=America/Detroit:20260906T222500
+SUMMARY:Vijay Iyer Trio
+LOCATION:Hart Plaza - Waterfront Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Pianist Vijay Iyer\, a MacArthur "genius grant" recipient\, leads his trio in dense\, intellectually rigorous\, genre-crossing jazz. Trumpeter Adam O'Farrill\, grandson of Afro-Cuban jazz pioneer Chico O'Farrill\, joins as special guest.
+END:VEVENT
+END:VCALENDAR

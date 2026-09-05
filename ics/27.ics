@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-27@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T164500
+DTEND;TZID=America/Detroit:20260906T180000
+SUMMARY:Catherine Russell
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A vocalist steeped in classic jazz\, blues\, and swing standards\; her father Luis Russell was Louis Armstrong's longtime pianist and music director\, and that lineage runs through her repertoire.
+END:VEVENT
+END:VCALENDAR

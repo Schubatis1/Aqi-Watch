@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-2@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260904T211500
+DTEND;TZID=America/Detroit:20260904T221500
+SUMMARY:2026 Artist-In-Residence Joe Lovano's Paramount Quartet
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Joe Lovano — Grammy winner and NEA Jazz Master — is this year's Artist-in-Residence\, appearing across all four days. This quartet pairs him with guitarist Julian Lage\, one of the most acclaimed young guitarists in jazz\, and drummer Will Calhoun\, best known for his work with the rock band Living Colour.
+END:VEVENT
+END:VCALENDAR

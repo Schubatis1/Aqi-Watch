@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-22@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T164500
+DTEND;TZID=America/Detroit:20260906T180000
+SUMMARY:Gabrielle Cavassa
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A rising jazz vocalist and winner of the Sarah Vaughan International Jazz Vocal Competition\, known for a warm\, understated delivery on standards and original material.
+END:VEVENT
+END:VCALENDAR

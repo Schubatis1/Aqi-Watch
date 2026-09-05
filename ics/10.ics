@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-10@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T170000
+DTEND;TZID=America/Detroit:20260905T180000
+SUMMARY:Skyler Tang
+LOCATION:Hart Plaza - JPMorganChase Stage
+DESCRIPTION:Detroit Jazz Fest 2026. An emerging jazz artist on the JPMorganChase Stage lineup.
+END:VEVENT
+END:VCALENDAR

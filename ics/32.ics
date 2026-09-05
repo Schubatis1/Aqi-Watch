@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-32@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260906T172000
+DTEND;TZID=America/Detroit:20260906T183000
+SUMMARY:2026 Legacy Artist: Jaribu Shahid Salute to the AACM
+LOCATION:Hart Plaza - Waterfront Stage
+DESCRIPTION:Detroit Jazz Fest 2026. Bassist Jaribu Shahid\, a longtime member of Detroit's jazz avant-garde and of the Association for the Advancement of Creative Musicians (AACM)\, is honored this year as the festival's Legacy Artist with a set celebrating the AACM's boundary-pushing legacy.
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-5@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T150000
+DTEND;TZID=America/Detroit:20260905T160000
+SUMMARY:Jeffrey Trent
+LOCATION:Hart Plaza - Carhartt Amphitheater Stage
+DESCRIPTION:Detroit Jazz Fest 2026. A Detroit Signature Series artist — the festival's showcase for Detroit-area musicians presented by Rocket Companies.
+END:VEVENT
+END:VCALENDAR

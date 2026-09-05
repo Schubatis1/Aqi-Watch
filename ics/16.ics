@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN
+BEGIN:VEVENT
+UID:djf2026-16@detroitjazzfest-dashboard
+DTSTART;TZID=America/Detroit:20260905T210000
+DTEND;TZID=America/Detroit:20260905T221500
+SUMMARY:Artemis
+LOCATION:Hart Plaza - Waterfront Stage
+DESCRIPTION:Detroit Jazz Fest 2026. An all-star jazz supergroup founded by pianist Renee Rosnes\, Artemis rotates a lineup of top-tier instrumentalists and vocalists\, all women\, playing hard-swinging\, modern acoustic jazz.
+END:VEVENT
+END:VCALENDAR
