@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detroit Jazz Fest 2026</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel2: #1c2330;
+    --border: #2a3240;
+    --text: #e8edf3;
+    --text-dim: #9aa7b8;
+    --accent: #3fa9f5;
+    --accent2: #f5a623;
+    --sig: #f5a623;
+    --card-hover: #202a38;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 24px 20px 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #101823, #0d1117);
+  }
+  header h1 {
+    margin: 0 0 4px;
+    font-size: 1.6rem;
+    letter-spacing: 0.3px;
+  }
+  header p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 12px 16px;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: #06111c;
+    border-color: var(--accent);
+  }
+  .searchbar {
+    padding: 8px 16px 4px;
+  }
+  .searchbar input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 8px 16px 60px;
+  }
+  .venue-block {
+    margin-top: 18px;
+  }
+  .venue-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 18px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stage-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-dim);
+    margin: 14px 0 6px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+  }
+  .card:hover { background: var(--card-hover); }
+  .card .time {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    min-width: 100px;
+  }
+  .card .title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    flex: 1;
+  }
+  .card .badge {
+    font-size: 0.65rem;
+    background: var(--sig);
+    color: #1a1300;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .empty-note {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    padding: 20px 4px;
+    text-align: center;
+  }
+  /* modal */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    max-width: 560px;
+    width: 100%;
+    padding: 22px 20px 28px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  @media (min-width: 640px) {
+    .overlay { align-items: center; }
+    .modal { border-radius: 16px; margin: 20px; }
+  }
+  .modal h2 {
+    margin: 0 0 6px;
+    font-size: 1.25rem;
+  }
+  .modal .meta {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .modal .meta strong { color: var(--text); }
+  .modal .notes {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    background: var(--panel);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .btn {
+    display: block;
+    text-align: center;
+    padding: 13px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--accent); color: #06111c; }
+  .btn-secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .btn-close {
+    background: transparent;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .legend {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 6px 16px 0;
+  }
+  .legend span.badge {
+    font-size: 0.65rem;
+    background: var(--sig);
+    color: #1a1300;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Detroit Jazz Fest 2026</h1>
+  <p>Sept 4&ndash;7 &middot; Hart Plaza &amp; Gretchen C. Valade Jazz Center (Wayne State)</p>
+</header>
+
+<div class="tabs" id="tabs"></div>
+<div class="legend"><span class="badge">SIG</span> = Detroit Signature Series Artist, presented by Rocket Companies</div>
+<div class="searchbar"><input id="search" type="text" placeholder="Search artist or band..." /></div>
+
+<main id="main"></main>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const DATA = [
+  // ===== FRIDAY SEPT 4 =====
+  {day:"fri", date:"2026-09-04", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"18:15", end:"18:25", title:"Dr. Valade's Brass Band featuring Shannon Powell", sig:true},
+  {day:"fri", date:"2026-09-04", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"19:00", end:"20:15", title:"Miles Electric Band"},
+  {day:"fri", date:"2026-09-04", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"21:15", end:"22:15", title:"2026 Artist-In-Residence Joe Lovano's Paramount Quartet", notes:"Featuring Julian Lage, Asante Sante Debriano, Will Calhoun"},
+  {day:"fri", date:"2026-09-04", venue:"Gretchen C. Valade Jazz Center", stage:"Detroit Jazz Hall (Midtown After Hours)", start:"22:45", end:"24:00", title:"Tia Fuller featuring Shamie Fuller-Royston", notes:"\"Fuller Sound\" — Midtown After Hours Special. Doors 9:30pm. Entrance on Hancock."},
+
+  // ===== SATURDAY SEPT 5 =====
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"13:15", end:"14:15", title:"Collegiate Combo Winner: LoEnd Quintet"},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"15:00", end:"16:00", title:"Jeffrey Trent", sig:true},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"16:45", end:"18:00", title:"African Rhythms Alumni Quintet", notes:"\"Celebrating the Centennial of Dr. Randy Weston\" — T.K. Blue (sax/flute/musical director), Chief Baba Neil Clarke (percussion), Alex Blake (bass), Ku-umba Frank Lacy (trombone), Sharp Radway (piano)"},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"19:00", end:"20:15", title:"Ravi Coltrane Quartet: Centennial Celebration"},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"21:15", end:"22:30", title:"Kurt Elling & Yellowjackets Celebrate Weather Report"},
+
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"15:15", end:"16:15", title:"Borderland Ensemble", sig:true},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"17:00", end:"18:00", title:"Skyler Tang"},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"18:45", end:"20:00", title:"Jill Opal & The Bill Meyer Group", sig:true},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"20:45", end:"22:00", title:"Bob James"},
+
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Waterfront Stage", start:"14:30", end:"15:45", title:"University of Michigan Jazz Ensemble & Jazz Trombone Ensemble", notes:"Directed by Professor Kris Johnson (Jazz Ensemble) and Professor Dennis Wilson (Trombone Ensemble)"},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Waterfront Stage", start:"16:45", end:"18:00", title:"Vermilion Field", notes:"Takatsuki Jazz Street Representative Band"},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Waterfront Stage", start:"19:00", end:"20:15", title:"Cyrille Aimée"},
+  {day:"sat", date:"2026-09-05", venue:"Hart Plaza", stage:"Waterfront Stage", start:"21:00", end:"22:15", title:"Artemis"},
+
+  {day:"sat", date:"2026-09-05", venue:"Gretchen C. Valade Jazz Center", stage:"Detroit Jazz Hall — High School Showcase", start:"11:30", end:"14:30", title:"High School Showcase", notes:"Grosse Ile HS Jazz Band, Midland HS Jazz Band, University of Detroit Jazz Orchestra, Troy Athens HS Jazz Band, Northview HS Jazz Ensemble. Doors 10:30am."},
+  {day:"sat", date:"2026-09-05", venue:"Gretchen C. Valade Jazz Center", stage:"Detroit Jazz Hall (Midtown After Hours)", start:"22:45", end:"24:00", title:"Delvon Lamarr Organ Trio", notes:"Midtown After Hours Special. Break/no programming 3–9:30pm, doors reopen 9:30pm."},
+  {day:"sat", date:"2026-09-05", venue:"Gretchen C. Valade Jazz Center", stage:"Dee Dee Bridgewater's", start:"22:45", end:"24:00", title:"LoEnd Quintet featuring guest vocalists", notes:"Doors 9:30pm. Entrance on Cass Ave."},
+
+  // ===== SUNDAY SEPT 6 =====
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"13:15", end:"14:15", title:"Downbeat Blindfold Test with Special Guest Joe Lovano"},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"15:00", end:"16:00", title:"The Search: Echoes of the Fallen", notes:"A tribute to Karim Gideon", sig:true},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"16:45", end:"18:00", title:"Gabrielle Cavassa"},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"19:00", end:"20:15", title:"2026 Artist-In-Residence Joe Lovano and Dave Douglas Quintet: Sound Prints", notes:"Featuring Lawrence Fields, Yasushi Nakamura, and Rudy Royston"},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"21:15", end:"22:30", title:"Take 6"},
+
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"13:15", end:"14:15", title:"J.C. Heard JazzWeek All Stars", notes:"Featuring 2026 Youth Jazz Vocal Competition Winner Ava Noecker", sig:true},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"15:15", end:"16:15", title:"Dave Sharp Worlds Quartet", sig:true},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"16:45", end:"18:00", title:"Catherine Russell"},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"18:45", end:"20:00", title:"Sequoia \"REDWOOD\" Snyder and INNER KNOWING", sig:true},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"20:45", end:"22:00", title:"Dee Dee Bridgewater with Bill Charlap", sig:true},
+
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Waterfront Stage", start:"13:45", end:"14:45", title:"Wayne State University \"Jazz Warriors\" Big Band & Advanced Vocal Jazz Quartet", notes:"Big Band directed by Professor Vincent Chandler; Vocal Jazz Quartet directed by Cayla Stus"},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Waterfront Stage", start:"15:30", end:"16:40", title:"Luca Ciarla solOrkestra"},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Waterfront Stage", start:"17:20", end:"18:30", title:"2026 Legacy Artist: Jaribu Shahid Salute to the AACM", sig:true},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Waterfront Stage", start:"19:15", end:"20:25", title:"Instant Alter", notes:"Featuring Natasha Agrama Clarke and Emilio Modeste"},
+  {day:"sun", date:"2026-09-06", venue:"Hart Plaza", stage:"Waterfront Stage", start:"21:10", end:"22:25", title:"Vijay Iyer Trio", notes:"With special guest Adam O'Farrill"},
+
+  {day:"sun", date:"2026-09-06", venue:"Gretchen C. Valade Jazz Center", stage:"Detroit Jazz Hall — High School Showcase", start:"11:30", end:"14:30", title:"High School Showcase", notes:"Taylor HS Jazz Band, Utica HS Jazz Band, Jackson Northwest HS Jazz Band, Northville HS Jazz Ensemble, Meridian HS Jazz Ensemble. Doors 10:30am."},
+  {day:"sun", date:"2026-09-06", venue:"Gretchen C. Valade Jazz Center", stage:"Detroit Jazz Hall (Midtown After Hours)", start:"22:45", end:"24:00", title:"Nduduzo Makhathini", notes:"Midtown After Hours Special. Break/no programming 3–9:30pm, doors reopen 9:30pm."},
+  {day:"sun", date:"2026-09-06", venue:"Gretchen C. Valade Jazz Center", stage:"Dee Dee Bridgewater's", start:"22:45", end:"24:00", title:"LoEnd Quintet featuring guest vocalists", notes:"Doors 9:30pm. Entrance on Cass Ave."},
+
+  // ===== MONDAY SEPT 7 =====
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"14:00", end:"15:10", title:"Himiko Kikuchi Tottori Young Lions Trio"},
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"16:00", end:"17:10", title:"Cindy Blackman Santana"},
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"Carhartt Amphitheater Stage", start:"18:00", end:"19:30", title:"Coltrane 100: Both Directions at Once", notes:"2026 Artist-In-Residence Joe Lovano, Melissa Aldana, Nduduzo Makhathini, Linda May Han Oh, Jeff \"Tain\" Watts"},
+
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"13:45", end:"14:45", title:"Teiku", sig:true},
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"15:30", end:"16:45", title:"Roberta Gambarini and the Detroit Jazz Festival Orchestra", sig:true},
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"JPMorganChase Stage", start:"17:15", end:"18:30", title:"Joey Alexander Trio"},
+
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"Waterfront Stage", start:"13:00", end:"14:00", title:"Michigan State University Jazz Orchestral \"The Bebop Spartans\"", notes:"Directed by Professor Rodney Whitaker"},
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"Waterfront Stage", start:"15:00", end:"16:15", title:"The Django Festival Allstars", notes:"Featuring Samson Schmitt, Ludovic Beier, Pierre Blanchard, with special guest Grace Kelly"},
+  {day:"mon", date:"2026-09-07", venue:"Hart Plaza", stage:"Waterfront Stage", start:"17:00", end:"18:15", title:"Ron Carter & Foursight", sig:true},
+
+  {day:"mon", date:"2026-09-07", venue:"Gretchen C. Valade Jazz Center", stage:"Detroit Jazz Hall", start:"11:30", end:"14:30", title:"Detroit Public Schools Community District Jazz Showcase + Tottori Jazz Mission International Jam", notes:"Doors 10:30am."},
+];
+
+const DAY_LABELS = {fri:"Fri, Sept 4", sat:"Sat, Sept 5", sun:"Sun, Sept 6", mon:"Mon, Sept 7"};
+const DAY_ORDER = ["fri","sat","sun","mon"];
+let currentDay = "fri";
+let currentSearch = "";
+
+function fmtTime(t) {
+  let [h, m] = t.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  return `${h12}:${String(m).padStart(2,"0")} ${ampm}`;
+}
+
+function renderTabs() {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = DAY_ORDER.map(d =>
+    `<div class="tab ${d===currentDay?'active':''}" data-day="${d}">${DAY_LABELS[d]}</div>`
+  ).join("");
+  tabs.querySelectorAll(".tab").forEach(el => {
+    el.addEventListener("click", () => {
+      currentDay = el.dataset.day;
+      renderTabs();
+      renderMain();
+    });
+  });
+}
+
+function renderMain() {
+  const main = document.getElementById("main");
+  const q = currentSearch.trim().toLowerCase();
+  let events = DATA.filter(e => e.day === currentDay);
+  if (q) {
+    events = DATA.filter(e => e.title.toLowerCase().includes(q) || (e.notes||"").toLowerCase().includes(q));
+  }
+  if (events.length === 0) {
+    main.innerHTML = `<div class="empty-note">No performances match "${currentSearch}".</div>`;
+    return;
+  }
+  // group by venue then stage
+  const venues = {};
+  events.forEach(e => {
+    venues[e.venue] = venues[e.venue] || {};
+    venues[e.venue][e.stage] = venues[e.venue][e.stage] || [];
+    venues[e.venue][e.stage].push(e);
+  });
+  let html = "";
+  Object.keys(venues).forEach(venue => {
+    html += `<div class="venue-block"><div class="venue-title">${venue}</div>`;
+    Object.keys(venues[venue]).forEach(stage => {
+      html += `<div class="stage-title">${stage}</div>`;
+      venues[venue][stage].sort((a,b) => a.start.localeCompare(b.start)).forEach(e => {
+        const idx = DATA.indexOf(e);
+        html += `<div class="card" data-idx="${idx}">
+          <div class="time">${fmtTime(e.start)}&ndash;${fmtTime(e.end)}</div>
+          <div class="title">${e.title}</div>
+          ${e.sig ? '<div class="badge">SIG</div>' : ''}
+        </div>`;
+      });
+    });
+    html += `</div>`;
+  });
+  main.innerHTML = html;
+  main.querySelectorAll(".card").forEach(el => {
+    el.addEventListener("click", () => openModal(DATA[el.dataset.idx]));
+  });
+}
+
+function icsDate(dateStr, timeStr) {
+  const [y,mo,d] = dateStr.split("-");
+  const [h,mi] = timeStr.split(":");
+  return `${y}${mo}${d}T${h}${mi}00`;
+}
+
+function buildIcs(e) {
+  let endDate = e.date, endTime = e.end;
+  if (e.end === "24:00") { endTime = "23:59"; }
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Detroit Jazz Fest 2026 Dashboard//EN",
+    "BEGIN:VEVENT",
+    "UID:" + Math.random().toString(36).slice(2) + "@detroitjazzfest",
+    "DTSTART;TZID=America/Detroit:" + icsDate(e.date, e.start),
+    "DTEND;TZID=America/Detroit:" + icsDate(endDate, endTime),
+    "SUMMARY:" + e.title.replace(/,/g, "\\,"),
+    "LOCATION:" + (e.venue + " - " + e.stage).replace(/,/g, "\\,"),
+    "DESCRIPTION:" + ("Detroit Jazz Fest 2026. " + (e.notes || "")).replace(/,/g, "\\,").replace(/\n/g, "\\n"),
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ];
+  return lines.join("\r\n");
+}
+
+function openModal(e) {
+  const overlay = document.getElementById("overlay");
+  const modal = document.getElementById("modal");
+  const searchQuery = encodeURIComponent(e.title.replace(/\(.*?\)/g,"").split(" featuring")[0].split(":")[0].trim() + " Detroit Jazz Festival");
+  const ics = buildIcs(e);
+  const icsHref = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
+  modal.innerHTML = `
+    <h2>${e.title}</h2>
+    <div class="meta">
+      <strong>${DAY_LABELS[e.day]}</strong>, ${fmtTime(e.start)}&ndash;${fmtTime(e.end)}<br>
+      ${e.venue} &mdash; ${e.stage}
+      ${e.sig ? '<br><span class="badge">Detroit Signature Series Artist</span>' : ''}
+    </div>
+    ${e.notes ? `<div class="notes">${e.notes}</div>` : ''}
+    <div class="modal-actions">
+      <a class="btn btn-primary" href="${icsHref}" download="${e.title.replace(/[^a-z0-9]/gi,'_').slice(0,40)}.ics">Add to iPhone Calendar</a>
+      <a class="btn btn-secondary" href="https://www.google.com/search?q=${searchQuery}" target="_blank" rel="noopener">Learn more about this artist</a>
+      <button class="btn btn-close" id="closeModal">Close</button>
+    </div>
+  `;
+  overlay.classList.add("open");
+  document.getElementById("closeModal").addEventListener("click", closeModal);
+}
+
+function closeModal() {
+  document.getElementById("overlay").classList.remove("open");
+}
+
+document.getElementById("overlay").addEventListener("click", (ev) => {
+  if (ev.target.id === "overlay") closeModal();
+});
+
+document.getElementById("search").addEventListener("input", (ev) => {
+  currentSearch = ev.target.value;
+  renderMain();
+});
+
+renderTabs();
+renderMain();
+</script>
+
+</body>
+</html>
