@@ -1,7 +1,8 @@
 name: Goodreads sync
 
-# Refreshes book-club/data/goodreads.json from the public Goodreads shelf RSS
-# feeds so the GitHub Pages book-club picker always reflects current ratings.
+# Refreshes book-club/data/goodreads-<id>.json for every reader listed in
+# book-club/data/readers.json from the public Goodreads shelf RSS feeds, so
+# the GitHub Pages book-club picker always reflects current ratings.
 
 on:
   schedule:
@@ -26,17 +27,18 @@ jobs:
           python-version: "3.12"
 
       - name: Fetch Goodreads shelves
-        run: python3 book-club/scripts/fetch_goodreads.py --user 49141241
+        run: python3 book-club/scripts/fetch_goodreads.py
 
       - name: Commit if changed
         run: |
-          # fetchedAt changes every run; only commit when the books themselves changed.
-          if git diff --quiet -I '"fetchedAt"' -- book-club/data/goodreads.json; then
+          # Stage first so a newly added reader's file counts. fetchedAt changes
+          # every run; only commit when the books themselves changed.
+          git add book-club/data/goodreads-*.json
+          if git diff --cached --quiet -I '"fetchedAt"'; then
             echo "No shelf changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add book-club/data/goodreads.json
           git commit -m "Sync Goodreads shelves"
           git push

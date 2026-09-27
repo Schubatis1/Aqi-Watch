@@ -12,15 +12,15 @@
 
   const AXES = [
     { key: 'author', label: 'Author affinity', short: 'Author', group: 'taste', weight: 0.20,
-      help: 'How I rated this author, plus authors with a direct literary link (at half weight).' },
+      help: 'How the reader rated this author, plus authors with a direct literary link (at half weight).' },
     { key: 'theme', label: 'Theme match', short: 'Themes', group: 'taste', weight: 0.35,
-      help: 'My ratings of books whose themes overlap this one, weighted by how much they overlap.' },
+      help: "The reader's ratings of books whose themes overlap this one, weighted by how much they overlap." },
     { key: 'crowd', label: 'Crowd signal', short: 'Crowd', group: 'taste', weight: 0.20,
-      help: 'What the Goodreads average predicts for me, using how my ratings track the crowd.' },
+      help: 'What the Goodreads average predicts for the reader, using how their ratings track the crowd.' },
     { key: 'length', label: 'Length fit', short: 'Length', group: 'taste', weight: 0.10,
-      help: 'How I have rated books of similar page count.' },
+      help: 'How the reader has rated books of similar page count.' },
     { key: 'era', label: 'Era fit', short: 'Era', group: 'taste', weight: 0.15,
-      help: 'How I have rated books published around the same time.' },
+      help: 'How the reader has rated books published around the same time.' },
     { key: 'discuss', label: 'Discussion potential', short: 'Discussion', group: 'club', weight: 0.60,
       help: 'Hand-scored: how much a group will have to argue about.' },
     { key: 'access', label: 'Group-friendly', short: 'Group-friendly', group: 'club', weight: 0.40,
@@ -39,7 +39,7 @@
     return { pred: (swr + prior * mu) / (sw + prior), n: sw };
   }
 
-  function buildProfile(read) {
+  function buildProfile(read, name = 'You') {
     const rated = read.filter((b) => b.rating > 0);
     const n = rated.length;
     const mu = rated.reduce((s, b) => s + b.rating, 0) / n;
@@ -64,7 +64,7 @@
       .sort((a, b) => b.avg - a.avg || b.n - a.n);
 
     const dist = [1, 2, 3, 4, 5].map((s) => rated.filter((b) => b.rating === s).length);
-    return { rated, n, mu, crowd, tags, dist, unrated: read.length - n };
+    return { name, read, rated, n, mu, crowd, tags, dist, unrated: read.length - n };
   }
 
   const toScore = (pred, mu) => clamp(50 + (pred - mu) * 50);
@@ -73,7 +73,7 @@
     const pairs = [], notes = [];
     for (const b of P.rated) {
       if (normAuthor(b.author) === normAuthor(c.author)) {
-        pairs.push([1, b.rating]); notes.push(`I gave ${c.author}'s ${short(b.title)} ${stars(b.rating)}`);
+        pairs.push([1, b.rating]); notes.push(`${P.name} gave ${c.author}'s ${short(b.title)} ${stars(b.rating)}`);
       }
     }
     for (const k of c.kindred || []) {
@@ -83,7 +83,7 @@
         notes.push(`${k.author}: ${short(b.title)} ${stars(b.rating)}. ${k.why}`);
       }
     }
-    if (!pairs.length) return { score: 50, pred: P.mu, n: 0, notes: [`No ${c.author} (or close kin) on my read shelf yet, so this stays neutral.`] };
+    if (!pairs.length) return { score: 50, pred: P.mu, n: 0, notes: [`No ${c.author} (or close kin) on ${P.name}'s read shelf yet, so this stays neutral.`] };
     const { pred, n } = shrink(pairs, P.mu, 1);
     return { score: toScore(pred, P.mu), pred, n, notes };
   }
@@ -114,7 +114,7 @@
     const dir = bias >= 0 ? 'above' : 'below';
     return {
       score: toScore(pred, P.mu), pred, n: P.n,
-      notes: [`Goodreads average ${c.avg.toFixed(2)} → about ${pred.toFixed(2)}★ for me. I rate ${Math.abs(bias).toFixed(2)}★ ${dir} the crowd on average.`],
+      notes: [`Goodreads average ${c.avg.toFixed(2)} → about ${pred.toFixed(2)}★ for ${P.name}, who rates ${Math.abs(bias).toFixed(2)}★ ${dir} the crowd on average.`],
     };
   }
 
@@ -133,8 +133,8 @@
     const closeish = near.filter((x) => x.w > 0.5);
     const avgNear = closeish.length ? closeish.reduce((s, x) => s + x.b.rating, 0) / closeish.length : null;
     const notes = [avgNear != null
-      ? `${closeish.length} rated books ${fmt(c)} average ${avgNear.toFixed(2)}★ from me.`
-      : `Few rated books ${fmt(c)}; leaning on my overall average.`];
+      ? `${closeish.length} rated books ${fmt(c)} average ${avgNear.toFixed(2)}★ from ${P.name}.`
+      : `Few rated books ${fmt(c)}; leaning on ${P.name}'s overall average.`];
     return { score: toScore(pred, P.mu), pred, n, notes };
   }
 
@@ -157,7 +157,15 @@
     };
   }
 
-  function scoreCandidate(c, P) {
+  // Same book, possibly a different edition: match on id, else title+author.
+  const sameBook = (b, c) => b.id === c.id ||
+    (short(b.title).toLowerCase() === c.title.toLowerCase() && normAuthor(b.author) === normAuthor(c.author));
+
+  function scoreCandidate(c, P0) {
+    // A contender the reader has already read mustn't count as evidence for
+    // itself; score it from the rest of the shelf and flag it.
+    const already = P0.read.find((b) => sameBook(b, c)) || null;
+    const P = already ? { ...P0, rated: P0.rated.filter((b) => !sameBook(b, c)) } : P0;
     const axes = {
       author: scoreAuthor(c, P),
       theme: scoreTheme(c, P),
@@ -176,11 +184,11 @@
     const tAx = AXES.filter((a) => a.group === 'taste');
     const predStars = tAx.reduce((s, a) => s + a.weight * axes[a.key].pred, 0) /
       tAx.reduce((s, a) => s + a.weight, 0);
-    return { c, axes, taste: group('taste'), club: group('club'), predStars };
+    return { c, axes, taste: group('taste'), club: group('club'), predStars, already };
   }
 
-  function rank(candidates, read, tasteWeight = 0.6) {
-    const P = buildProfile(read);
+  function rank(candidates, read, tasteWeight = 0.6, name = 'You') {
+    const P = buildProfile(read, name);
     const results = candidates.map((c) => scoreCandidate(c, P));
     for (const r of results) r.overall = tasteWeight * r.taste + (1 - tasteWeight) * r.club;
     results.sort((a, b) => b.overall - a.overall);

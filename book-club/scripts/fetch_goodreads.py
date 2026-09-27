@@ -10,7 +10,8 @@ Browsers can't read that feed directly from GitHub Pages (no CORS headers),
 so a scheduled GitHub Action runs this script and commits the JSON the page
 reads. Standard library only, so the Action needs no installs.
 
-Usage:  python3 fetch_goodreads.py [--user 49141241] [--out ../data/goodreads.json]
+Usage:  python3 fetch_goodreads.py              # every reader in data/readers.json
+        python3 fetch_goodreads.py --user 123 --out some.json
 """
 
 import argparse
@@ -25,8 +26,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_OUT = HERE.parent / "data" / "goodreads.json"
-OVERRIDES = HERE.parent / "data" / "tag-overrides.json"
+DATA = HERE.parent / "data"
+READERS = DATA / "readers.json"
+OVERRIDES = DATA / "tag-overrides.json"
 FEED = "https://www.goodreads.com/review/list_rss/{user}?shelf={shelf}&per_page=200&page={page}"
 UA = "Mozilla/5.0 (book-club-picker; +https://github.com/schubatis1/Aqi-Watch)"
 
@@ -147,29 +149,43 @@ def fetch_shelf(user, shelf, overrides):
     return books
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--user", default="49141241")
-    ap.add_argument("--out", default=str(DEFAULT_OUT))
-    args = ap.parse_args()
-
-    overrides = json.loads(OVERRIDES.read_text()) if OVERRIDES.exists() else {}
-    overrides.pop("_comment", None)
-    print(f"Fetching Goodreads shelves for user {args.user}", file=sys.stderr)
-    read = fetch_shelf(args.user, "read", overrides)
-    to_read = fetch_shelf(args.user, "to-read", overrides)
+def sync(user, out_path, overrides, profile=None):
+    print(f"Fetching Goodreads shelves for user {user}", file=sys.stderr)
+    read = fetch_shelf(user, "read", overrides)
+    to_read = fetch_shelf(user, "to-read", overrides)
     if not read:
-        sys.exit("Read shelf came back empty -- is the profile public? Refusing to overwrite data.")
-
+        print(f"  read shelf empty for {user} -- is the profile public? Keeping old data.", file=sys.stderr)
+        return False
     out = {
-        "user": args.user,
-        "profile": f"https://www.goodreads.com/user/show/{args.user}",
+        "user": user,
+        "profile": profile or f"https://www.goodreads.com/user/show/{user}",
         "fetchedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "read": read,
         "toRead": to_read,
     }
-    Path(args.out).write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n")
-    print(f"Wrote {args.out}", file=sys.stderr)
+    Path(out_path).write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n")
+    print(f"  wrote {out_path}", file=sys.stderr)
+    return True
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--user", help="one Goodreads user id (default: everyone in readers.json)")
+    ap.add_argument("--out", help="output path when --user is given")
+    args = ap.parse_args()
+
+    overrides = json.loads(OVERRIDES.read_text()) if OVERRIDES.exists() else {}
+    overrides.pop("_comment", None)
+
+    if args.user:
+        ok = sync(args.user, args.out or DATA / f"goodreads-{args.user}.json", overrides)
+        sys.exit(0 if ok else 1)
+
+    readers = json.loads(READERS.read_text())["readers"]
+    results = [sync(r["id"], DATA / f"goodreads-{r['id']}.json", overrides, r.get("profile")) for r in readers]
+    # One private/broken profile shouldn't block everyone else's refresh.
+    if not any(results):
+        sys.exit("Every shelf came back empty; nothing written.")
 
 
 if __name__ == "__main__":

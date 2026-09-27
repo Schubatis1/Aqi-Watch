@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Book Club Picker</title>
-<meta name="description" content="Which of six autumn reads should I propose to book club? Scored against my Goodreads history." />
+<meta name="description" content="Which of six autumn reads should we propose to book club? Scored against a reader's Goodreads history." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎃</text></svg>" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,6 +47,13 @@
   h1 { font-family: 'IM Fell English', Georgia, serif; font-weight: 400; font-size: clamp(32px, 6vw, 52px); line-height: 1.05; margin: 0 0 12px; }
   h2 { font-family: 'IM Fell English', Georgia, serif; font-weight: 400; font-size: clamp(24px, 4vw, 32px); margin: 0 0 6px; }
   h3 { margin: 0; font-size: 15px; font-weight: 600; }
+  .reader-pick { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 18px; padding: 6px 6px 6px 14px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; }
+  .reader-pick label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .reader-pick select { appearance: none; -webkit-appearance: none; font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); cursor: pointer;
+    background: var(--card-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23f2c14e' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 12px center;
+    border: 1px solid #5a3a22; border-radius: 999px; padding: 6px 34px 6px 14px; }
+  .reader-pick select:hover { border-color: var(--pumpkin); }
+  .fact.read { border-color: #4b6b3a; color: #b5d69a; }
   .lede { color: var(--ink-2); max-width: 62ch; margin: 0; font-size: 16px; }
   .meta { color: var(--muted); font-size: 13px; margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
   .meta span::before { content: '◆ '; color: var(--pumpkin); font-size: 9px; vertical-align: 2px; }
@@ -180,8 +187,12 @@
 <div class="wrap">
   <header>
     <p class="eyebrow">Book club · Autumn 2026 pick</p>
-    <h1>Which spooky book should I propose?</h1>
-    <p class="lede">Six Halloween-season contenders, scored against every book I've rated on Goodreads, then weighed for how well each would work for the whole club.</p>
+    <h1>Which spooky book should we propose?</h1>
+    <div class="reader-pick">
+      <label for="reader">Whose taste?</label>
+      <select id="reader"><option>Adam</option></select>
+    </div>
+    <p class="lede">Six Halloween-season contenders, scored against every book <span class="rname">Adam</span> has rated on Goodreads, then weighed for how well each would work for the whole club.</p>
     <div class="meta" id="meta"><span>Loading Goodreads data…</span></div>
   </header>
 
@@ -189,8 +200,8 @@
 
   <div class="card weigh">
     <div class="weigh-row">
-      <span class="pole taste">My taste</span>
-      <input type="range" id="blend" min="0" max="100" step="5" value="60" aria-label="Balance between my taste and club fit" />
+      <span class="pole taste"><span class="rname">Adam</span>'s taste</span>
+      <input type="range" id="blend" min="0" max="100" step="5" value="60" aria-label="Balance between the reader's taste and club fit" />
       <span class="pole club">Club fit</span>
     </div>
     <p class="hint" id="blend-hint"></p>
@@ -198,7 +209,7 @@
 
   <section>
     <h2>Head to head</h2>
-    <p class="section-sub">Seven axes, 0–100. On the <span style="color:var(--taste)">taste</span> axes, 50 means "about as much as my average book". Tap a book to hide or show it.</p>
+    <p class="section-sub">Seven axes, 0–100. On the <span style="color:var(--taste)">taste</span> axes, 50 means "about as much as <span class="rname">Adam</span>'s average book". Tap a book to hide or show it.</p>
     <div class="card radar-panel">
       <div class="radar-big" id="radar-big"></div>
       <div>
@@ -219,7 +230,7 @@
   </section>
 
   <section>
-    <h2>What my shelf says about me</h2>
+    <h2>What <span class="rname">Adam</span>'s shelf says</h2>
     <p class="section-sub">The taste axes are built from this profile.</p>
     <div class="profile" id="profile"></div>
   </section>
@@ -227,12 +238,12 @@
   <section>
     <h2>How it works</h2>
     <div class="card method">
-      <p style="margin-top:0">Goodreads shut down its public API in 2020, but every public shelf still has an RSS feed with my star ratings, the Goodreads average, page count, year and description. A GitHub Action (<code>.github/workflows/goodreads-sync.yml</code>) pulls <a href="https://www.goodreads.com/review/list_rss/49141241?shelf=read" rel="noopener">my read shelf</a> every morning. It tags each book's themes from its description and commits <code>book-club/data/goodreads.json</code>, which this page reads. The six contenders and their hand-scored discussion notes live in <code>book-club/data/candidates.json</code>.</p>
+      <p style="margin-top:0">Goodreads shut down its public API in 2020, but every public shelf still has an RSS feed with the reader's star ratings, the Goodreads average, page count, year and description. A GitHub Action (<code>.github/workflows/goodreads-sync.yml</code>) pulls the read shelf of everyone in <code>book-club/data/readers.json</code> every morning (<a id="rss-link" href="https://www.goodreads.com/review/list_rss/49141241?shelf=read" rel="noopener">here's <span class="rname">Adam</span>'s</a>). It tags each book's themes from its description and commits <code>book-club/data/goodreads-&lt;id&gt;.json</code>, which this page reads. The six contenders and their hand-scored discussion notes live in <code>book-club/data/candidates.json</code>.</p>
       <dl id="method-axes"></dl>
     </div>
   </section>
 
-  <footer>Data from Goodreads RSS · Not affiliated with Goodreads · <a href="https://www.goodreads.com/user/show/49141241-adam-schubatis" rel="noopener">My Goodreads profile</a></footer>
+  <footer>Data from Goodreads RSS · Not affiliated with Goodreads · <a id="footer-profile" href="https://www.goodreads.com/user/show/49141241-adam-schubatis" rel="noopener"><span class="rname">Adam</span>'s Goodreads profile</a></footer>
 </div>
 <div class="radar-tip" id="tip" role="tooltip"></div>
 
@@ -247,7 +258,9 @@
   const svgNS = 'http://www.w3.org/2000/svg';
   const grUrl = (c) => `https://www.goodreads.com/book/show/${c.id}`;
 
-  let DATA = null, colorOf = {}, visible = new Set();
+  let DATA = null, READERS = [], READER = null, colorOf = {}, visible = new Set();
+  const shelfCache = {};
+  const nm = () => READER.name;
 
   function loadPref() { try { return JSON.parse(localStorage.getItem('bookclub-pref') || '{}'); } catch { return {}; } }
   function savePref(p) { try { localStorage.setItem('bookclub-pref', JSON.stringify(p)); } catch {} }
@@ -312,9 +325,9 @@
   /* ---------- Render ---------- */
   function render() {
     const t = Number($('blend').value) / 100;
-    const { profile: P, results } = rank(DATA.candidates, DATA.gr.read, t);
+    const { profile: P, results } = rank(DATA.candidates, DATA.gr.read, t, nm());
     const pct = Math.round(t * 100);
-    $('blend-hint').textContent = `Ranking = ${pct}% my taste + ${100 - pct}% club fit. Slide toward "My taste" if it's my turn to pick for me, or toward "Club fit" if I want the best night.`;
+    $('blend-hint').textContent = `Ranking = ${pct}% ${nm()}'s taste + ${100 - pct}% club fit. Slide left to pick for ${nm()}, or right to pick the best night for the group.`;
 
     // Verdict
     const [top, second] = results;
@@ -328,7 +341,8 @@
         <div>
           <div class="kicker">Propose this one</div>
           <h2 class="serif"><a href="${grUrl(top.c)}" rel="noopener">${esc(top.c.title)}</a></h2>
-          <p class="by">by ${esc(top.c.author)} · I'd likely rate it about <b>${top.predStars.toFixed(1)}★</b> · score ${top.overall.toFixed(0)}</p>
+          <p class="by">by ${esc(top.c.author)} · ${esc(nm())} would likely rate it about <b>${top.predStars.toFixed(1)}★</b> · score ${top.overall.toFixed(0)}</p>
+          ${top.already ? `<p class="by" style="color:#b5d69a">${esc(nm())} has already read this one${top.already.rating ? ` (rated ${top.already.rating}★)` : ''}, so it's a re-read.</p>` : ''}
           <ul>${reasons.map((r) => `<li>${r}</li>`).join('')}</ul>
           <p class="runner">${margin < 2.5 ? 'A photo finish: ' : 'Runner-up: '}<a href="${grUrl(second.c)}" rel="noopener">${esc(second.c.title)}</a> is ${margin.toFixed(1)} points behind.${margin < 2.5 ? ' The slider can flip this.' : ''}</p>
         </div>
@@ -363,14 +377,15 @@
           <h3><a href="${grUrl(c)}" rel="noopener">${esc(c.title)}</a></h3>
           <p class="by">by ${esc(c.author)} · ${c.year}</p>
           <div class="facts">
-            <span class="fact hot">≈ ${r.predStars.toFixed(1)}★ for me</span>
+            <span class="fact hot">≈ ${r.predStars.toFixed(1)}★ for ${esc(nm())}</span>
+            ${r.already ? `<span class="fact read">${esc(nm())} already read it${r.already.rating ? ` · rated ${r.already.rating}★` : ''}</span>` : ''}
             <span class="fact">${c.pages} pages</span>
             <span class="fact">${c.avg.toFixed(2)} avg · ${c.ratingsCount.toLocaleString('en-US')} ratings</span>
-            ${onShelf ? '<span class="fact">On my Want to Read</span>' : ''}
+            ${onShelf ? `<span class="fact">On ${esc(nm())}'s Want to Read</span>` : ''}
           </div>
           <div class="bars">
             ${bar('overall', 'Overall', r.overall)}
-            ${bar('taste', 'My taste', r.taste)}
+            ${bar('taste', 'Taste', r.taste)}
             ${bar('club', 'Club fit', r.club)}
           </div>
           ${c.caveat ? `<p class="caveat">${esc(c.caveat)}</p>` : ''}
@@ -398,7 +413,7 @@
     });
 
     renderProfile(P, results);
-    savePref({ blend: $('blend').value, visible: [...visible] });
+    savePref({ blend: $('blend').value, visible: [...visible], reader: READER.id });
   }
 
   const bar = (cls, label, v) => `
@@ -413,17 +428,17 @@
       <div class="card">
         <div class="stat-row">
           <div class="stat"><div class="k">${P.n}</div><div class="l">books rated</div></div>
-          <div class="stat"><div class="k">${P.mu.toFixed(2)}★</div><div class="l">my average</div></div>
+          <div class="stat"><div class="k">${P.mu.toFixed(2)}★</div><div class="l">${esc(nm())}'s average</div></div>
           <div class="stat"><div class="k">${bias >= 0 ? '+' : '−'}${Math.abs(bias).toFixed(2)}</div><div class="l">vs. Goodreads avg</div></div>
         </div>
         <div class="dist">
           ${[5, 4, 3, 2, 1].map((s) => `
             <div class="row"><span>${s}★</span><div class="track"><div class="fill" style="width:${(P.dist[s - 1] / max * 100).toFixed(1)}%"></div></div><span>${P.dist[s - 1]}</span></div>`).join('')}
         </div>
-        <p class="section-sub" style="margin:14px 0 0">Every +1 in a book's Goodreads average moves my rating by about ${slope.toFixed(2)}★, so I track the crowd closely, and more steeply than 1:1. That makes the crowd axis tough on the lower-rated classics. ${P.unrated} books on my read shelf have no star rating and are left out.</p>
+        <p class="section-sub" style="margin:14px 0 0">Every +1 in a book's Goodreads average moves ${esc(nm())}'s rating by about ${slope.toFixed(2)}★${slope > 1.1 ? ', steeper than 1:1, which makes the crowd axis tough on lower-rated classics' : slope < 0.7 ? ', so the crowd is only a loose guide to their taste' : ', roughly tracking the crowd'}. ${P.unrated} books on the read shelf have no star rating and are left out.</p>
       </div>
       <div class="card">
-        <h3 style="margin-bottom:4px">My average rating by theme</h3>
+        <h3 style="margin-bottom:4px">${esc(nm())}'s average rating by theme</h3>
         <p class="section-sub" style="margin-bottom:12px">Bars run from 2★ to 5★; the line marks 3.5★. <b style="color:var(--ink)">Bold</b> themes appear in the six contenders.</p>
         <div class="tags">
           ${tags.map((t) => {
@@ -446,33 +461,75 @@
       <span>Synced from <a href="${gr.profile}" rel="noopener">Goodreads</a> ${when.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
       <span>${DATA.candidates.length} contenders</span>`;
     $('axis-key').innerHTML = `
-      <div><span class="dot" style="background:var(--taste)"></span><b>Taste axes</b> predict how much I'd like it</div>
+      <div><span class="dot" style="background:var(--taste)"></span><b>Taste axes</b> predict how much ${esc(nm())} would like it</div>
       <div><span class="dot" style="background:var(--club)"></span><b>Club axes</b> judge it as a group pick</div>`;
     $('method-axes').innerHTML = AXES.map((a) => `<dt><span class="dot" style="background:${a.group === 'taste' ? 'var(--taste)' : 'var(--club)'}"></span>${esc(a.label)}</dt><dd>${esc(a.help)} Weight within ${a.group === 'taste' ? 'taste' : 'club fit'}: ${Math.round(a.weight * 100)}%.</dd>`).join('');
   }
 
-  async function init() {
+  const getJSON = (url) => fetch(url, { cache: 'no-cache' }).then((r) => {
+    if (!r.ok) throw new Error(`${url.split('/').pop()} ${r.status}`);
+    return r.json();
+  });
+
+  function loadShelf(reader) {
+    return (shelfCache[reader.id] ||= getJSON(`data/goodreads-${reader.id}.json`)
+      .catch((e) => { delete shelfCache[reader.id]; throw e; }));
+  }
+
+  function showError(e) {
+    $('meta').innerHTML = '';
+    $('verdict').innerHTML = `<div class="card error" style="margin-top:24px">Couldn't load the book data (${esc(e.message)}). If you opened this file directly, serve the folder instead, e.g. <code>python3 -m http.server</code>.</div>`;
+  }
+
+  async function selectReader(id) {
+    const reader = READERS.find((r) => r.id === id) || READERS[0];
+    $('reader').disabled = true;
     try {
-      const [gr, cand] = await Promise.all([
-        fetch('data/goodreads.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error('goodreads.json ' + r.status); return r.json(); }),
-        fetch('data/candidates.json', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error('candidates.json ' + r.status); return r.json(); }),
-      ]);
-      DATA = { gr, candidates: cand.candidates };
+      DATA.gr = await loadShelf(reader);
     } catch (e) {
-      $('meta').innerHTML = '';
-      $('verdict').innerHTML = `<div class="card error" style="margin-top:24px">Couldn't load the book data (${esc(e.message)}). If you opened this file directly, serve the folder instead, e.g. <code>python3 -m http.server</code>.</div>`;
+      $('reader').value = READER ? READER.id : reader.id;
+      $('reader').disabled = false;
+      if (!READER) showError(e); else alert(`Couldn't load ${reader.name}'s shelf (${e.message}).`);
       return;
     }
+    READER = reader;
+    $('reader').value = reader.id;
+    $('reader').disabled = false;
+    document.querySelectorAll('.rname').forEach((el) => { el.textContent = reader.name; });
+    $('rss-link').href = `https://www.goodreads.com/review/list_rss/${reader.id}?shelf=read`;
+    $('footer-profile').href = reader.profile || DATA.gr.profile;
+    document.title = `Book Club Picker · ${reader.name}`;
+    const url = new URL(location.href);
+    url.searchParams.set('reader', reader.name.toLowerCase());
+    history.replaceState(null, '', url);
+    renderStatic();
+    render();
+  }
+
+  async function init() {
+    let cand, readers;
+    try {
+      [cand, readers] = await Promise.all([getJSON('data/candidates.json'), getJSON('data/readers.json')]);
+    } catch (e) { showError(e); return; }
+    DATA = { gr: null, candidates: cand.candidates };
+    READERS = readers.readers;
+    $('reader').innerHTML = READERS.map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');
+
     DATA.candidates.forEach((c, i) => { colorOf[c.id] = PALETTE[i % PALETTE.length]; });
     const pref = loadPref();
     if (pref.blend != null) $('blend').value = pref.blend;
     visible = new Set(Array.isArray(pref.visible) && pref.visible.length ? pref.visible : DATA.candidates.map((c) => c.id));
 
-    renderStatic();
-    render();
+    // ?reader=lauren (name or id) wins, so a link can open straight to someone.
+    const q = (new URLSearchParams(location.search).get('reader') || '').toLowerCase();
+    const fromUrl = READERS.find((r) => r.id === q || r.name.toLowerCase() === q);
+    await selectReader((fromUrl || READERS.find((r) => r.id === pref.reader) || READERS[0]).id);
+    if (!READER) return;
+
     wireTips($('radar-big'));
     wireTips($('books'));
 
+    $('reader').addEventListener('change', (e) => selectReader(e.target.value));
     $('blend').addEventListener('input', render);
     $('legend').addEventListener('click', (e) => {
       const b = e.target.closest('.chip'); if (!b) return;
@@ -483,7 +540,7 @@
     $('show-all').addEventListener('click', () => { visible = new Set(DATA.candidates.map((c) => c.id)); render(); });
     $('show-top').addEventListener('click', () => {
       const t = Number($('blend').value) / 100;
-      visible = new Set(rank(DATA.candidates, DATA.gr.read, t).results.slice(0, 2).map((r) => r.c.id));
+      visible = new Set(rank(DATA.candidates, DATA.gr.read, t, nm()).results.slice(0, 2).map((r) => r.c.id));
       render();
     });
   }

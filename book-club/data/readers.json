@@ -1,0 +1,7 @@
+{
+ "_comment": "Goodreads users the book-club picker can score for. Each needs a public profile; the sync writes data/goodreads-<id>.json for each.",
+ "readers": [
+  { "id": "49141241", "name": "Adam", "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis" },
+  { "id": "36349659", "name": "Lauren", "profile": "https://www.goodreads.com/user/show/36349659-lauren" }
+ ]
+}
