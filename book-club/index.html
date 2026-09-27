@@ -124,6 +124,7 @@
   .bar .v { font-variant-numeric: tabular-nums; text-align: right; }
   .bar.overall .fill { background: var(--pumpkin); } .bar.overall { color: var(--ink); font-weight: 600; }
   .bar.taste .fill { background: var(--taste); } .bar.club .fill { background: var(--club); }
+  .synopsis { font-size: 14.5px; line-height: 1.6; color: var(--ink); margin: 0 0 12px; max-width: 62ch; }
   .caveat { font-size: 13.5px; color: var(--ink-2); margin: 8px 0 0; padding-left: 10px; border-left: 2px solid #6b3a2e; }
   details { margin-top: 12px; }
   summary { cursor: pointer; color: var(--candle); font-size: 13.5px; font-weight: 600; list-style: none; }
@@ -376,6 +377,7 @@
         <div>
           <h3><a href="${grUrl(c)}" rel="noopener">${esc(c.title)}</a></h3>
           <p class="by">by ${esc(c.author)} · ${c.year}</p>
+          ${c.synopsis ? `<p class="synopsis">${esc(c.synopsis)}</p>` : ''}
           <div class="facts">
             <span class="fact hot">≈ ${r.predStars.toFixed(1)}★ for ${esc(nm())}</span>
             ${r.already ? `<span class="fact read">${esc(nm())} already read it${r.already.rating ? ` · rated ${r.already.rating}★` : ''}</span>` : ''}
