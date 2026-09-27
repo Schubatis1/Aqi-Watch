@@ -1,0 +1,98 @@
+{
+ "_comment": "Hand corrections to auto-inferred theme tags, keyed by Goodreads book_id. The keyword tagger reads RSS descriptions, which sometimes miss the obvious.",
+ "17934530": {
+  "remove": [
+   "history",
+   "fantasy"
+  ]
+ },
+ "126919002": {
+  "add": [
+   "sci-fi",
+   "literary"
+  ],
+  "remove": [
+   "nonfiction"
+  ]
+ },
+ "60457992": {
+  "add": [
+   "sci-fi",
+   "psychological"
+  ],
+  "remove": [
+   "ghost",
+   "horror"
+  ]
+ },
+ "52766853": {
+  "add": [
+   "weird",
+   "literary"
+  ]
+ },
+ "172366": {
+  "add": [
+   "weird"
+  ]
+ },
+ "11003233": {
+  "add": [
+   "weird",
+   "psychological"
+  ],
+  "remove": [
+   "ghost"
+  ]
+ },
+ "18305608": {
+  "add": [
+   "supernatural",
+   "classic"
+  ],
+  "remove": [
+   "history",
+   "thriller"
+  ]
+ },
+ "53593653": {
+  "add": [
+   "death",
+   "classic",
+   "literary"
+  ],
+  "remove": [
+   "folk-horror",
+   "nonfiction"
+  ]
+ },
+ "40130093": {
+  "add": [
+   "gothic"
+  ]
+ },
+ "1335601": {
+  "add": [
+   "folk-horror"
+  ]
+ },
+ "1137702": {
+  "add": [
+   "supernatural"
+  ]
+ },
+ "13543121": {
+  "add": [
+   "supernatural"
+  ],
+  "remove": [
+   "thriller"
+  ]
+ },
+ "52702097": {
+  "add": [
+   "fantasy",
+   "literary"
+  ]
+ }
+}

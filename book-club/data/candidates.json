@@ -1,0 +1,105 @@
+{
+ "_comment": "The six book-club contenders. Numbers are from each book's Goodreads page (the edition on the Want to Read shelf). 'year' is original publication. 'kindred' lists authors on your read shelf with a real literary link, used at half weight when you haven't read the author themselves. 'discussion' is a hand-scored 0-100 for how much a group will have to argue about.",
+ "candidates": [
+  {
+   "id": "12948",
+   "title": "The Turn of the Screw",
+   "author": "Henry James",
+   "year": 1898,
+   "pages": 121,
+   "avg": 3.38,
+   "ratingsCount": 188487,
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1567172392i/12948._SY475_.jpg",
+   "tags": ["gothic", "ghost", "horror", "classic", "psychological", "literary", "supernatural"],
+   "kindred": [
+    { "author": "Diane Setterfield", "why": "Setterfield writes in James's Victorian ghost-story tradition" },
+    { "author": "Algernon Blackwood", "why": "Blackwood was James's contemporary in the English ghost-story boom" }
+   ],
+   "discussion": 95,
+   "discussionWhy": "Are the ghosts real or is the governess unravelling? Critics have argued about this for 125 years, and your group will too.",
+   "caveat": "Late-Henry-James sentences are famously dense; short, but not fast."
+  },
+  {
+   "id": "1201724",
+   "title": "Dark Harvest",
+   "author": "Norman Partridge",
+   "year": 2006,
+   "pages": 176,
+   "avg": 3.59,
+   "ratingsCount": 14822,
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1442687968i/1201724._SY475_.jpg",
+   "tags": ["horror", "halloween", "folk-horror", "coming-of-age", "supernatural", "thriller", "death"],
+   "kindred": [
+    { "author": "Ray Bradbury", "why": "Partridge's Halloween small town is a deliberate riff on Bradbury's Something Wicked This Way Comes" }
+   ],
+   "discussion": 70,
+   "discussionWhy": "A town that feeds its boys to an annual Halloween ritual: conformity, violence and who benefits from tradition. Bram Stoker Award winner.",
+   "caveat": "Pulpy second-person voice and a lot of gore; plays more like a movie than a novel."
+  },
+  {
+   "id": "33124137",
+   "title": "Pet Sematary",
+   "author": "Stephen King",
+   "year": 1983,
+   "pages": 580,
+   "avg": 4.09,
+   "ratingsCount": 734946,
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1480069533i/33124137._SY475_.jpg",
+   "tags": ["horror", "supernatural", "death", "folk-horror", "psychological"],
+   "kindred": [
+    { "author": "Algernon Blackwood", "why": "King borrowed Blackwood's Wendigo as the thing behind the burial ground" }
+   ],
+   "discussion": 85,
+   "discussionWhy": "The best-known horror novel about grief. Would you walk up that path? What do we owe the dead, and what do we tell our kids about death?",
+   "caveat": "The longest pick by far, and the death of a child is central. Check the room before proposing it."
+  },
+  {
+   "id": "761381",
+   "title": "The Halloween Tree",
+   "author": "Ray Bradbury",
+   "year": 1972,
+   "pages": 145,
+   "avg": 3.76,
+   "ratingsCount": 40372,
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1320398641i/761381._SY475_.jpg",
+   "tags": ["halloween", "coming-of-age", "death", "mythology", "fantasy", "history", "supernatural"],
+   "kindred": [],
+   "discussion": 60,
+   "discussionWhy": "A whirlwind tour of how cultures (Egypt, Celtic Britain, Notre-Dame, Día de Muertos) have faced death. Good for comparing traditions.",
+   "caveat": "Written for young readers, so there's less to chew on for adults than the others."
+  },
+  {
+   "id": "816085",
+   "title": "Harvest Home",
+   "author": "Thomas Tryon",
+   "year": 1973,
+   "pages": 403,
+   "avg": 3.80,
+   "ratingsCount": 11825,
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1688105555i/816085._SY475_.jpg",
+   "tags": ["folk-horror", "horror", "supernatural", "psychological", "thriller", "gothic"],
+   "kindred": [],
+   "discussion": 75,
+   "discussionWhy": "The American Wicker Man: city family, perfect New England village, corn-goddess cult. Gender power, nostalgia and 1970s back-to-the-land anxieties.",
+   "caveat": "Slow-burn first half; some 1970s gender politics that will read as dated (which can itself be a discussion)."
+  },
+  {
+   "id": "310584",
+   "title": "The Hill of Dreams",
+   "author": "Arthur Machen",
+   "year": 1907,
+   "pages": 204,
+   "avg": 3.84,
+   "ratingsCount": 1451,
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1348328655i/310584._SY475_.jpg",
+   "tags": ["weird", "literary", "classic", "psychological", "coming-of-age", "mythology", "folk-horror"],
+   "kindred": [
+    { "author": "Algernon Blackwood", "why": "Machen and Blackwood were fellow Golden Dawn members and the twin pillars of Edwardian weird fiction" },
+    { "author": "Jorge Luis Borges", "why": "Borges championed Machen and picked him for his own 'Library of Babel' anthology series" }
+   ],
+   "discussion": 65,
+   "discussionWhy": "A lonely young writer, a Roman ruin in Wales and a mind dissolving into visions. Is it horror at all? A good debate about art and isolation.",
+   "caveat": "Hardly any plot, and hard to find in stores: only about 1.5k Goodreads ratings."
+  }
+ ]
+}
