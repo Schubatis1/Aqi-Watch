@@ -1,18 +1,144 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-09-27T13:38:07+00:00",
+ "fetchedAt": "2026-09-28T18:35:48+00:00",
  "read": [
+  {
+   "id": "375802",
+   "title": "Ender’s Game (Ender's Saga, #1)",
+   "author": "Orson Scott Card",
+   "rating": 4,
+   "avg": 4.31,
+   "year": 1985,
+   "pages": 324,
+   "readAt": "Fri, 10 May 2024 00:00:00 +0000",
+   "added": "Sun, 27 Sep 2026 07:39:34 -0700",
+   "shelves": [],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1408303130l/375802._SY160_.jpg",
+   "url": "https://www.goodreads.com/book/show/375802",
+   "tags": [
+    "coming-of-age",
+    "fantasy",
+    "literary",
+    "psychological",
+    "sci-fi"
+   ],
+   "blurb": "From New York Times bestselling author Orson Scott Card, Ender's Game―adapted to film starring Asa Butterfield and Harrison Ford―is the classic Hugo and Nebula award-winning science fiction novel of a young boy's recruitment into the midst of an interstellar war. In order to deve"
+  },
+  {
+   "id": "77683",
+   "title": "The Fellowship of the Ring (The Lord of the Rings #1)",
+   "author": "J.R.R. Tolkien",
+   "rating": 5,
+   "avg": 4.57,
+   "year": 1954,
+   "pages": 423,
+   "readAt": "Wed, 22 Jan 2025 00:00:00 +0000",
+   "added": "Sun, 27 Sep 2026 07:38:57 -0700",
+   "shelves": [],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1386919780l/77683._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/77683",
+   "tags": [
+    "classic",
+    "fantasy",
+    "horror",
+    "literary",
+    "mythology"
+   ],
+   "blurb": "The Lord of the Rings, J.R.R. Tolkien's three-volume epic, is set in the imaginary world of Middle-earth - home to many strange beings, and most notably hobbits, a peace-loving \"little people,\" cheerful and shy. Since its original British publication in 1954-55, the saga has entr"
+  },
+  {
+   "id": "40130093",
+   "title": "Once Upon a River",
+   "author": "Diane Setterfield",
+   "rating": 4,
+   "avg": 3.9,
+   "year": 2018,
+   "pages": 464,
+   "readAt": "Sun, 22 Jun 2025 00:00:00 +0000",
+   "added": "Sun, 27 Sep 2026 07:38:47 -0700",
+   "shelves": [],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1526451355l/40130093._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/40130093",
+   "tags": [
+    "fantasy",
+    "gothic",
+    "mythology",
+    "supernatural",
+    "thriller"
+   ],
+   "blurb": "On a dark midwinter’s night in an ancient inn on the river Thames, an extraordinary event takes place. The regulars are telling stories to while away the dark hours, when the door bursts open on a grievously wounded stranger. In his arms is the lifeless body of a small child. Hou"
+  },
+  {
+   "id": "20518872",
+   "title": "The Three-Body Problem (Remembrance of Earth’s Past, #1)",
+   "author": "Liu Cixin",
+   "rating": 5,
+   "avg": 4.07,
+   "year": 2006,
+   "pages": 472,
+   "readAt": "Wed, 16 Jul 2025 00:00:00 +0000",
+   "added": "Sun, 27 Sep 2026 07:38:40 -0700",
+   "shelves": [],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1415428227l/20518872._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/20518872",
+   "tags": [
+    "history",
+    "sci-fi"
+   ],
+   "blurb": "Set against the backdrop of China's Cultural Revolution, a secret military project sends signals into space to establish contact with aliens. An alien civilization on the brink of destruction captures the signal and plans to invade Earth. Meanwhile, on Earth, different camps star"
+  },
+  {
+   "id": "60457992",
+   "title": "I Who Have Never Known Men",
+   "author": "Jacqueline Harpman",
+   "rating": 4,
+   "avg": 3.96,
+   "year": 1995,
+   "pages": 175,
+   "readAt": "Tue, 30 Dec 2025 00:00:00 +0000",
+   "added": "Sun, 27 Sep 2026 07:38:13 -0700",
+   "shelves": [],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1645371720l/60457992._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/60457992",
+   "tags": [
+    "literary",
+    "psychological",
+    "sci-fi"
+   ],
+   "blurb": "Deep underground, thirty-nine women live imprisoned in a cage. Watched over by guards, the women have no memory of how they got there, no notion of time, and only a vague recollection of their lives before. As the burn of electric light merges day into night and numberless years "
+  },
+  {
+   "id": "126919002",
+   "title": "The Tusks of Extinction",
+   "author": "Ray Nayler",
+   "rating": 4,
+   "avg": 4.15,
+   "year": 2024,
+   "pages": 105,
+   "readAt": "Tue, 20 Jan 2026 00:00:00 +0000",
+   "added": "Sun, 27 Sep 2026 07:38:03 -0700",
+   "shelves": [],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1683036798l/126919002._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/126919002",
+   "tags": [
+    "death",
+    "literary",
+    "psychological",
+    "sci-fi"
+   ],
+   "blurb": "When you bring back a long-extinct species, there’s more to success than the DNA. Moscow has resurrected the mammoth. But someone must teach them how to be mammoths, or they are doomed to die out again. Dr. Damira Khismatullina, an expert in elephant behavior, was brutally murder"
+  },
   {
    "id": "54659324",
    "title": "Dungeon Crawler Carl (Dungeon Crawler Carl, #1)",
    "author": "Matt Dinniman",
-   "rating": 4,
+   "rating": 3,
    "avg": 4.53,
    "year": 2020,
    "pages": 464,
    "readAt": "Sun, 5 Jul 2026 00:00:00 +0000",
-   "added": "Sun, 05 Jul 2026 19:43:47 -0700",
+   "added": "Sun, 27 Sep 2026 07:37:50 -0700",
    "shelves": [],
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1757926884l/54659324._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/54659324",
@@ -22,6 +148,25 @@
     "supernatural"
    ],
    "blurb": "An alternative cover edition for this ASIN can be found here . The apocalypse will be televised! Welcome to the first book in the wildly popular and addictive Dungeon Crawler Carl series by Matt Dinniman—now with bonus material exclusive to this print edition. You know what’s wor"
+  },
+  {
+   "id": "58107911",
+   "title": "Lavinia",
+   "author": "Ursula K. Le Guin",
+   "rating": 3,
+   "avg": 4.19,
+   "year": 2008,
+   "pages": 293,
+   "readAt": "Sun, 27 Sep 2026 00:00:00 +0000",
+   "added": "Sun, 27 Sep 2026 07:04:09 -0700",
+   "shelves": [],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1621550310l/58107911._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/58107911",
+   "tags": [
+    "folk-horror",
+    "history"
+   ],
+   "blurb": "In The Aeneid, Vergil’s hero fights to claim the king’s daughter, Lavinia, with whom he is destined to found an empire. Lavinia herself never speaks a word. Now, Ursula K. Le Guin gives Lavinia a voice in a novel that takes us to the half-wild world of ancient Italy, when Rome wa"
   },
   {
    "id": "222697645",
@@ -85,27 +230,6 @@
    "blurb": "\"Learn. That is the only thing that never fails.\"--Merlyn the Wizard Before there was a famous king named Arthur, there was a curious boy named Wart and a kind old wizard named Merlyn. Transformed by Merlyn into the forms of his fantasy, Wart learns the value of history from a sn"
   },
   {
-   "id": "126919002",
-   "title": "The Tusks of Extinction",
-   "author": "Ray Nayler",
-   "rating": 5,
-   "avg": 4.16,
-   "year": 2024,
-   "pages": 105,
-   "readAt": "Tue, 20 Jan 2026 00:00:00 +0000",
-   "added": "Tue, 20 Jan 2026 05:20:12 -0800",
-   "shelves": [],
-   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1683036798l/126919002._SX98_.jpg",
-   "url": "https://www.goodreads.com/book/show/126919002",
-   "tags": [
-    "death",
-    "literary",
-    "psychological",
-    "sci-fi"
-   ],
-   "blurb": "When you bring back a long-extinct species, there’s more to success than the DNA. Moscow has resurrected the mammoth. But someone must teach them how to be mammoths, or they are doomed to die out again. Dr. Damira Khismatullina, an expert in elephant behavior, was brutally murder"
-  },
-  {
    "id": "61174946",
    "title": "Every Version of You",
    "author": "Grace Chan",
@@ -124,26 +248,6 @@
     "weird"
    ],
    "blurb": "In late twenty-first century Australia, Tao-Yi and her partner Navin spend most of their time inside a hyper-immersive, hyper-consumerist virtual reality called Gaia. They log on, go to work, socialise, and even eat in this digital utopia. Meanwhile their aging bodies lie suspend"
-  },
-  {
-   "id": "60457992",
-   "title": "I Who Have Never Known Men",
-   "author": "Jacqueline Harpman",
-   "rating": 5,
-   "avg": 3.96,
-   "year": 1995,
-   "pages": 175,
-   "readAt": "Tue, 30 Dec 2025 00:00:00 +0000",
-   "added": "Tue, 30 Dec 2025 14:56:59 -0800",
-   "shelves": [],
-   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1645371720l/60457992._SX98_.jpg",
-   "url": "https://www.goodreads.com/book/show/60457992",
-   "tags": [
-    "literary",
-    "psychological",
-    "sci-fi"
-   ],
-   "blurb": "Deep underground, thirty-nine women live imprisoned in a cage. Watched over by guards, the women have no memory of how they got there, no notion of time, and only a vague recollection of their lives before. As the burn of electric light merges day into night and numberless years "
   },
   {
    "id": "25451264",
@@ -275,7 +379,7 @@
    "title": "Our Town: The Timeless Pulitzer Prize-winning Drama (Perennial Classics)",
    "author": "Thornton Wilder",
    "rating": 0,
-   "avg": 4.18,
+   "avg": 4.19,
    "year": 1938,
    "pages": 224,
    "readAt": "Mon, 6 Oct 2025 00:00:00 +0000",
@@ -375,47 +479,6 @@
    "blurb": "This near-future trilogy is the first chance for English-speaking readers to experience this multiple-award-winning phenomenon from Cixin Liu, China's most beloved science fiction author. In The Dark Forest , Earth is reeling from the revelation of a coming alien invasion-in just"
   },
   {
-   "id": "20518872",
-   "title": "The Three-Body Problem (Remembrance of Earth’s Past, #1)",
-   "author": "Liu Cixin",
-   "rating": 4,
-   "avg": 4.07,
-   "year": 2006,
-   "pages": 472,
-   "readAt": "Wed, 16 Jul 2025 00:00:00 +0000",
-   "added": "Thu, 17 Jul 2025 09:13:18 -0700",
-   "shelves": [],
-   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1415428227l/20518872._SX98_.jpg",
-   "url": "https://www.goodreads.com/book/show/20518872",
-   "tags": [
-    "history",
-    "sci-fi"
-   ],
-   "blurb": "Set against the backdrop of China's Cultural Revolution, a secret military project sends signals into space to establish contact with aliens. An alien civilization on the brink of destruction captures the signal and plans to invade Earth. Meanwhile, on Earth, different camps star"
-  },
-  {
-   "id": "40130093",
-   "title": "Once Upon a River",
-   "author": "Diane Setterfield",
-   "rating": 4,
-   "avg": 3.9,
-   "year": 2018,
-   "pages": 464,
-   "readAt": "Sun, 22 Jun 2025 00:00:00 +0000",
-   "added": "Sun, 22 Jun 2025 09:16:52 -0700",
-   "shelves": [],
-   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1526451355l/40130093._SX98_.jpg",
-   "url": "https://www.goodreads.com/book/show/40130093",
-   "tags": [
-    "fantasy",
-    "gothic",
-    "mythology",
-    "supernatural",
-    "thriller"
-   ],
-   "blurb": "On a dark midwinter’s night in an ancient inn on the river Thames, an extraordinary event takes place. The regulars are telling stories to while away the dark hours, when the door bursts open on a grievously wounded stranger. In his arms is the lifeless body of a small child. Hou"
-  },
-  {
    "id": "77685",
    "title": "The Return of the King (The Lord of the Rings, #3)",
    "author": "J.R.R. Tolkien",
@@ -472,28 +535,6 @@
     "supernatural"
    ],
    "blurb": "Alternate cover edition of ISBN 9780395489338 . In celebration of The Hobbit's fiftieth anniversary, the authoratative edition of its stirring sequel, The Lord of the Rings, is elegantly presented in hardcover, uniform edition. In the First Part of The Lord of the Rings, 111-year"
-  },
-  {
-   "id": "77683",
-   "title": "The Fellowship of the Ring (The Lord of the Rings #1)",
-   "author": "J.R.R. Tolkien",
-   "rating": 0,
-   "avg": 4.57,
-   "year": 1954,
-   "pages": 423,
-   "readAt": "Wed, 22 Jan 2025 00:00:00 +0000",
-   "added": "Wed, 22 Jan 2025 20:23:36 -0800",
-   "shelves": [],
-   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1386919780l/77683._SX98_.jpg",
-   "url": "https://www.goodreads.com/book/show/77683",
-   "tags": [
-    "classic",
-    "fantasy",
-    "horror",
-    "literary",
-    "mythology"
-   ],
-   "blurb": "The Lord of the Rings, J.R.R. Tolkien's three-volume epic, is set in the imaginary world of Middle-earth - home to many strange beings, and most notably hobbits, a peace-loving \"little people,\" cheerful and shy. Since its original British publication in 1954-55, the saga has entr"
   },
   {
    "id": "83763",
@@ -673,28 +714,6 @@
    "blurb": "On the world called Hyperion, beyond the law of the Hegemony of Man, there waits the creature called the Shrike. There are those who worship it. There are those who fear it. And there are those who have vowed to destroy it. In the Valley of the Time Tombs, where huge, brooding st"
   },
   {
-   "id": "375802",
-   "title": "Ender’s Game (Ender's Saga, #1)",
-   "author": "Orson Scott Card",
-   "rating": 0,
-   "avg": 4.31,
-   "year": 1985,
-   "pages": 324,
-   "readAt": "Fri, 10 May 2024 00:00:00 +0000",
-   "added": "Fri, 10 May 2024 17:25:42 -0700",
-   "shelves": [],
-   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1408303130l/375802._SY160_.jpg",
-   "url": "https://www.goodreads.com/book/show/375802",
-   "tags": [
-    "coming-of-age",
-    "fantasy",
-    "literary",
-    "psychological",
-    "sci-fi"
-   ],
-   "blurb": "From New York Times bestselling author Orson Scott Card, Ender's Game―adapted to film starring Asa Butterfield and Harrison Ford―is the classic Hugo and Nebula award-winning science fiction novel of a young boy's recruitment into the midst of an interstellar war. In order to deve"
-  },
-  {
    "id": "6573885",
    "title": "The Firm",
    "author": "John Grisham",
@@ -776,7 +795,7 @@
    "title": "Between Two Fires",
    "author": "Christopher Buehlman",
    "rating": 4,
-   "avg": 4.15,
+   "avg": 4.14,
    "year": 2012,
    "pages": 432,
    "readAt": "Fri, 2 Feb 2024 00:00:00 +0000",
@@ -2068,7 +2087,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.38,
+   "avg": 3.39,
    "year": 2026,
    "pages": 352,
    "readAt": null,
