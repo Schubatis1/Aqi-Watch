@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-09-29T16:53:39+00:00",
+ "fetchedAt": "2026-09-30T16:49:36+00:00",
  "read": [
   {
    "id": "58107911",
@@ -3021,7 +3021,7 @@
    "title": "The Girls",
    "author": "Emma Cline",
    "rating": 4,
-   "avg": 3.48,
+   "avg": 3.49,
    "year": 2016,
    "pages": 355,
    "readAt": "Thu, 19 Jan 2017 00:00:00 +0000",
@@ -3365,7 +3365,7 @@
    "title": "Library of Souls (Miss Peregrine's Peculiar Children, #3)",
    "author": "Ransom Riggs",
    "rating": 4,
-   "avg": 4.12,
+   "avg": 4.11,
    "year": 2015,
    "pages": 458,
    "readAt": "Tue, 1 Mar 2016 00:00:00 +0000",
@@ -4564,7 +4564,7 @@
    "title": "The Diary of a Young Girl",
    "author": "Anne Frank",
    "rating": 4,
-   "avg": 4.19,
+   "avg": 4.2,
    "year": 1947,
    "pages": 340,
    "readAt": null,
@@ -4804,27 +4804,6 @@
    "blurb": "A fast-moving, eerie tale set on Halloween night... Eight costumed boys running to meet their friend Pipkin at the haunted house outside town encounter instead the huge and cadaverous Mr. Moundshroud. As Pipkin scrambles to join them, he is swept away by a dark Something, and Mou"
   },
   {
-   "id": "816085",
-   "title": "Harvest Home",
-   "author": "Thomas Tryon",
-   "rating": 0,
-   "avg": 3.8,
-   "year": 1973,
-   "pages": 403,
-   "readAt": null,
-   "added": "Sat, 26 Sep 2026 05:54:16 -0700",
-   "shelves": [
-    "to-read"
-   ],
-   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1688105555l/816085._SX98_.jpg",
-   "url": "https://www.goodreads.com/book/show/816085",
-   "tags": [
-    "folk-horror",
-    "horror"
-   ],
-   "blurb": "It was almost as if time had not touched the village of Cornwall Coombe. The quiet, peaceful place was straight out of a bygone era, with well-cared-for Colonial houses, a white-steepled church fronting a broad Common. Ned and Beth Constantine chanced upon the hamlet and immediat"
-  },
-  {
    "id": "310584",
    "title": "The Hill of Dreams",
    "author": "Arthur Machen",
@@ -4854,7 +4833,7 @@
    "title": "The Killer Isn't Alice",
    "author": "Iris Starling",
    "rating": 0,
-   "avg": 4.12,
+   "avg": 4.11,
    "year": null,
    "pages": 224,
    "readAt": null,
@@ -7259,7 +7238,7 @@
    "title": "The Traitor Baru Cormorant (The Masquerade, #1)",
    "author": "Seth Dickinson",
    "rating": 0,
-   "avg": 4.03,
+   "avg": 4.04,
    "year": 2015,
    "pages": 399,
    "readAt": null,
