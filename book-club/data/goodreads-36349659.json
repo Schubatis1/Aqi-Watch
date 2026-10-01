@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-09-30T16:49:36+00:00",
+ "fetchedAt": "2026-10-01T17:22:13+00:00",
  "read": [
   {
    "id": "58107911",
@@ -27,7 +27,7 @@
    "title": "The Great Wherever",
    "author": "Shannon Sanders",
    "rating": 5,
-   "avg": 3.73,
+   "avg": 3.72,
    "year": 2026,
    "pages": 416,
    "readAt": "Sun, 6 Sep 2026 00:00:00 +0000",
@@ -3021,7 +3021,7 @@
    "title": "The Girls",
    "author": "Emma Cline",
    "rating": 4,
-   "avg": 3.49,
+   "avg": 3.48,
    "year": 2016,
    "pages": 355,
    "readAt": "Thu, 19 Jan 2017 00:00:00 +0000",
@@ -4833,7 +4833,7 @@
    "title": "The Killer Isn't Alice",
    "author": "Iris Starling",
    "rating": 0,
-   "avg": 4.11,
+   "avg": 4.09,
    "year": null,
    "pages": 224,
    "readAt": null,
@@ -4854,7 +4854,7 @@
    "title": "Yesteryear",
    "author": "Caro Claire Burke",
    "rating": 0,
-   "avg": 3.83,
+   "avg": 3.82,
    "year": 2026,
    "pages": 400,
    "readAt": null,
@@ -8022,9 +8022,10 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1491249206l/26247008._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/26247008",
    "tags": [
-    "fantasy"
+    "fantasy",
+    "humor"
    ],
-   "blurb": "Six responsible adults. Three cute kids. One small dog. It’s just a normal weekend. What could possibly go wrong? Sam and Clementine have a wonderful, albeit, busy life: they have two little girls, Sam has just started a new dream job, and Clementine, a cellist, is busy preparing"
+   "blurb": "The new novel from Liane Moriarty, the #1 New York Times bestselling author of The Husband's Secret, Big Little Lies, and What Alice Forgot, about how sometimes we don't appreciate how extraordinary our ordinary lives are until it's too late. â€œWhat a wonderful writerâ€”smart, w"
   },
   {
    "id": "25893693",

@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-09-30T16:49:13+00:00",
+ "fetchedAt": "2026-10-01T17:21:51+00:00",
  "read": [
   {
    "id": "375802",
@@ -295,7 +295,7 @@
    "title": "A Short Stay in Hell",
    "author": "Steven L. Peck",
    "rating": 5,
-   "avg": 4.19,
+   "avg": 4.2,
    "year": 2011,
    "pages": 110,
    "readAt": "Thu, 13 Nov 2025 00:00:00 +0000",
@@ -2066,7 +2066,7 @@
    "title": "The Price of Time: The Real Story of Interest",
    "author": "Edward Chancellor",
    "rating": 0,
-   "avg": 4.12,
+   "avg": 4.11,
    "year": 2022,
    "pages": 432,
    "readAt": null,
@@ -2087,7 +2087,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.36,
+   "avg": 3.38,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -2107,10 +2107,10 @@
   },
   {
    "id": "21083719",
-   "title": "Human Universe",
+   "title": "Human Universe: A Sunday Times Bestseller of Popular Science, Astronomy, and the Cosmos",
    "author": "Brian Cox",
    "rating": 0,
-   "avg": 4.26,
+   "avg": 4.27,
    "year": 2014,
    "pages": 288,
    "readAt": null,
@@ -2121,8 +2121,7 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1411334979l/21083719._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/21083719",
    "tags": [
-    "fantasy",
-    "sci-fi"
+    "nonfiction"
    ],
    "blurb": "Human life is a staggeringly strange thing. On the surface of a ball of rock falling around a nuclear fireball in the blackness of a vacuum the laws of nature conspired to create a naked ape that can look up at the stars and wonder where it came from. What is a human being? Objec"
   },
