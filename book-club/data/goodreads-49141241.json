@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-03T15:08:34+00:00",
+ "fetchedAt": "2026-10-04T15:47:34+00:00",
  "read": [
   {
    "id": "375802",
@@ -2087,7 +2087,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.42,
+   "avg": 3.4,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -2617,7 +2617,7 @@
    "title": "The Lifecycle of Software Objects",
    "author": "Ted Chiang",
    "rating": 0,
-   "avg": 3.91,
+   "avg": 3.9,
    "year": 2010,
    "pages": 150,
    "readAt": null,
@@ -4256,7 +4256,7 @@
    "title": "How to Do Nothing: Resisting the Attention Economy",
    "author": "Jenny Odell",
    "rating": 0,
-   "avg": 3.66,
+   "avg": 3.65,
    "year": 2019,
    "pages": 232,
    "readAt": null,
