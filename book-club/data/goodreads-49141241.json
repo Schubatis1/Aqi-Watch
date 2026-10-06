@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-05T19:46:49+00:00",
+ "fetchedAt": "2026-10-06T17:10:41+00:00",
  "read": [
   {
    "id": "375802",
@@ -908,7 +908,7 @@
     "death",
     "nonfiction"
    ],
-   "blurb": "The author of I Used to Be a Miserable F*ck, The Angry Therapist, now teaches you how to prioritize your relationship with yourself and live a more meaningful life, whether you’re alone, dating, or with a partner. There’s more to life than loving someone. But being single can fee"
+   "blurb": "The bestselling self-love guide to prioritizing your relationship with yourself and living a more meaningful life, whether you’re alone, dating, or with a partner. There’s more to life than loving someone, right? But being single can feel like a death sentence. Why does being alo"
   },
   {
    "id": "36809135",
@@ -2520,10 +2520,12 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1707471048l/203647807._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/203647807",
    "tags": [
+    "death",
     "history",
+    "mythology",
     "nonfiction"
    ],
-   "blurb": "Landmark world history from the creator of the Top Ten podcast Fall of Civilizations. Based on the podcast with over 100 million downloads, Fall of Civilizations brilliantly explores how a range of ancient societies rose to power and sophistication, and how they tipped over into "
+   "blurb": "\"A treasure trove of myths and terror… Atmospheric as hell… Immersive.\"- The Times Based on the podcast with over one hundred million downloads, Fall of Civilizations brilliantly explores how a range of ancient societies rose to power and sophistication, and how they tipped over "
   },
   {
    "id": "40106480",
@@ -2732,7 +2734,7 @@
    "title": "Six Feet Over: Science Tackles the Afterlife",
    "author": "Mary Roach",
    "rating": 0,
-   "avg": 3.47,
+   "avg": 3.46,
    "year": 2005,
    "pages": 320,
    "readAt": null,
