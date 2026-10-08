@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-07T17:48:47+00:00",
+ "fetchedAt": "2026-10-08T17:52:18+00:00",
  "read": [
   {
    "id": "375802",
@@ -1555,7 +1555,7 @@
    "title": "Babel: Around the World in Twenty Languages",
    "author": "Gaston Dorren",
    "rating": 3,
-   "avg": 3.78,
+   "avg": 3.79,
    "year": 2018,
    "pages": 361,
    "readAt": null,
@@ -1595,7 +1595,7 @@
    "title": "Empty Planet: The Shock of Global Population Decline",
    "author": "Darrell Bricker",
    "rating": 4,
-   "avg": 3.76,
+   "avg": 3.75,
    "year": 2019,
    "pages": 304,
    "readAt": "Mon, 4 Mar 2019 00:00:00 +0000",
@@ -2087,7 +2087,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.38,
+   "avg": 3.41,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -2619,7 +2619,7 @@
    "title": "The Lifecycle of Software Objects",
    "author": "Ted Chiang",
    "rating": 0,
-   "avg": 3.91,
+   "avg": 3.9,
    "year": 2010,
    "pages": 150,
    "readAt": null,
@@ -3015,7 +3015,7 @@
    "title": "How to Do the Work: Recognize Your Patterns, Heal from Your Past, and Create Your Self",
    "author": "Nicole LePera",
    "rating": 0,
-   "avg": 4.08,
+   "avg": 4.09,
    "year": 2021,
    "pages": 320,
    "readAt": null,
@@ -4947,7 +4947,7 @@
     "death",
     "nonfiction"
    ],
-   "blurb": "Opera is often dismissed as outdated and excessive, and perceived to be characterised by excessive passions, sumptuous costumes, and ill-mannered divas. In reality, however, operas address the most fundamental and universal of human concerns - love, death, jealousy, greed, and po"
+   "blurb": "Opera is often perceived to be characterised by excessive passions, sumptuous costumes, lavish sets, and ill-mannered divas. In reality, operas address the most fundamental and universal human concerns – love, death, jealousy, greed and power. In this timeless introduction, Alexa"
   },
   {
    "id": "39813945",
@@ -5882,7 +5882,7 @@
    "title": "Connectography: Mapping the Future of Global Civilization",
    "author": "Parag Khanna",
    "rating": 0,
-   "avg": 3.82,
+   "avg": 3.81,
    "year": 2016,
    "pages": 496,
    "readAt": null,

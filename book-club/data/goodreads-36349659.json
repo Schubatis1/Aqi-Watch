@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-10-07T17:49:09+00:00",
+ "fetchedAt": "2026-10-08T17:52:41+00:00",
  "read": [
   {
    "id": "58107911",
@@ -2316,11 +2316,8 @@
    "shelves": [],
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1525583112l/39961982._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/39961982",
-   "tags": [
-    "psychological",
-    "weird"
-   ],
-   "blurb": "No one’s ever told Eleanor that life should be better than fine. Meet Eleanor Oliphant: She struggles with appropriate social skills and tends to say exactly what she’s thinking. Nothing is missing in her carefully timetabled life of avoiding social interactions, where weekends a"
+   "tags": [],
+   "blurb": "Элеанор Олифант в полном порядке: она работает бухгалтером, по выходным выпивает, а по средам беседует с мамочкой, которая находится далеко. Элеанор не везет: ее окружают непримечательные люди с примитивными вкусами и бедным словарным запасом (так ей, по крайней мере, кажется). Н"
   },
   {
    "id": "37703550",
@@ -3021,7 +3018,7 @@
    "title": "The Girls",
    "author": "Emma Cline",
    "rating": 4,
-   "avg": 3.48,
+   "avg": 3.49,
    "year": 2016,
    "pages": 355,
    "readAt": "Thu, 19 Jan 2017 00:00:00 +0000",
@@ -3365,7 +3362,7 @@
    "title": "Library of Souls (Miss Peregrine's Peculiar Children, #3)",
    "author": "Ransom Riggs",
    "rating": 4,
-   "avg": 4.12,
+   "avg": 4.11,
    "year": 2015,
    "pages": 458,
    "readAt": "Tue, 1 Mar 2016 00:00:00 +0000",
@@ -4833,7 +4830,7 @@
    "title": "The Killer Isn't Alice",
    "author": "Iris Starling",
    "rating": 0,
-   "avg": 4.11,
+   "avg": 4.12,
    "year": null,
    "pages": 224,
    "readAt": null,
@@ -5094,7 +5091,7 @@
    "title": "The Ladies of Grace Adieu and Other Stories",
    "author": "Susanna Clarke",
    "rating": 0,
-   "avg": 3.89,
+   "avg": 3.9,
    "year": 2006,
    "pages": 256,
    "readAt": null,
@@ -6542,9 +6539,10 @@
     "coming-of-age",
     "humor",
     "literary",
-    "nonfiction"
+    "nonfiction",
+    "psychological"
    ],
-   "blurb": "“This funny and fresh take on a classic tale manages to comment on gender roles, racial disparities, and white privilege all while creeping me all the way out. So good.”—Zakiya Dalila Harris, author of The Other Black Girl Now in paperback, Steel Magnolias meets Dracula in this N"
+   "blurb": "Steel Magnolias meets Dracula in this New York Times best-selling horror novel about a women's book club that must do battle with a mysterious newcomer to their small Southern town. “This funny and fresh take on a classic tale manages to comment on gender roles, racial disparitie"
   },
   {
    "id": "52762903",
@@ -9495,7 +9493,7 @@
    "title": "Green Girl",
    "author": "Kate Zambreno",
    "rating": 0,
-   "avg": 3.6,
+   "avg": 3.61,
    "year": 2011,
    "pages": 279,
    "readAt": null,
