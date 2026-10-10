@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-09T17:26:20+00:00",
+ "fetchedAt": "2026-10-10T16:13:49+00:00",
  "read": [
   {
    "id": "375802",
@@ -379,7 +379,7 @@
    "title": "Our Town: The Timeless Pulitzer Prize-winning Drama (Perennial Classics)",
    "author": "Thornton Wilder",
    "rating": 0,
-   "avg": 4.18,
+   "avg": 4.19,
    "year": 1938,
    "pages": 224,
    "readAt": "Mon, 6 Oct 2025 00:00:00 +0000",
@@ -2087,7 +2087,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.39,
+   "avg": 3.4,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -2734,7 +2734,7 @@
    "title": "Six Feet Over: Science Tackles the Afterlife",
    "author": "Mary Roach",
    "rating": 0,
-   "avg": 3.46,
+   "avg": 3.47,
    "year": 2005,
    "pages": 320,
    "readAt": null,
@@ -2788,9 +2788,10 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1347923725l/98399._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/98399",
    "tags": [
-    "fantasy"
+    "fantasy",
+    "literary"
    ],
-   "blurb": "“I used to drink,” writes John Bradshaw, “to solve the problems caused by drinking. The more I drank to relieve my shame-based loneliness and hurt, the more I felt ashamed.” Shame is the motivator behind our toxic behaviors: the compulsion, co-dependency, addiction and drive to s"
+   "blurb": "“I used to drink,” writes John Bradshaw, “to solve the problems caused by drinking. The more I drank to relieve my shame-based loneliness and hurt, the more I felt ashamed.” Shame is the motivator behind our toxic the compulsion, co-dependency, addiction and drive to superachieve"
   },
   {
    "id": "18693771",
