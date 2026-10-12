@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-10-11T16:39:03+00:00",
+ "fetchedAt": "2026-10-12T20:17:29+00:00",
  "read": [
   {
    "id": "58107911",
@@ -848,10 +848,13 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1660050779l/60194162._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/60194162",
    "tags": [
+    "coming-of-age",
+    "gothic",
     "humor",
-    "literary"
+    "literary",
+    "supernatural"
    ],
-   "blurb": "Vinnare av Pulitzerpriset 2023 Vinnare av Women's Prize for Fiction 2023 Vinnare av James Tait Black Prize 2023 Demon Copperhead kommer till världen på ett badrumsgolv i en husvagn. Hans artonåriga mamma ligger utslagen av droger och är knappt vid medvetande. Så börjar Demon sitt"
+   "blurb": "WINNER OF THE PULITZER PRIZE • WINNER OF THE WOMEN'S PRIZE FOR FICTION New York Times Readers’ Pick: Top 100 Books of the 21st Century • An Oprah’s Book Club Selection • An Instant New York Times Bestseller • An Instant Wall Street Journal Bestseller • A #1 Washington Post Bestse"
   },
   {
    "id": "62919375",
@@ -1248,7 +1251,7 @@
    "title": "The Hacienda",
    "author": "Isabel Cañas",
    "rating": 4,
-   "avg": 3.87,
+   "avg": 3.88,
    "year": 2022,
    "pages": 345,
    "readAt": "Fri, 1 Jul 2022 00:00:00 +0000",
@@ -4833,7 +4836,7 @@
    "title": "The Killer Isn't Alice",
    "author": "Iris Starling",
    "rating": 0,
-   "avg": 4.1,
+   "avg": 4.11,
    "year": null,
    "pages": 224,
    "readAt": null,
@@ -6991,7 +6994,7 @@
    "rating": 3,
    "avg": 3.8,
    "year": 2017,
-   "pages": 352,
+   "pages": 342,
    "readAt": "Sat, 29 Jul 2017 00:00:00 +0000",
    "added": "Wed, 31 Jul 2019 18:55:55 -0700",
    "shelves": [
@@ -11172,7 +11175,7 @@
    "title": "In the Shadow of the Banyan",
    "author": "Vaddey Ratner",
    "rating": 0,
-   "avg": 4.04,
+   "avg": 4.05,
    "year": 2012,
    "pages": 322,
    "readAt": null,

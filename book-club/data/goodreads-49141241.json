@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-11T16:38:42+00:00",
+ "fetchedAt": "2026-10-12T20:17:07+00:00",
  "read": [
   {
    "id": "375802",
@@ -113,7 +113,7 @@
    "title": "The Tusks of Extinction",
    "author": "Ray Nayler",
    "rating": 4,
-   "avg": 4.15,
+   "avg": 4.16,
    "year": 2024,
    "pages": 105,
    "readAt": "Tue, 20 Jan 2026 00:00:00 +0000",
@@ -650,10 +650,13 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1660050779l/60194162._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/60194162",
    "tags": [
+    "coming-of-age",
+    "gothic",
     "humor",
-    "literary"
+    "literary",
+    "supernatural"
    ],
-   "blurb": "Vinnare av Pulitzerpriset 2023 Vinnare av Women's Prize for Fiction 2023 Vinnare av James Tait Black Prize 2023 Demon Copperhead kommer till världen på ett badrumsgolv i en husvagn. Hans artonåriga mamma ligger utslagen av droger och är knappt vid medvetande. Så börjar Demon sitt"
+   "blurb": "WINNER OF THE PULITZER PRIZE • WINNER OF THE WOMEN'S PRIZE FOR FICTION New York Times Readers’ Pick: Top 100 Books of the 21st Century • An Oprah’s Book Club Selection • An Instant New York Times Bestseller • An Instant Wall Street Journal Bestseller • A #1 Washington Post Bestse"
   },
   {
    "id": "44585295",
@@ -2087,7 +2090,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.39,
+   "avg": 3.42,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -2557,7 +2560,7 @@
    "title": "Neuromancer (Sprawl, #1)",
    "author": "William Gibson",
    "rating": 0,
-   "avg": 3.92,
+   "avg": 3.91,
    "year": 1984,
    "pages": 268,
    "readAt": null,
@@ -4618,7 +4621,7 @@
    "title": "The Dumb Things Smart People Do with Their Money: Thirteen Ways to Right Your Financial Wrongs",
    "author": "Jill Schlesinger",
    "rating": 0,
-   "avg": 3.74,
+   "avg": 3.75,
    "year": 2019,
    "pages": 288,
    "readAt": null,
@@ -4636,7 +4639,7 @@
   },
   {
    "id": "79766",
-   "title": "A Pattern Language: Towns, Buildings, Construction (Center for Environmental Structure)",
+   "title": "A Pattern Language: Towns, Buildings, Construction (Center for Environmental Structure Series)",
    "author": "Christopher W. Alexander",
    "rating": 0,
    "avg": 4.42,
