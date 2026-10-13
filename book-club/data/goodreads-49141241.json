@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-12T20:17:07+00:00",
+ "fetchedAt": "2026-10-13T18:16:44+00:00",
  "read": [
   {
    "id": "375802",
@@ -985,7 +985,7 @@
    "title": "Harry Potter and the Philosopher's Stone (Harry Potter, #1)",
    "author": "J.K. Rowling",
    "rating": 5,
-   "avg": 4.45,
+   "avg": 4.44,
    "year": 1997,
    "pages": 333,
    "readAt": "Fri, 14 Jan 2022 00:00:00 +0000",
@@ -2090,7 +2090,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.42,
+   "avg": 3.41,
    "year": 2026,
    "pages": 352,
    "readAt": null,
