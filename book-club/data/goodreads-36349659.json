@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-10-13T18:17:09+00:00",
+ "fetchedAt": "2026-10-14T15:49:42+00:00",
  "read": [
   {
    "id": "58107911",
@@ -501,7 +501,7 @@
    "title": "Joyful Recollections of Trauma",
    "author": "Paul Scheer",
    "rating": 4,
-   "avg": 4.14,
+   "avg": 4.13,
    "year": 2024,
    "pages": 256,
    "readAt": "Sun, 16 Feb 2025 00:00:00 +0000",
@@ -2520,11 +2520,9 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1617768316l/68428._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/68428",
    "tags": [
-    "fantasy",
-    "history",
-    "horror"
+    "history"
    ],
-   "blurb": "What if the whole world were a dead, blasted wasteland? Mistborn For a thousand years the ash fell and no flowers bloomed. For a thousand years the Skaa slaved in misery and lived in fear. For a thousand years the Lord Ruler, the \"Sliver of Infinity,\" reigned with absolute power "
+   "blurb": "MAGLE VLADAJU MRAKOM. GOSPOD VLADAR DRŽI CEO SVET. Jednom davno, heroj se pojavio kako bi spasao svet. Nije uspeo. Od tada je svet pustoš pepela i magle kojom upravlja besmrtni car znan kao Gospod Vladar. Međutim, nada ostaje. Diže se nova buna sazdana oko najluđe prevare, lukavs"
   },
   {
    "id": "34273236",
@@ -3368,7 +3366,7 @@
    "title": "Library of Souls (Miss Peregrine's Peculiar Children, #3)",
    "author": "Ransom Riggs",
    "rating": 4,
-   "avg": 4.12,
+   "avg": 4.11,
    "year": 2015,
    "pages": 458,
    "readAt": "Tue, 1 Mar 2016 00:00:00 +0000",
@@ -4836,7 +4834,7 @@
    "title": "The Killer Isn't Alice",
    "author": "Iris Starling",
    "rating": 0,
-   "avg": 4.09,
+   "avg": 4.1,
    "year": null,
    "pages": 224,
    "readAt": null,
@@ -7061,7 +7059,7 @@
    "title": "The City of Dreaming Books (Zamonien, #4)",
    "author": "Walter Moers",
    "rating": 0,
-   "avg": 4.11,
+   "avg": 4.12,
    "year": 2004,
    "pages": 464,
    "readAt": null,

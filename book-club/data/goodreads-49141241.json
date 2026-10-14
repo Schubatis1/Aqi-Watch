@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-13T18:16:44+00:00",
+ "fetchedAt": "2026-10-14T15:49:19+00:00",
  "read": [
   {
    "id": "375802",
@@ -1021,7 +1021,7 @@
   },
   {
    "id": "37570546",
-   "title": "Maybe You Should Talk to Someone: A Therapist, Her Therapist, and Our Lives Revealed",
+   "title": "Maybe You Should Talk to Someone",
    "author": "Lori Gottlieb",
    "rating": 4,
    "avg": 4.35,
@@ -1034,8 +1034,9 @@
    "url": "https://www.goodreads.com/book/show/37570546",
    "tags": [
     "death",
-    "humor",
-    "nonfiction"
+    "fantasy",
+    "horror",
+    "humor"
    ],
    "blurb": "From a psychotherapist, and national advice columnist comes a thought-provoking new book that takes us behind the scenes of a therapist's world -- where her patients are looking for answers (and so is she). One day, Lori Gottlieb is a therapist who helps patients in her Los Angel"
   },
@@ -4199,7 +4200,7 @@
    "title": "Guns, Germs, and Steel: The Fates of Human Societies",
    "author": "Jared Diamond",
    "rating": 0,
-   "avg": 4.13,
+   "avg": 4.14,
    "year": 1997,
    "pages": 494,
    "readAt": null,
