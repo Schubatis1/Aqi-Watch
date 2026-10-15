@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-10-14T15:49:42+00:00",
+ "fetchedAt": "2026-10-15T15:35:42+00:00",
  "read": [
   {
    "id": "58107911",
@@ -69,7 +69,7 @@
    "title": "The Children",
    "author": "Melissa Albert",
    "rating": 4,
-   "avg": 3.45,
+   "avg": 3.44,
    "year": 2026,
    "pages": 398,
    "readAt": "Tue, 4 Aug 2026 00:00:00 +0000",
@@ -501,7 +501,7 @@
    "title": "Joyful Recollections of Trauma",
    "author": "Paul Scheer",
    "rating": 4,
-   "avg": 4.13,
+   "avg": 4.14,
    "year": 2024,
    "pages": 256,
    "readAt": "Sun, 16 Feb 2025 00:00:00 +0000",
@@ -942,11 +942,11 @@
    "rating": 4,
    "avg": 4.27,
    "year": 1989,
-   "pages": 500,
+   "pages": 482,
    "readAt": "Sat, 29 Jun 2024 00:00:00 +0000",
    "added": "Sat, 29 Jun 2024 06:31:35 -0700",
    "shelves": [],
-   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1746983261l/77566._SX98_.jpg",
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1792011177l/77566._SY160_.jpg",
    "url": "https://www.goodreads.com/book/show/77566",
    "tags": [
     "gothic",
@@ -2332,7 +2332,7 @@
    "rating": 5,
    "avg": 4.41,
    "year": 2018,
-   "pages": 370,
+   "pages": 372,
    "readAt": "Fri, 8 May 2020 00:00:00 +0000",
    "added": "Fri, 08 May 2020 20:18:30 -0700",
    "shelves": [],
@@ -2520,9 +2520,11 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1617768316l/68428._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/68428",
    "tags": [
-    "history"
+    "death",
+    "history",
+    "psychological"
    ],
-   "blurb": "MAGLE VLADAJU MRAKOM. GOSPOD VLADAR DRŽI CEO SVET. Jednom davno, heroj se pojavio kako bi spasao svet. Nije uspeo. Od tada je svet pustoš pepela i magle kojom upravlja besmrtni car znan kao Gospod Vladar. Međutim, nada ostaje. Diže se nova buna sazdana oko najluđe prevare, lukavs"
+   "blurb": "Once, a hero arose to save the world. He failed. Ever since, the world has been a wasteland of ash and mist controlled by the immortal emperor known as the Lord Ruler. But hope survives. A new uprising is forming, one built around the ultimate caper, the cunning of a brilliant cr"
   },
   {
    "id": "34273236",
@@ -4834,7 +4836,7 @@
    "title": "The Killer Isn't Alice",
    "author": "Iris Starling",
    "rating": 0,
-   "avg": 4.1,
+   "avg": 4.09,
    "year": null,
    "pages": 224,
    "readAt": null,
@@ -6112,7 +6114,7 @@
    "title": "I Love You But I've Chosen Darkness",
    "author": "Claire Vaye Watkins",
    "rating": 0,
-   "avg": 3.12,
+   "avg": 3.11,
    "year": 2021,
    "pages": 304,
    "readAt": null,
@@ -8359,7 +8361,7 @@
    "title": "The Strays",
    "author": "Emily Bitto",
    "rating": 0,
-   "avg": 3.83,
+   "avg": 3.82,
    "year": 2014,
    "pages": 290,
    "readAt": null,
