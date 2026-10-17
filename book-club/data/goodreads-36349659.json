@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-10-16T15:22:27+00:00",
+ "fetchedAt": "2026-10-17T14:12:40+00:00",
  "read": [
   {
    "id": "58107911",
@@ -178,7 +178,7 @@
    "title": "A Short Stay in Hell",
    "author": "Steven L. Peck",
    "rating": 5,
-   "avg": 4.11,
+   "avg": 4.1,
    "year": 2011,
    "pages": 104,
    "readAt": "Sat, 29 Nov 2025 00:00:00 +0000",
@@ -4049,7 +4049,7 @@
    "rating": 3,
    "avg": 4.04,
    "year": 2010,
-   "pages": 766,
+   "pages": 784,
    "readAt": null,
    "added": "Mon, 27 Oct 2014 12:45:14 -0700",
    "shelves": [],
@@ -5342,7 +5342,7 @@
    "title": "Children of Blood and Bone (Legacy of Orïsha, #1)",
    "author": "Tomi Adeyemi",
    "rating": 0,
-   "avg": 4.13,
+   "avg": 4.14,
    "year": 2018,
    "pages": 560,
    "readAt": null,
@@ -7072,9 +7072,10 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1348953741l/1707509._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/1707509",
    "tags": [
-    "fantasy"
+    "supernatural",
+    "weird"
    ],
-   "blurb": "A translation of a follow-up to The 13 1/2 Lives of Captain Bluebeard finds young writer Optimus Yarnspinner inheriting from his beloved godfather an unpublished anonymous short story, a bequest that takes him to the city of Bookholm in search of its writer."
+   "blurb": "In The City of Dreaming Books , Walter Moers transports us to a magical world where reading is a remarkable adventure. The search for the author’s identity takes Yarnspinner to Bookholm—the so-called City of Dreaming Books. On entering its streets, our hero feels as if he has ope"
   },
   {
    "id": "170162",

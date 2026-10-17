@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-16T15:22:06+00:00",
+ "fetchedAt": "2026-10-17T14:12:19+00:00",
  "read": [
   {
    "id": "375802",
@@ -376,7 +376,7 @@
   },
   {
    "id": "53593653",
-   "title": "Our Town: A Play in Three Acts (Perennial Classics)",
+   "title": "Our Town: The Timeless Pulitzer Prize-winning Drama (Perennial Classics)",
    "author": "Thornton Wilder",
    "rating": 0,
    "avg": 4.19,
@@ -522,7 +522,7 @@
    "title": "The Two Towers (The Lord of the Rings, #2)",
    "author": "J.R.R. Tolkien",
    "rating": 5,
-   "avg": 4.57,
+   "avg": 4.56,
    "year": 1954,
    "pages": 352,
    "readAt": "Wed, 5 Mar 2025 00:00:00 +0000",
@@ -2091,7 +2091,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.42,
+   "avg": 3.41,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -3682,7 +3682,7 @@
    "title": "Good Economics for Hard Times: Better Answers to Our Biggest Problems",
    "author": "Abhijit V. Banerjee",
    "rating": 0,
-   "avg": 4.25,
+   "avg": 4.22,
    "year": 2019,
    "pages": 0,
    "readAt": null,
