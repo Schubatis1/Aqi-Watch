@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-18T14:33:38+00:00",
+ "fetchedAt": "2026-10-19T17:27:52+00:00",
  "read": [
   {
    "id": "375802",
@@ -316,7 +316,7 @@
    "title": "The Library of Babel",
    "author": "Jorge Luis Borges",
    "rating": 5,
-   "avg": 4.3,
+   "avg": 4.31,
    "year": 1941,
    "pages": 36,
    "readAt": null,
@@ -1599,7 +1599,7 @@
    "title": "Empty Planet: The Shock of Global Population Decline",
    "author": "Darrell Bricker",
    "rating": 4,
-   "avg": 3.75,
+   "avg": 3.76,
    "year": 2019,
    "pages": 304,
    "readAt": "Mon, 4 Mar 2019 00:00:00 +0000",
@@ -2066,6 +2066,28 @@
  ],
  "toRead": [
   {
+   "id": "41954426",
+   "title": "The History of Philosophy",
+   "author": "A.C. Grayling",
+   "rating": 0,
+   "avg": 4.04,
+   "year": 2019,
+   "pages": 682,
+   "readAt": null,
+   "added": "Sun, 18 Oct 2026 16:08:27 -0700",
+   "shelves": [
+    "to-read"
+   ],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1559497530l/41954426._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/41954426",
+   "tags": [
+    "history",
+    "literary",
+    "psychological"
+   ],
+   "blurb": "The story of philosophy is an epic tale: an exploration of the ideas, views and teachings of some of the most creative minds known to humanity. But since the long-popular classic Bertrand Russell's History of Western Philosophy , first published in 1945, there has been no compreh"
+  },
+  {
    "id": "59056157",
    "title": "The Price of Time: The Real Story of Interest",
    "author": "Edward Chancellor",
@@ -2091,7 +2113,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.4,
+   "avg": 3.42,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -4200,7 +4222,7 @@
    "title": "Guns, Germs, and Steel: The Fates of Human Societies",
    "author": "Jared Diamond",
    "rating": 0,
-   "avg": 4.14,
+   "avg": 4.13,
    "year": 1997,
    "pages": 494,
    "readAt": null,
