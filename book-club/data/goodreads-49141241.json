@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-19T17:27:52+00:00",
+ "fetchedAt": "2026-10-20T15:38:53+00:00",
  "read": [
   {
    "id": "375802",
@@ -122,12 +122,13 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1683036798l/126919002._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/126919002",
    "tags": [
-    "death",
+    "ghost",
     "literary",
     "psychological",
-    "sci-fi"
+    "sci-fi",
+    "thriller"
    ],
-   "blurb": "Winner of the Hugo Award for Best Novella When you bring back a long-extinct species, there’s more to success than the DNA. Moscow has resurrected the mammoth. But someone must teach them how to be mammoths, or they are doomed to die out again. Dr. Damira Khismatullina, an expert"
+   "blurb": "Korean edition of [The Tusks of Extinction] by Ray Nayler. 2025 Hugo Award winner for novella. Dr. Damira Khismatullina, an expert in elephant behavior, was murdered trying to defend the world's last elephants from the brutal ivory trade. Now, her digitized consciousness has been"
   },
   {
    "id": "54659324",
@@ -1599,7 +1600,7 @@
    "title": "Empty Planet: The Shock of Global Population Decline",
    "author": "Darrell Bricker",
    "rating": 4,
-   "avg": 3.76,
+   "avg": 3.75,
    "year": 2019,
    "pages": 304,
    "readAt": "Mon, 4 Mar 2019 00:00:00 +0000",
@@ -4941,7 +4942,7 @@
    "title": "How to Listen to Jazz",
    "author": "Ted Gioia",
    "rating": 0,
-   "avg": 4.06,
+   "avg": 4.05,
    "year": 2016,
    "pages": 272,
    "readAt": null,
@@ -5346,7 +5347,7 @@
    "title": "The Subtle Art of Not Giving a F*ck: A Counterintuitive Approach to Living a Good Life",
    "author": "Mark Manson",
    "rating": 0,
-   "avg": 3.86,
+   "avg": 3.85,
    "year": 2016,
    "pages": 212,
    "readAt": null,
