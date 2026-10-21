@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-10-20T15:39:14+00:00",
+ "fetchedAt": "2026-10-21T15:57:01+00:00",
  "read": [
   {
    "id": "58107911",
@@ -27,7 +27,7 @@
    "title": "The Great Wherever",
    "author": "Shannon Sanders",
    "rating": 5,
-   "avg": 3.72,
+   "avg": 3.71,
    "year": 2026,
    "pages": 416,
    "readAt": "Sun, 6 Sep 2026 00:00:00 +0000",
@@ -2906,7 +2906,7 @@
    "rating": 5,
    "avg": 4.64,
    "year": 2015,
-   "pages": 440,
+   "pages": 570,
    "readAt": "Mon, 15 May 2017 00:00:00 +0000",
    "added": "Mon, 15 May 2017 19:42:41 -0700",
    "shelves": [],
@@ -3024,7 +3024,7 @@
    "title": "The Girls",
    "author": "Emma Cline",
    "rating": 4,
-   "avg": 3.48,
+   "avg": 3.49,
    "year": 2016,
    "pages": 355,
    "readAt": "Thu, 19 Jan 2017 00:00:00 +0000",
@@ -3368,7 +3368,7 @@
    "title": "Library of Souls (Miss Peregrine's Peculiar Children, #3)",
    "author": "Ransom Riggs",
    "rating": 4,
-   "avg": 4.11,
+   "avg": 4.12,
    "year": 2015,
    "pages": 458,
    "readAt": "Tue, 1 Mar 2016 00:00:00 +0000",
@@ -4836,7 +4836,7 @@
    "title": "The Killer Isn't Alice",
    "author": "Iris Starling",
    "rating": 0,
-   "avg": 4.08,
+   "avg": 4.1,
    "year": null,
    "pages": 224,
    "readAt": null,
@@ -5097,7 +5097,7 @@
    "title": "The Ladies of Grace Adieu and Other Stories",
    "author": "Susanna Clarke",
    "rating": 0,
-   "avg": 3.88,
+   "avg": 3.89,
    "year": 2006,
    "pages": 256,
    "readAt": null,
@@ -5254,7 +5254,7 @@
    "title": "On Earth as It Is on Television",
    "author": "Emily Jane",
    "rating": 0,
-   "avg": 3.84,
+   "avg": 3.85,
    "year": 2023,
    "pages": 380,
    "readAt": null,
@@ -5481,7 +5481,7 @@
    "rating": 0,
    "avg": 4.53,
    "year": 2023,
-   "pages": 517,
+   "pages": 528,
    "readAt": null,
    "added": "Sun, 10 Sep 2023 14:01:27 -0700",
    "shelves": [
@@ -6872,9 +6872,10 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1584222716l/44074800._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/44074800",
    "tags": [
+    "coming-of-age",
     "nonfiction"
    ],
-   "blurb": "Difficile la vita di Patricia divisa tra un marito troppo impegnato col lavoro, i figli e l'anziana suocera, la sua unica oasi felice è un gruppo di lettura di libri true crime. Un giorno al gruppo si unisce James Harris, bello, misterioso e sensibile, che fa sentire alla donna c"
+   "blurb": "Patricia Campbell’s life has never felt smaller. Her husband is a workaholic, her teenage kids have their own lives, her senile mother-in-law needs constant care, and she’s always a step behind on her endless to-do list. The only thing keeping her sane is her book club, a close-k"
   },
   {
    "id": "49532216",
@@ -6961,7 +6962,7 @@
    "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1659086907l/10964._SX98_.jpg",
    "url": "https://www.goodreads.com/book/show/10964",
    "tags": [],
-   "blurb": "Dette er første del av sagaen om Claire og Jamie, to unge mennesker fra ulike tidsaldre, men som møtes gjennom en skjebnesvanger tidsreise. En reise som har sitt utspring i en sagnomspunnet heksering på det skotske høylandet. Claire går gjennom en ring av trolldomsstener og havne"
+   "blurb": "Claire Randall is leading a double life. She has a husband in one century, and a lover in another... In 1945, Claire Randall, a former combat nurse, is back from the war and reunited with her husband on a second honeymoon—when she innocently touches a boulder in one of the ancien"
   },
   {
    "id": "34814099",
@@ -10997,7 +10998,7 @@
    "title": "Alibis: Essays on Elsewhere",
    "author": "André Aciman",
    "rating": 0,
-   "avg": 3.84,
+   "avg": 3.85,
    "year": 2011,
    "pages": 208,
    "readAt": null,

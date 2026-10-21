@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-20T15:38:53+00:00",
+ "fetchedAt": "2026-10-21T15:56:39+00:00",
  "read": [
   {
    "id": "375802",
@@ -317,7 +317,7 @@
    "title": "The Library of Babel",
    "author": "Jorge Luis Borges",
    "rating": 5,
-   "avg": 4.31,
+   "avg": 4.3,
    "year": 1941,
    "pages": 36,
    "readAt": null,
@@ -523,7 +523,7 @@
    "title": "The Two Towers (The Lord of the Rings, #2)",
    "author": "J.R.R. Tolkien",
    "rating": 5,
-   "avg": 4.56,
+   "avg": 4.57,
    "year": 1954,
    "pages": 352,
    "readAt": "Wed, 5 Mar 2025 00:00:00 +0000",
@@ -2114,7 +2114,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.42,
+   "avg": 3.43,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -2382,7 +2382,7 @@
    "title": "Just After Sunset",
    "author": "Stephen King",
    "rating": 0,
-   "avg": 3.77,
+   "avg": 3.78,
    "year": 2008,
    "pages": 539,
    "readAt": null,
@@ -2669,7 +2669,7 @@
    "title": "Gods and Mortals: Ancient Greek Myths for Modern Readers",
    "author": "Sarah Iles Johnston",
    "rating": 0,
-   "avg": 3.89,
+   "avg": 3.9,
    "year": null,
    "pages": 496,
    "readAt": null,
@@ -4870,7 +4870,7 @@
    "tags": [
     "nonfiction"
    ],
-   "blurb": "Right now, 70% of Americans aren’t passionate about their work and are desperately longing for meaning and purpose. They’re sick of “average” and know there’s something better out there, but they just don’t know how to reach it. One basic principle―The Proximity Principle―can cha"
+   "blurb": "#1 WALL STREET JOURNAL NATIONAL BESTSELLER Right now, 70% of Americans aren’t passionate about their work and are desperately longing for meaning and purpose. They’re sick of “average” and know there’s something better out there, but they just don’t know how to reach it. One basi"
   },
   {
    "id": "8493026",
@@ -4942,7 +4942,7 @@
    "title": "How to Listen to Jazz",
    "author": "Ted Gioia",
    "rating": 0,
-   "avg": 4.05,
+   "avg": 4.06,
    "year": 2016,
    "pages": 272,
    "readAt": null,
@@ -5049,7 +5049,7 @@
    "title": "All Over the Map: A Cartographic Odyssey",
    "author": "Betsy Mason",
    "rating": 0,
-   "avg": 4.39,
+   "avg": 4.4,
    "year": null,
    "pages": 320,
    "readAt": null,
@@ -5912,7 +5912,7 @@
    "title": "Connectography: Mapping the Future of Global Civilization",
    "author": "Parag Khanna",
    "rating": 0,
-   "avg": 3.81,
+   "avg": 3.82,
    "year": 2016,
    "pages": 496,
    "readAt": null,
