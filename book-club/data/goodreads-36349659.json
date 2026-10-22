@@ -1,7 +1,7 @@
 {
  "user": "36349659",
  "profile": "https://www.goodreads.com/user/show/36349659-lauren",
- "fetchedAt": "2026-10-21T15:57:01+00:00",
+ "fetchedAt": "2026-10-22T15:52:51+00:00",
  "read": [
   {
    "id": "58107911",
@@ -198,7 +198,7 @@
    "title": "Wild Dark Shore",
    "author": "Charlotte McConaghy",
    "rating": 4,
-   "avg": 4.05,
+   "avg": 4.04,
    "year": 2025,
    "pages": 298,
    "readAt": "Thu, 20 Nov 2025 00:00:00 +0000",
@@ -217,7 +217,7 @@
    "title": "Something Wicked This Way Comes",
    "author": "Ray Bradbury",
    "rating": 3,
-   "avg": 3.82,
+   "avg": 3.83,
    "year": 1962,
    "pages": 293,
    "readAt": "Sun, 2 Nov 2025 00:00:00 +0000",
@@ -3024,7 +3024,7 @@
    "title": "The Girls",
    "author": "Emma Cline",
    "rating": 4,
-   "avg": 3.49,
+   "avg": 3.48,
    "year": 2016,
    "pages": 355,
    "readAt": "Thu, 19 Jan 2017 00:00:00 +0000",
@@ -3368,7 +3368,7 @@
    "title": "Library of Souls (Miss Peregrine's Peculiar Children, #3)",
    "author": "Ransom Riggs",
    "rating": 4,
-   "avg": 4.12,
+   "avg": 4.11,
    "year": 2015,
    "pages": 458,
    "readAt": "Tue, 1 Mar 2016 00:00:00 +0000",
@@ -4836,7 +4836,7 @@
    "title": "The Killer Isn't Alice",
    "author": "Iris Starling",
    "rating": 0,
-   "avg": 4.1,
+   "avg": 4.09,
    "year": null,
    "pages": 224,
    "readAt": null,
@@ -8889,9 +8889,10 @@
    "url": "https://www.goodreads.com/book/show/5297",
    "tags": [
     "classic",
-    "coming-of-age"
+    "death",
+    "psychological"
    ],
-   "blurb": "The Picture of Dorian Gray tells the story of a young man, the subject of a painting by Basil Hallward. Infatuated by his subject's beauty he believes that Gray's beauty is responsible for his great work of art. Upon meeting Lord Henry Wotton, a friend of Basil Hallward Dorian fa"
+   "blurb": "Oscar Wildes Meisterwerk \"Das Bildnis des Dorian Gray\" ist ein fesselnder Roman, der die Themen Ästhetik, Moral und das Streben nach unsterblichem Jugend verkundet. Der literarische Stil zeichnet sich durch witzige Dialoge und scharfsinnige Beobachtungen aus, die den Leser in das"
   },
   {
    "id": "20613821",
