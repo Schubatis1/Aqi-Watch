@@ -1,7 +1,7 @@
 {
  "user": "49141241",
  "profile": "https://www.goodreads.com/user/show/49141241-adam-schubatis",
- "fetchedAt": "2026-10-23T15:43:56+00:00",
+ "fetchedAt": "2026-10-24T14:30:10+00:00",
  "read": [
   {
    "id": "375802",
@@ -2067,6 +2067,71 @@
  ],
  "toRead": [
   {
+   "id": "41021344",
+   "title": "Thomas Jefferson: The Art of Power",
+   "author": "Jon Meacham",
+   "rating": 0,
+   "avg": 4.14,
+   "year": 2012,
+   "pages": 802,
+   "readAt": null,
+   "added": "Sat, 24 Oct 2026 04:51:55 -0700",
+   "shelves": [
+    "to-read"
+   ],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1533134287l/41021344._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/41021344",
+   "tags": [
+    "history",
+    "literary",
+    "nonfiction"
+   ],
+   "blurb": "In this magnificent biography, the Pulitzer Prize–winning author of American Lion and Franklin and Winston brings vividly to life an extraordinary man and his remarkable times. Thomas Jefferson: The Art of Power gives us Jefferson the politician and president, a great and complex"
+  },
+  {
+   "id": "1975627",
+   "title": "The American Revolution",
+   "author": "Gordon S. Wood",
+   "rating": 0,
+   "avg": 3.75,
+   "year": 2002,
+   "pages": null,
+   "readAt": null,
+   "added": "Sat, 24 Oct 2026 04:51:38 -0700",
+   "shelves": [
+    "to-read"
+   ],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1699873440l/1975627.jpg",
+   "url": "https://www.goodreads.com/book/show/1975627",
+   "tags": [
+    "history",
+    "nonfiction"
+   ],
+   "blurb": "Gordon S. Wood's The American Revolution , part of the Modern Library Chronicles series, is an erudite, concise summary of the events and circumstances surrounding the seminal conflict, both physical and philosophical, in American history. The Modern Library Chronicles are access"
+  },
+  {
+   "id": "32191710",
+   "title": "Astrophysics for People in a Hurry",
+   "author": "Neil deGrasse Tyson",
+   "rating": 0,
+   "avg": 4.06,
+   "year": 2017,
+   "pages": 223,
+   "readAt": null,
+   "added": "Sat, 24 Oct 2026 04:51:28 -0700",
+   "shelves": [
+    "to-read"
+   ],
+   "cover": "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1562761669l/32191710._SX98_.jpg",
+   "url": "https://www.goodreads.com/book/show/32191710",
+   "tags": [
+    "nonfiction",
+    "psychological",
+    "weird"
+   ],
+   "blurb": "The #1 New York Times Bestseller: The essential universe, from our most celebrated and beloved astrophysicist. What is the nature of space and time? How do we fit within the universe? How does the universe fit within us? There’s no better guide through these mind-expanding questi"
+  },
+  {
    "id": "41954426",
    "title": "The History of Philosophy",
    "author": "A.C. Grayling",
@@ -2114,7 +2179,7 @@
    "title": "Lords of Serendipity",
    "author": "Randy Boyagoda",
    "rating": 0,
-   "avg": 3.44,
+   "avg": 3.43,
    "year": 2026,
    "pages": 352,
    "readAt": null,
@@ -4223,7 +4288,7 @@
    "title": "Guns, Germs, and Steel: The Fates of Human Societies",
    "author": "Jared Diamond",
    "rating": 0,
-   "avg": 4.13,
+   "avg": 4.14,
    "year": 1997,
    "pages": 494,
    "readAt": null,
