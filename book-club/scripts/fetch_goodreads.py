@@ -182,10 +182,19 @@ def main():
         sys.exit(0 if ok else 1)
 
     readers = json.loads(READERS.read_text())["readers"]
-    results = [sync(r["id"], DATA / f"goodreads-{r['id']}.json", overrides, r.get("profile")) for r in readers]
+    results = []
+    for r in readers:
+        try:
+            results.append(sync(r["id"], DATA / f"goodreads-{r['id']}.json", overrides, r.get("profile")))
+        except Exception as e:
+            # Fail soft in the all-readers run: Goodreads can block the
+            # unauthenticated RSS feeds (e.g. 404). Keep this reader's
+            # previous JSON untouched and let the others refresh.
+            print(f"WARNING: failed to fetch Goodreads shelves for user {r['id']}: {e}. Keeping previous data; continuing.", file=sys.stderr)
+            results.append(False)
     # One private/broken profile shouldn't block everyone else's refresh.
     if not any(results):
-        sys.exit("Every shelf came back empty; nothing written.")
+        print("WARNING: no shelves refreshed; keeping all previous data.", file=sys.stderr)
 
 
 if __name__ == "__main__":
